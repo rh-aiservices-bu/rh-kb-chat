@@ -1,0 +1,18 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+langchain =  "==0.1.12"
+beautifulsoup4 =  "==4.12.2"
+html2text =  "==2024.2.26"
+lxml =  "==5.1.0"
+tqdm =  "==4.66.2"
+
+[dev-packages]
+ipykernel = "*"
+
+[requires]
+python_version = "3.11"
+python_full_version = "3.11.7"

@@ -1,0 +1,9 @@
+beautifulsoup4==4.12.2
+einops==0.7.0
+html2text==2024.2.26
+langchain==0.1.12
+lxml==5.1.0
+pymilvus==2.3.6
+pypdf==4.0.2
+sentence-transformers==2.4.0
+tqdm==4.66.2 
