@@ -18,13 +18,13 @@ import remarkGfm from 'remark-gfm';
  *
  * @component
  * @param {Object} props - The component props.
- * @param {string} props.claimSummary - The claim summary.
  * @returns {JSX.Element} The rendered Chat component.
  */
-const Chat: React.FunctionComponent<{ claimSummary: string }> = ({ claimSummary }) => {
+const Chat: React.FunctionComponent<{}> = () => {
 
   class Query {
     content: string;
+    type = 'Query';
 
     constructor(content: string) {
       this.content = content;
@@ -33,6 +33,7 @@ const Chat: React.FunctionComponent<{ claimSummary: string }> = ({ claimSummary 
 
   class Answer {
     content: string[];
+    type = 'Answer';
 
     constructor(content: string[]) {
       this.content = content;
@@ -41,6 +42,7 @@ const Chat: React.FunctionComponent<{ claimSummary: string }> = ({ claimSummary 
 
   class Sources {
     content: string[];
+    type = 'Sources';
 
     constructor(content: string[]) {
       this.content = content;
@@ -430,7 +432,7 @@ const Chat: React.FunctionComponent<{ claimSummary: string }> = ({ claimSummary 
                       {messageHistory.content.map((message: Message, index) => {
                         const renderMessage = () => {
                           if (message.content.content.length != 0) {
-                            if (message.content.constructor.name === "Query" && message.content.content != "") { // If the message is a query
+                            if (message.content.type === "Query" && message.content.content != "") { // If the message is a query
                               return <Grid className='chat-item'>
                                 <GridItem span={1} className='grid-item-orb'>
                                   <img src={userAvatar} className='user-avatar' />
@@ -439,7 +441,7 @@ const Chat: React.FunctionComponent<{ claimSummary: string }> = ({ claimSummary 
                                   <Text component={TextVariants.p} className='chat-question-text'>{message.content.content}</Text>
                                 </GridItem>
                               </Grid>
-                            } else if (message.content.constructor.name === "Answer" && (message.content.content as string[]).join("") != "") { // If the message is a response
+                            } else if (message.content.type === "Answer" && (message.content.content as string[]).join("") != "") { // If the message is a response
                               return <Grid className='chat-item'>
                                 <GridItem span={1} className='grid-item-orb'>
                                   <img src={orb} className='orb' />
@@ -448,7 +450,7 @@ const Chat: React.FunctionComponent<{ claimSummary: string }> = ({ claimSummary 
                                   <MarkdownRenderer>{(message.content.content as string[]).join("")}</MarkdownRenderer>
                                 </GridItem>
                               </Grid>
-                            } else if (message.content.constructor.name === "Sources") { // If the message is a source
+                            } else if (message.content.type === "Sources") { // If the message is a source
                               return <Grid className='chat-item'>
                                 <GridItem span={1} className='grid-item-orb'>&nbsp;</GridItem>
                                 <GridItem span={11}>
@@ -472,7 +474,7 @@ const Chat: React.FunctionComponent<{ claimSummary: string }> = ({ claimSummary 
                                 </GridItem>
                               </Grid>
                             } else {
-                              console.log('Unknown message type: ' + message.content.constructor.name);
+                              console.log('Unknown message type.');
                               return;
                             }
                           } else {
