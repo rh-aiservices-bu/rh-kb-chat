@@ -169,6 +169,8 @@ const Chat: React.FunctionComponent<{ claimSummary: string }> = ({ claimSummary 
         var product_full_name = "";
         if (selectedCollection !== 'none') {
           product_full_name = collections.find(collection => collection.product === product)?.product_full_name ?? "";
+        } else {
+          product_full_name = "None";
         }
         let data = {
           query: queryText.content,

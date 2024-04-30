@@ -143,6 +143,7 @@ class Chatbot:
                 new_query = f"We are talking about {product_full_name} version {version}. {query}"
             else:
                 new_query = query
+            self.logger.info(f"Query: {new_query}")
             resp = rag_chain.invoke({"query": new_query})
             sources = self._format_sources(resp['source_documents'])
             if len(sources) != 0:
