@@ -8,8 +8,7 @@
 
 # env vars
 .env
-.env*.local
-.env.*
+*.local
 
 # dependencies
 node_modules
