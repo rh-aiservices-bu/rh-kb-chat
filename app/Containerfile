@@ -10,6 +10,9 @@ FROM registry.access.redhat.com/ubi9/nodejs-18
 
 USER root
 
+RUN yum -y update && \
+    yum clean all
+
 COPY --from=stage /tmp/rh-kb-chat/app/ /tmp/src
 
 RUN chown -R 1001:0 /tmp/src
