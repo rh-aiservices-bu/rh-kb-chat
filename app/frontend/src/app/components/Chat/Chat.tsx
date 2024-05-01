@@ -79,6 +79,7 @@ const Chat: React.FunctionComponent<{}> = () => {
   // Websocket
   const wsUrl = config.backend_api_url.replace(/http/, 'ws').replace(/\/api$/, '/ws'); // WebSocket URL
   const connection = React.useRef<WebSocket | null>(null); // WebSocket connection
+  const uuid = Math.floor(Math.random() * 1000000000); // Generate a random number between 0 and 999999999
 
   // Collection elements
   const [collections, setCollections] = React.useState<Collection[]>([]); // The collections
@@ -111,7 +112,7 @@ const Chat: React.FunctionComponent<{}> = () => {
 
   // Open a WebSocket connection and listen for messages
   React.useEffect(() => {
-    const ws = new WebSocket(wsUrl + '/query') || {};
+    const ws = new WebSocket(wsUrl + '/query/' + uuid) || {};
 
     ws.onopen = () => {
       console.log('opened ws connection')
@@ -201,7 +202,7 @@ const Chat: React.FunctionComponent<{}> = () => {
       setMessageHistory(new MessageHistory([
         new Message(
           new Answer(
-            ['We are talking about **' + collection?.product_full_name + '** version **' + collection?.version + '**. Ask me any question!']
+            ['We are talking about **' + collection?.product_full_name + '** version **' + selectedVersion + '**. Ask me any question!']
           )
         )
       ]));

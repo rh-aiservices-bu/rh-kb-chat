@@ -12,7 +12,7 @@ import chatbot
 import httpx
 from app_config import LOG_LEVELS, LOGGING_CONFIG
 from dotenv import dotenv_values, load_dotenv
-from fastapi import FastAPI, File, HTTPException, Request, UploadFile, WebSocket
+from fastapi import FastAPI, File, HTTPException, Request, UploadFile, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import Response, StreamingResponse
 from fastapi.staticfiles import StaticFiles
@@ -61,7 +61,31 @@ app.add_middleware(
     allow_headers=headers
 )
 
-# API Endpoints definitions
+# Connection Manager for Websockets
+class ConnectionManager:
+    def __init__(self):
+        self.active_connections: list[WebSocket] = []
+
+    async def connect(self, websocket: WebSocket):
+        await websocket.accept()
+        self.active_connections.append(websocket)
+
+    def disconnect(self, websocket: WebSocket):
+        self.active_connections.remove(websocket)
+
+    async def send_personal_message(self, message: str, websocket: WebSocket):
+        await websocket.send_text(message)
+
+    async def broadcast(self, message: str):
+        for connection in self.active_connections:
+            await connection.send_text(message)
+
+
+manager = ConnectionManager()
+
+############################# 
+# API Endpoints definitions #
+#############################
 
 # Status
 @app.get("/health")
@@ -76,16 +100,20 @@ async def get_collections():
     return collections_data
 
 # Query (chatbot exchanges are handled through websocket for streaming)
-@app.websocket("/ws/query")
-async def websocket_endpoint(websocket: WebSocket):
-    await websocket.accept()
-
-    while True:
-        data = await websocket.receive_text()
-        data = json.loads(data)
-        for next_item in chatbot.stream(data["query"], data["collection"], data["product_full_name"], data["version"]):
-            answer = json.dumps(next_item)
-            await websocket.send_text(answer)
+@app.websocket("/ws/query/{client_id}")
+async def websocket_endpoint(websocket: WebSocket, client_id: int):
+    await manager.connect(websocket)
+    try:
+      while True:
+          data = await websocket.receive_text()
+          data = json.loads(data)
+          logger.info(f"Received data: {data}")
+          for next_item in chatbot.stream(data["query"], data["collection"], data["product_full_name"], data["version"]):
+              answer = json.dumps(next_item)
+              await websocket.send_text(answer)
+    except WebSocketDisconnect:
+        manager.disconnect(websocket)
+        logger.info(f"Client {client_id} disconnected")
 
 # Serve React App (frontend)
 class SPAStaticFiles(StaticFiles):
