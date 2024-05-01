@@ -23,6 +23,7 @@ uvicorn = "~=0.29.0"
 websockets = "~=12.0"
 python-multipart = "0.0.9"
 torch = {version = "==2.2.2+cpu", index = "pytorch"}
+gunicorn = "~=22.0.0"
 
 [dev-packages]
 "watchdog[watchmedo]" = "~=4.0.0"
