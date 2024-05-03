@@ -566,7 +566,7 @@ const Chat: React.FunctionComponent<{}> = () => {
                   </StackItem>
                   <StackItem>
                     <TextContent>
-                      <Text className='chat-disclaimer'>This assistant is powered by an AI. It may display inaccurate info, so please double-check the responses.</Text>
+                      <Text className='chat-disclaimer'>This assistant is powered by an AI. It may display inaccurate information, so please double-check the responses.<br/>Not an official chatbot for Red Hat documentation. For demonstration purposes only.</Text>
                     </TextContent>
                   </StackItem>
                 </Stack>
