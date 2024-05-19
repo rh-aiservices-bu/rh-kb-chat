@@ -1,0 +1,40 @@
+{
+  "app_title": "ドキュメンテーションアシスタント",
+  "app_menu": {
+    "chat_documentation": "ドキュメントとチャットする"
+  },
+  "app_header": {
+    "powered_by": "提供",
+    "help": {
+      "header": "情報",
+      "body": "このアプリケーションはRed Hatのドキュメントの公式チャットボットではありません。デモンストレーション目的のみです。",
+      "footer": "ソースコードはhttps://github.com/rh-aiservices-bu/rh-kb-chatで利用可能"
+    },
+    "select_language": "言語を選択してください",
+    "anonymous_user": "匿名ユーザー"
+  },
+  "chat": {
+    "title": "ドキュメンテーションアシスタント",
+    "filter": {
+      "product": "製品",
+      "version": "バージョン",
+      "language": "言語"
+    },
+    "placeholder": "何でも聞いてください...",
+    "new_chat": "新しいチャットを開始",
+    "send": "クエリを送信",
+    "disclaimer1": "このアシスタントはAIによって提供されています。不正確な情報が表示される場合があるため、回答を必ず確認してください。",
+    "disclaimer2": "Red Hatのドキュメントの公式チャットボットではありません。デモンストレーション目的のみです。",
+    "content": {
+      "greeting": "こんにちは！私はあなたのドキュメンテーションアシスタントです。今日はどのようにお手伝いできますか？",
+      "change_product_prompt_start": "わかりました、今は",
+      "change_product_prompt_version": "バージョンについて話しています。",
+      "change_product_prompt_none": "わかりました、特定の製品については話していません。",
+      "new_chat_product": "話している製品は ",
+      "new_chat_version": "バージョン",
+      "new_chat_no_product": "特定の製品については話していません。1つ選択するか、どのようにお手伝いできるか教えてください！",
+      "empty_query": "会話を始めるには何か入力してください。",
+      "references": "参考文献"
+    }
+  }
+}

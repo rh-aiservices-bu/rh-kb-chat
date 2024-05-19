@@ -1,0 +1,40 @@
+{
+  "app_title": "文档助手",
+  "app_menu": {
+    "chat_documentation": "与文档聊天"
+  },
+  "app_header": {
+    "powered_by": "技术支持",
+    "help": {
+      "header": "信息",
+      "body": "此应用程序不是Red Hat文档的官方聊天机器人。仅用于演示目的。",
+      "footer": "源代码可在https://github.com/rh-aiservices-bu/rh-kb-chat获取"
+    },
+    "select_language": "选择你的语言",
+    "anonymous_user": "匿名用户"
+  },
+  "chat": {
+    "title": "文档助手",
+    "filter": {
+      "product": "产品",
+      "version": "版本",
+      "language": "语言"
+    },
+    "placeholder": "问我任何问题...",
+    "new_chat": "开始新的聊天",
+    "send": "发送你的查询",
+    "disclaimer1": "此助手由AI提供支持。它可能会显示不准确的信息，请务必仔细检查响应。",
+    "disclaimer2": "不是Red Hat文档的官方聊天机器人。仅用于演示目的。",
+    "content": {
+      "greeting": "你好！我是你的文档助手。我今天能帮你什么吗？",
+      "change_product_prompt_start": "好的，我们现在谈论的是",
+      "change_product_prompt_version": "版本",
+      "change_product_prompt_none": "好的，我们没有谈论任何特定的产品。",
+      "new_chat_product": "我们在谈论",
+      "new_chat_version": "版本",
+      "new_chat_no_product": "我们没有谈论任何特定的产品。请选择一个或告诉我你需要什么帮助！",
+      "empty_query": "请输入内容以开始对话。",
+      "references": "参考文献"
+    }
+  }
+}

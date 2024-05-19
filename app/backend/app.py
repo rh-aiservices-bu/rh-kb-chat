@@ -107,8 +107,7 @@ async def websocket_endpoint(websocket: WebSocket, client_id: int):
       while True:
           data = await websocket.receive_text()
           data = json.loads(data)
-          logger.info(f"Received data: {data}")
-          for next_item in chatbot.stream(data["query"], data["collection"], data["product_full_name"], data["version"]):
+          for next_item in chatbot.stream(data["query"], data["collection"], data["product_full_name"], data["version"], data["language"]):
               answer = json.dumps(next_item)
               await websocket.send_text(answer)
     except WebSocketDisconnect:

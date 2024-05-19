@@ -26,6 +26,7 @@ export interface IAppRouteGroup {
 
 export type AppRouteConfig = IAppRoute | IAppRouteGroup;
 
+
 const routes: AppRouteConfig[] = [
   {
     component: () => <Redirect to="/Chat" />,
@@ -36,9 +37,9 @@ const routes: AppRouteConfig[] = [
   {
     component: Chat,
     exact: true,
-    label: 'Chat with the documentation',
+    label: 'app_menu.chat_documentation',
     path: '/Chat',
-    title: 'Chat with the documentation',
+    title: 'app_menu.chat_documentation',
   },
 ];
 

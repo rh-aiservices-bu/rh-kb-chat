@@ -1,0 +1,40 @@
+{
+  "app_title": "Assistant de Documentation",
+  "app_menu": {
+    "chat_documentation": "Chattez avec la Documentation"
+  },
+  "app_header": {
+    "powered_by": "Propulsé par",
+    "help": {
+      "header": "Information",
+      "body": "Cette application n'est pas un chatbot officiel pour la documentation Red Hat. À des fins de démonstration uniquement.",
+      "footer": "Code source disponible sur https://github.com/rh-aiservices-bu/rh-kb-chat"
+    },
+    "select_language": "Choisissez une langue",
+    "anonymous_user": "Utilisateur anonyme"
+  },
+  "chat": {
+    "title": "Assistant de Documentation",
+    "filter": {
+      "product": "Produit",
+      "version": "Version",
+      "language": "Langue"
+    },
+    "placeholder": "Posez moi une question...",
+    "new_chat": "Démarrer un nouveau chat",
+    "send": "Envoyer",
+    "disclaimer1": "Cet assistant est alimenté par une IA. Il peut afficher des informations inexactes, veuillez donc vérifier les réponses.",
+    "disclaimer2": "Cette application n'est pas un chatbot officiel pour la documentation Red Hat. À des fins de démonstration uniquement.",
+    "content": {
+      "greeting": "Bonjour! Je suis votre assistant de documentation. Comment puis-je vous aider aujourd'hui ?",
+      "change_product_prompt_start": "D'accord, nous parlons maintenant de",
+      "change_product_prompt_version": "version",
+      "change_product_prompt_none": "Ok, we are not talking about any specific product.",
+      "new_chat_product": "Nous parlons de",
+      "new_chat_version": "version",
+      "new_chat_no_product": "Nous ne parlons d'aucun produit spécifique. Choisissez un produit svp ou dîtes-moi comment je peux vous aider.",
+      "empty_query": "Entrez quelque chose pour commencer la conversation.",
+      "references": "References"
+    }
+  }
+}

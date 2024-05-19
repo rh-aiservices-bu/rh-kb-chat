@@ -6,6 +6,8 @@ import {
   Brand,
   Button,
   ButtonVariant,
+  FormSelect,
+  FormSelectOption,
   Masthead,
   MastheadBrand,
   MastheadContent,
@@ -18,6 +20,9 @@ import {
   Page,
   PageSidebar,
   PageSidebarBody,
+  Popover,
+  Select,
+  SelectOption,
   SkipToContent,
   Text,
   TextContent,
@@ -30,6 +35,10 @@ import {
 import { BarsIcon, QuestionCircleIcon } from '@patternfly/react-icons';
 import * as React from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
+import { supportedLngs } from '../../../i18n/config';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faLanguage } from '@fortawesome/free-solid-svg-icons';
 
 interface IAppLayout {
   children: React.ReactNode;
@@ -37,6 +46,18 @@ interface IAppLayout {
 
 const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
   const [sidebarOpen, setSidebarOpen] = React.useState(true);
+  const [selectedLanguage, setSelectedLanguage] = React.useState('en');
+
+  const onChangeLanguage = (_event: React.FormEvent<HTMLSelectElement>, language: string) => {
+    setSelectedLanguage(language);
+    i18n.changeLanguage(language);
+  };
+
+  //i18n
+  const { t, i18n } = useTranslation();
+  React.useEffect(() => {
+    i18n.changeLanguage(selectedLanguage);
+  }, [selectedLanguage]);
 
   const headerToolbar = (
     <Toolbar id="toolbar" isFullHeight isStatic>
@@ -44,21 +65,45 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
         <ToolbarGroup
           variant="icon-button-group"
           align={{ default: 'alignRight' }}
-          spacer={{ default: 'spacerNone', md: 'spacerMd' }}
+          spacer={{ default: 'spacerMd', md: 'spacerMd' }}
         >
           <ToolbarItem>
-            <Button aria-label="Help" variant={ButtonVariant.plain} icon={<QuestionCircleIcon />} />
+            <FontAwesomeIcon icon={faLanguage} className='language-icon'/>
+          </ToolbarItem>
+          <ToolbarItem>
+            <FormSelect
+              value={selectedLanguage}
+              onChange={onChangeLanguage}
+              aria-label="FormSelect Input"
+              ouiaId="BasicFormSelectLanguage"
+              className='version-language-select'
+            >
+              {Object.entries(supportedLngs).map(([lngCode, lngName], index) => (
+                <FormSelectOption key={index} value={lngCode} label={lngName} />
+              ))}
+            </FormSelect>
+          </ToolbarItem>
+          <ToolbarItem>
+            <Popover
+              aria-label="Help"
+              position="right"
+              headerContent={t('app_header.help.header')}
+              bodyContent={t('app_header.help.body')}
+              footerContent={t('app_header.help.footer')}
+            >
+              <Button aria-label="Help" variant={ButtonVariant.plain} icon={<QuestionCircleIcon />} />
+            </Popover>
           </ToolbarItem>
         </ToolbarGroup>
         <ToolbarItem>
           <TextContent>
             <Text component={TextVariants.p} className='pf-v5-global--spacer--md'>
-              Anonymous User
+              {t('app_header.anonymous_user')}
             </Text>
           </TextContent>
         </ToolbarItem>
         <ToolbarItem>
-          <Avatar src={imgAvatar} alt="" border='light' className='avatar'/>
+          <Avatar src={imgAvatar} alt="" border='light' className='avatar' />
         </ToolbarItem>
       </ToolbarContent>
     </Toolbar>
@@ -74,9 +119,9 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
       <MastheadMain>
         <MastheadBrand>
           <TextContent>
-            <Text component={TextVariants.h3} className='title-text'>Powered by</Text>
-            </TextContent>
-            <Brand src={logo} alt="Patternfly Logo" heights={{ default: '36px' }} />
+            <Text component={TextVariants.h3} className='title-text'>{t('app_header.powered_by')}</Text>
+          </TextContent>
+          <Brand src={logo} alt="Patternfly Logo" heights={{ default: '36px' }} />
         </MastheadBrand>
       </MastheadMain>
       <MastheadContent>
@@ -91,7 +136,7 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
   const renderNavItem = (route: IAppRoute, index: number) => (
     <NavItem key={`${route.label}-${index}`} id={`${route.label}-${index}`} isActive={route.path === location.pathname} className='navitem-flex'>
       <NavLink exact={route.exact} to={route.path} className={route.path !== '#' ? '' : 'disabled-link'}>
-        {route.label}
+        {t(route.label as string)}
       </NavLink>
     </NavItem>
   );

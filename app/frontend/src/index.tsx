@@ -1,6 +1,7 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
 import App from '@app/index';
+import './i18n/config';
 
 if (process.env.NODE_ENV !== "production") {
   const config = {

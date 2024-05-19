@@ -134,7 +134,7 @@ module.exports = (env) => {
         silent: true,
       }),
       new CopyPlugin({
-        patterns: [{ from: './src/favicon.svg', to: 'images' }],
+        patterns: [{ from: './src/favicon.svg', to: 'images' },{ from: './public/locales', to: 'locales' }],
       }),
     ],
     resolve: {

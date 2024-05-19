@@ -11,7 +11,11 @@ import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { dracula } from 'react-syntax-highlighter/dist/cjs/styles/prism';
 import rehypeRaw from 'rehype-raw';
 import remarkGfm from 'remark-gfm';
+import { useTranslation } from 'react-i18next';
 
+interface ChatProps {
+  selectedLanguage: string;
+}
 
 /**
  * Represents the Chat component.
@@ -20,7 +24,7 @@ import remarkGfm from 'remark-gfm';
  * @param {Object} props - The component props.
  * @returns {JSX.Element} The rendered Chat component.
  */
-const Chat: React.FunctionComponent<{}> = () => {
+const Chat: React.FunctionComponent<ChatProps> = ({ selectedLanguage }) => {
 
   class Query {
     content: string;
@@ -65,6 +69,24 @@ const Chat: React.FunctionComponent<{}> = () => {
     }
   }
 
+  class UiLanguage {
+    code: string;
+    displayName: string;
+
+    constructor(code: string, displayName: string) {
+      this.code = code;
+      this.displayName = displayName;
+    }
+  }
+
+  class UiLanguages {
+    content: UiLanguage[];
+
+    constructor(content: UiLanguage[]) {
+      this.content = content;
+    }
+  }
+
   type Collection = {
     product: string;
     product_full_name: string;
@@ -75,6 +97,14 @@ const Chat: React.FunctionComponent<{}> = () => {
   type MarkdownRendererProps = {
     children: string;
   };
+
+  //i18n
+  const { t, i18n } = useTranslation();
+  /*   React.useEffect(() => {
+      console.log('selectedLanguage: ', selectedLanguage)
+      i18n.changeLanguage(selectedLanguage);
+      resetMessageHistory();
+    }, [selectedLanguage]); */
 
   // Websocket
   const wsUrl = config.backend_api_url.replace(/http/, 'ws').replace(/\/api$/, '/ws'); // WebSocket URL
@@ -95,7 +125,7 @@ const Chat: React.FunctionComponent<{}> = () => {
   const [answerSources, setAnswerSources] = React.useState<Sources>(new Sources([])); // Array of sources for the answer
   const [messageHistory, setMessageHistory] = React.useState<MessageHistory>(
     new MessageHistory([
-      new Message(new Answer(['Hi! I am your documentation Assistant. How can I help you today?']))
+      new Message(new Answer([t('chat.content.greeting')]))
     ])
   ); // The message history
   const chatBotAnswer = document.getElementById('chatBotAnswer'); // The chat bot answer element
@@ -151,6 +181,7 @@ const Chat: React.FunctionComponent<{}> = () => {
   }, [answerText, answerSources]);  // Dependency array
 
 
+
   /**
    * Sends the query text to the server via WebSocket.
    * Saves the previous response, sources, query, and message history, and create a new Message History from them.
@@ -180,10 +211,11 @@ const Chat: React.FunctionComponent<{}> = () => {
           collection: selectedCollection,
           product_full_name: product_full_name,
           version: selectedVersion,
+          language: i18n.language
         };
         connection.current?.send(JSON.stringify(data)); // Send the query to the server
       } else {
-        setAnswerText(new Answer(['Please enter a query...']));
+        setAnswerText(new Answer([t('chat.content.empty_query')]));
       }
     };
   }
@@ -198,18 +230,19 @@ const Chat: React.FunctionComponent<{}> = () => {
     setAnswerSources(new Sources([]));
     setAnswerText(new Answer(['']));
     const collection = collections.find(collection => collection.product === product);
-    if (collection?.product_full_name !== "None") {
+    if (collection?.product_full_name !== "None" && collection?.product_full_name !== undefined) {
+      console.log('collection: ', collection);
       setMessageHistory(new MessageHistory([
         new Message(
           new Answer(
-            ['We are talking about **' + collection?.product_full_name + '** version **' + selectedVersion + '**. Ask me any question!']
+            [t('chat.content.new_chat_product') + ' **' + collection?.product_full_name + '** ' + t('chat.content.new_chat_version') + '**' + selectedVersion + '**. Ask me any question!']
           )
         )
       ]));
     } else {
       setMessageHistory(new MessageHistory([
         new Message(
-          new Answer(['We are not talking about any specific product. Please choose one or tell me how can I help you!'])
+          new Answer([t('chat.content.new_chat_no_product')])
         )
       ])
       );
@@ -240,7 +273,7 @@ const Chat: React.FunctionComponent<{}> = () => {
           previousAnswer,
           previousSources,
         new Message(new Answer(
-          ['Ok, we are now talking about **' + selectedCollection.product_full_name + '** version **' + selectedVersion + '**.']
+          [t('chat.content.change_product_prompt_start') + ' **' + selectedCollection.product_full_name + '** ' + t('chat.content.change_product_prompt_version') + ' **' + selectedVersion + '**.']
         ))
         ]
       ));
@@ -250,7 +283,7 @@ const Chat: React.FunctionComponent<{}> = () => {
           previousAnswer,
           previousSources,
         new Message(new Answer(
-          ['Ok, we are not talking about any specific product.']
+          [t('chat.content.change_product_prompt_none')]
         ))
         ]
       ));
@@ -345,7 +378,7 @@ const Chat: React.FunctionComponent<{}> = () => {
                 <Flex direction={{ default: 'column' }}>
                   <FlexItem>
                     <TextContent>
-                      <Text component={TextVariants.h3} >Product</Text>
+                      <Text component={TextVariants.h3} >{t('chat.filter.product')}</Text>
                     </TextContent>
                   </FlexItem>
                   <FlexItem>
@@ -367,7 +400,7 @@ const Chat: React.FunctionComponent<{}> = () => {
                 <Flex direction={{ default: 'column' }}>
                   <FlexItem>
                     <TextContent>
-                      <Text component={TextVariants.h3} >Version</Text>
+                      <Text component={TextVariants.h3} >{t('chat.filter.version')}</Text>
                     </TextContent>
                   </FlexItem>
                   <FlexItem>
@@ -385,7 +418,7 @@ const Chat: React.FunctionComponent<{}> = () => {
                   </FlexItem>
                 </Flex>
               </FlexItem>
-              <FlexItem>
+              <FlexItem hidden={true}>
                 <Flex direction={{ default: 'column' }}>
                   <FlexItem>
                     <TextContent>
@@ -421,7 +454,7 @@ const Chat: React.FunctionComponent<{}> = () => {
             <Card isRounded className='chat-card'>
               <CardHeader className='chat-card-header'>
                 <TextContent>
-                  <Text component={TextVariants.h3} className='chat-card-header-title'><FontAwesomeIcon icon={faCommentDots} />&nbsp;Documentation Assistant</Text>
+                  <Text component={TextVariants.h3} className='chat-card-header-title'><FontAwesomeIcon icon={faCommentDots} />&nbsp;{t('chat.title')}</Text>
                 </TextContent>
               </CardHeader>
               <CardBody className='chat-card-body'>
@@ -455,7 +488,7 @@ const Chat: React.FunctionComponent<{}> = () => {
                               return <Grid className='chat-item'>
                                 <GridItem span={1} className='grid-item-orb'>&nbsp;</GridItem>
                                 <GridItem span={11}>
-                                  <Text component={TextVariants.p} className='chat-source-text'>{"References: "}</Text>
+                                  <Text component={TextVariants.p} className='chat-source-text'>{t('chat.content.references') + ": "}</Text>
                                   {message.content && (message.content.content as string[]).map((source, index) => {
                                     const renderSource = () => {
                                       if (source.startsWith('http')) {
@@ -493,32 +526,39 @@ const Chat: React.FunctionComponent<{}> = () => {
 
                       {/* New Answer rendering */}
                       {answerText.content.join("") !== "" && (
-                        <Grid className='chat-item'>
-                          <GridItem span={1} className='grid-item-orb'>
-                            <img src={orb} className='orb' />
-                          </GridItem>
-                          <GridItem span={11}>
-                            <MarkdownRenderer>{answerText.content.join("")}</MarkdownRenderer>
-                            <Text component={TextVariants.p} className='chat-source-text'>{answerSources.content.length != 0 && "References: "}</Text>
-                            {answerSources && answerSources.content.map((source, index) => {
-                              const renderSource = () => {
-                                if (source.startsWith('http')) {
-                                  return <Text component={TextVariants.p} className='chat-source-text'>
-                                    <a href={source} target="_blank" className='chat-source-link'>{source}</a>
-                                  </Text>
-                                } else {
-                                  return <Text component={TextVariants.p} className='chat-source-text'>{source}</Text>
-                                }
-                              };
-                              return (
-                                <React.Fragment key={index}>
-                                  {renderSource()}
-                                </React.Fragment>
-                              );
-                            })}
+                        <div>
+                          <Grid className='chat-item'>
+                            <GridItem span={1} className='grid-item-orb'>
+                              <img src={orb} className='orb' />
+                            </GridItem>
+                            <GridItem span={11}>
+                              <MarkdownRenderer>{answerText.content.join("")}</MarkdownRenderer>
+                            </GridItem>
+                          </Grid>
+                          <Grid className='chat-item'>
+                            <GridItem span={1} className='grid-item-orb'>&nbsp;</GridItem>
+                            <GridItem span={11}>
+                              <Text component={TextVariants.p} className='chat-source-text'>{answerSources.content.length != 0 && (t('chat.content.references') + ": ")}</Text>
+                              {answerSources && answerSources.content.map((source, index) => {
+                                const renderSource = () => {
+                                  if (source.startsWith('http')) {
+                                    return <Text component={TextVariants.p} className='chat-source-text'>
+                                      <a href={source} target="_blank" className='chat-source-link'>{source}</a>
+                                    </Text>
+                                  } else {
+                                    return <Text component={TextVariants.p} className='chat-source-text'>{source}</Text>
+                                  }
+                                };
+                                return (
+                                  <React.Fragment key={index}>
+                                    {renderSource()}
+                                  </React.Fragment>
+                                );
+                              })}
 
-                          </GridItem>
-                        </Grid>
+                            </GridItem>
+                          </Grid>
+                        </div>
                       )}
                     </TextContent>
                   </StackItem>
@@ -535,7 +575,7 @@ const Chat: React.FunctionComponent<{}> = () => {
                               setQueryText({ ...queryText, content: event.target.value });
                             }}
                             aria-label="query text input"
-                            placeholder='Ask me anything...'
+                            placeholder={t('chat.placeholder')}
                             onKeyDown={event => {
                               if (event.key === 'Enter') {
                                 event.preventDefault();
@@ -546,14 +586,14 @@ const Chat: React.FunctionComponent<{}> = () => {
                           <Flex>
                             <FlexItem>
                               <Tooltip
-                                content={<div>Start a new chat</div>}
+                                content={<div>{t('chat.new_chat')}</div>}
                               >
                                 <Button variant="link" onClick={resetMessageHistory} aria-label='StartNewChat'><FontAwesomeIcon icon={faPlusCircle} /></Button>
                               </Tooltip>
                             </FlexItem>
                             <FlexItem align={{ default: 'alignRight' }}>
                               <Tooltip
-                                content={<div>Send your query</div>}
+                                content={<div>{t('chat.send')}</div>}
                               >
                                 <Button variant="link" onClick={sendQueryText} aria-label='SendQuery'><FontAwesomeIcon icon={faPaperPlane} /></Button>
                               </Tooltip>
@@ -566,7 +606,7 @@ const Chat: React.FunctionComponent<{}> = () => {
                   </StackItem>
                   <StackItem>
                     <TextContent>
-                      <Text className='chat-disclaimer'>This assistant is powered by an AI. It may display inaccurate information, so please double-check the responses.<br/>Not an official chatbot for Red Hat documentation. For demonstration purposes only.</Text>
+                      <Text className='chat-disclaimer'>{t('chat.disclaimer1')}<br />{t('chat.disclaimer2')}</Text>
                     </TextContent>
                   </StackItem>
                 </Stack>
