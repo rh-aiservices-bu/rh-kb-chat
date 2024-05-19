@@ -1,0 +1,40 @@
+{
+  "app_title": "Documentation Assistant",
+  "app_menu": {
+    "chat_documentation": "Chat with the Documentation"
+  },
+  "app_header": {
+    "powered_by": "Powered by",
+    "help": {
+      "header": "Information",
+      "body": "This application is not an official chatbot for Red Hat documentation. For demonstration purposes only.",
+      "footer": "Source code available at https://github.com/rh-aiservices-bu/rh-kb-chat"
+    },
+    "select_language": "Select your language",
+    "anonymous_user": "Anonymous User"
+  },
+  "chat": {
+    "title": "Documentation Assistant",
+    "filter": {
+      "product": "Product",
+      "version": "Version",
+      "language": "Language"
+    },
+    "placeholder": "Ask me anything...",
+    "new_chat": "Start a new chat",
+    "send": "Send your query",
+    "disclaimer1": "This assistant is powered by an AI. It may display inaccurate information, so please double-check the responses.",
+    "disclaimer2": "Not an official chatbot for Red Hat documentation. For demonstration purposes only.",
+    "content": {
+      "greeting": "Hi! I am your documentation Assistant. How can I help you today?",
+      "change_product_prompt_start": "Ok, we are now talking about",
+      "change_product_prompt_version": "version",
+      "change_product_prompt_none": "Ok, we are not talking about any specific product.",
+      "new_chat_product": "We are talking about ",
+      "new_chat_version": "version",
+      "new_chat_no_product": "We are not talking about any specific product. Please choose one or tell me how can I help you!",
+      "empty_query": "Please enter something to start the conversation.",
+      "references": "References"
+    }
+  }
+}

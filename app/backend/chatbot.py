@@ -76,7 +76,7 @@ class Chatbot:
                 unique_list.append(item.metadata['source'])
         return unique_list
 
-    def stream(self, query, collection, product_full_name, version) -> Generator:
+    def stream(self, query, collection, product_full_name, version, language) -> Generator:
         """
         Streams the chatbot's response based on the query and other parameters.
 
@@ -106,6 +106,18 @@ class Chatbot:
             callbacks=[QueueCallback(q, self.logger)],
         )
 
+        llm_translate = VLLMOpenAI(
+            openai_api_key="EMPTY",
+            openai_api_base=self.config["INFERENCE_SERVER_URL"],
+            model_name=self.config["MODEL_NAME"],
+            max_tokens=256,
+            top_p=0.1,
+            temperature=0.1,
+            presence_penalty=1.03,
+            streaming=False,
+            verbose=False
+        )
+
         retriever = MilvusRetrieverWithScoreThreshold(
             embedding_function=self.embeddings,
             collection_name=collection,
@@ -126,12 +138,31 @@ class Chatbot:
             logger=self.logger,
         )
 
-        prompt_template = self.prompt_template
+        language_mapping = {
+            "en": "English",
+            "fr": "French",
+            "de": "German",
+            "es": "Spanish",
+            "cn": "Chinese",
+            "jp": "Japanese",
+        }
+        
+        prompt_template = self.prompt_template.format(language=language_mapping.get(language, "English"))
         prompt = PromptTemplate.from_template(prompt_template)
+
+        translate_prompt = """
+        <s>[INST] <<SYS>>
+        Translate the following text to English. Only translate the text as concisely as possible. Don't add any comment or information.
+        If the text is already in English, don't change it or apologize, just copy it without any other mention.
+        <</SYS>>
+        Text to translate:
+        {query}
+        """
 
         # Instantiate RAG chain
         rag_chain = RetrievalQA.from_chain_type(
             llm,
+            chain_type="stuff",
             retriever=retriever,
             chain_type_kwargs={"prompt": prompt},
             return_source_documents=True,
@@ -139,10 +170,16 @@ class Chatbot:
 
         # Create a function to call - this will run in a thread
         def task():
-            if (product_full_name != "None") and (version != "None"):
-                new_query = f"We are talking about {product_full_name} version {version}. {query}"
+            # Translate the query to English if needed
+            if language != "en":
+                english_query = str(llm_translate.invoke(translate_prompt.format(query=query))).replace("English:", "").replace("Answer:", "").replace("English translation:", "").replace("Translation:", "").strip().lstrip('\t')
             else:
-                new_query = query
+                english_query = query
+
+            if (product_full_name != "None") and (version != "None"):
+                new_query = f"We are talking about {product_full_name}. {english_query}"
+            else:
+                new_query = english_query
             self.logger.info(f"Query: {new_query}")
             resp = rag_chain.invoke({"query": new_query})
             sources = self._format_sources(resp['source_documents'])
