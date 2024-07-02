@@ -25,7 +25,7 @@ def get_pages(product, version, language):
     soup = loader.scrape()
 
     # Select only the element titles that contain the links to the documentation pages
-    filtered_elements = soup.find_all("h3", class_="list-result-title heading-inline")
+    filtered_elements = soup.find_all("h3", attrs={"slot":"headline"})
     new_soup = BeautifulSoup("", "lxml")
     for element in filtered_elements:
         new_soup.append(element)
@@ -37,7 +37,7 @@ def get_pages(product, version, language):
     for match in new_soup.findAll("a"):
         links.append(match.get("href"))
     links = [
-        url for url in links if url.startswith("/documentation")
+        url for url in links if url.startswith("/en/documentation")
     ]  # Filter out unwanted links
     pages = [
         link.replace("/html/", "/html-single/") for link in links if "/html/" in link
@@ -50,7 +50,7 @@ def split_document(product, version, language, page, product_full_name):
     """Split a Red Hat documentation page into smaller sections."""
 
     # Load, parse, and transform to Markdown
-    document_url = ["https://access.redhat.com" + page]
+    document_url = ["https://docs.redhat.com" + page]
     print(f"Processing: {document_url}")
     loader = RedHatDocumentationLoader(document_url)
     docs = loader.load()
