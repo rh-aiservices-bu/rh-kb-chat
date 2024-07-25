@@ -94,7 +94,7 @@ class Chatbot:
         job_done = object()
 
         llm = VLLMOpenAI(
-            openai_api_key="EMPTY",
+            openai_api_key=self.config["API_KEY"],
             openai_api_base=self.config["INFERENCE_SERVER_URL"],
             model_name=self.config["MODEL_NAME"],
             max_tokens=int(self.config["MAX_TOKENS"]),
