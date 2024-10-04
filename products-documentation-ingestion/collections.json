@@ -1,0 +1,20 @@
+[
+    {
+        "product": "red_hat_openshift_ai_self-managed",
+        "product_full_name": "Red Hat OpenShift AI Self-Managed",
+        "version": [
+            "2.11",
+            "2.12",
+            "2.13"
+        ],
+        "language": "en-US"
+    },
+    {
+        "product": "red_hat_insights",
+        "product_full_name": "Red Hat Insights",
+        "version": [
+            "1-latest"
+        ],
+        "language": "en-US"
+    }
+]
