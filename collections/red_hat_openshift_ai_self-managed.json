@@ -1,0 +1,14 @@
+{
+    "product": "red_hat_openshift_ai_self-managed",
+    "product_full_name": "Red Hat OpenShift AI Self-Managed",
+    "versions": [
+        {"version":"2.7", "directive": "remove"},
+        {"version":"2.8", "directive": "keep"},
+        {"version":"2.9", "directive": "remove"},
+        {"version":"2.10", "directive": "keep"},
+        {"version":"2.11", "directive": "keep"},
+        {"version":"2.12", "directive": "keep"},
+        {"version":"2.13", "directive": "update"}
+    ],
+    "language": "en-US"
+}
