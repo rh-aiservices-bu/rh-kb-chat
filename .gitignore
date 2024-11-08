@@ -9,6 +9,7 @@
 # env vars
 .env
 *.local
+local_collections
 
 # dependencies
 node_modules

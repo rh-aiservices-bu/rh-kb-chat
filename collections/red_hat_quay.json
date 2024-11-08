@@ -1,0 +1,147 @@
+{
+  "collection_base_name": "red_hat_quay",
+  "collection_full_name": "Red Hat Quay",
+  "common_sources": [],
+  "versions": [
+    {
+      "version_number": "2.9",
+      "store_directive": "create_or_keep",
+      "sources": [
+        {
+          "ingestion_type": "redhat_doc",
+          "language": "en-US"
+        }
+      ]
+    },
+    {
+      "version_number": "3",
+      "store_directive": "create_or_keep",
+      "sources": [
+        {
+          "ingestion_type": "redhat_doc",
+          "language": "en-US"
+        }
+      ]
+    },
+    {
+      "version_number": "3.2",
+      "store_directive": "create_or_keep",
+      "sources": [
+        {
+          "ingestion_type": "redhat_doc",
+          "language": "en-US"
+        }
+      ]
+    },
+    {
+      "version_number": "3.3",
+      "store_directive": "create_or_keep",
+      "sources": [
+        {
+          "ingestion_type": "redhat_doc",
+          "language": "en-US"
+        }
+      ]
+    },
+    {
+      "version_number": "3.4",
+      "store_directive": "create_or_keep",
+      "sources": [
+        {
+          "ingestion_type": "redhat_doc",
+          "language": "en-US"
+        }
+      ]
+    },
+    {
+      "version_number": "3.5",
+      "store_directive": "create_or_keep",
+      "sources": [
+        {
+          "ingestion_type": "redhat_doc",
+          "language": "en-US"
+        }
+      ]
+    },
+    {
+      "version_number": "3.6",
+      "store_directive": "create_or_keep",
+      "sources": [
+        {
+          "ingestion_type": "redhat_doc",
+          "language": "en-US"
+        }
+      ]
+    },
+    {
+      "version_number": "3.7",
+      "store_directive": "create_or_keep",
+      "sources": [
+        {
+          "ingestion_type": "redhat_doc",
+          "language": "en-US"
+        }
+      ]
+    },
+    {
+      "version_number": "3.8",
+      "store_directive": "create_or_keep",
+      "sources": [
+        {
+          "ingestion_type": "redhat_doc",
+          "language": "en-US"
+        }
+      ]
+    },
+    {
+      "version_number": "3.9",
+      "store_directive": "create_or_keep",
+      "sources": [
+        {
+          "ingestion_type": "redhat_doc",
+          "language": "en-US"
+        }
+      ]
+    },
+    {
+      "version_number": "3.10",
+      "store_directive": "create_or_keep",
+      "sources": [
+        {
+          "ingestion_type": "redhat_doc",
+          "language": "en-US"
+        }
+      ]
+    },
+    {
+      "version_number": "3.11",
+      "store_directive": "create_or_keep",
+      "sources": [
+        {
+          "ingestion_type": "redhat_doc",
+          "language": "en-US"
+        }
+      ]
+    },
+    {
+      "version_number": "3.12",
+      "store_directive": "create_or_keep",
+      "sources": [
+        {
+          "ingestion_type": "redhat_doc",
+          "language": "en-US"
+        }
+      ]
+    },
+    {
+      "version_number": "3.13",
+      "store_directive": "create_or_keep",
+      "sources": [
+        {
+          "ingestion_type": "redhat_doc",
+          "language": "en-US"
+        }
+      ]
+    }
+  ]
+}

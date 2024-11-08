@@ -1,0 +1,12 @@
+FROM quay.io/modh/runtime-images:runtime-minimal-ubi9-python-3.11-2024b-20241108
+
+USER 0
+
+RUN dnf -y update && \
+    dnf -y clean all && \
+    rm -rf /var/cache/dnf
+
+USER 1001
+
+RUN --mount=type=bind,source=requirements.txt,target=/tmp/requirements.txt \
+    pip install --no-cache-dir -r /tmp/requirements.txt

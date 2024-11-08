@@ -1,0 +1,207 @@
+{
+  "collection_base_name": "openshift_container_platform",
+  "collection_full_name": "OpenShift Container Platform",
+  "common_sources": [],
+  "versions": [
+    {
+      "version_number": "3.9",
+      "store_directive": "create_or_keep",
+      "sources": [
+        {
+          "ingestion_type": "redhat_doc",
+          "language": "en-US"
+        }
+      ]
+    },
+    {
+      "version_number": "3.10",
+      "store_directive": "create_or_keep",
+      "sources": [
+        {
+          "ingestion_type": "redhat_doc",
+          "language": "en-US"
+        }
+      ]
+    },
+    {
+      "version_number": "3.11",
+      "store_directive": "create_or_keep",
+      "sources": [
+        {
+          "ingestion_type": "redhat_doc",
+          "language": "en-US"
+        }
+      ]
+    },
+    {
+      "version_number": "4.1",
+      "store_directive": "create_or_keep",
+      "sources": [
+        {
+          "ingestion_type": "redhat_doc",
+          "language": "en-US"
+        }
+      ]
+    },
+    {
+      "version_number": "4.2",
+      "store_directive": "create_or_keep",
+      "sources": [
+        {
+          "ingestion_type": "redhat_doc",
+          "language": "en-US"
+        }
+      ]
+    },
+    {
+      "version_number": "4.3",
+      "store_directive": "create_or_keep",
+      "sources": [
+        {
+          "ingestion_type": "redhat_doc",
+          "language": "en-US"
+        }
+      ]
+    },
+    {
+      "version_number": "4.4",
+      "store_directive": "create_or_keep",
+      "sources": [
+        {
+          "ingestion_type": "redhat_doc",
+          "language": "en-US"
+        }
+      ]
+    },
+    {
+      "version_number": "4.5",
+      "store_directive": "create_or_keep",
+      "sources": [
+        {
+          "ingestion_type": "redhat_doc",
+          "language": "en-US"
+        }
+      ]
+    },
+    {
+      "version_number": "4.6",
+      "store_directive": "create_or_keep",
+      "sources": [
+        {
+          "ingestion_type": "redhat_doc",
+          "language": "en-US"
+        }
+      ]
+    },
+    {
+      "version_number": "4.7",
+      "store_directive": "create_or_keep",
+      "sources": [
+        {
+          "ingestion_type": "redhat_doc",
+          "language": "en-US"
+        }
+      ]
+    },
+    {
+      "version_number": "4.8",
+      "store_directive": "create_or_keep",
+      "sources": [
+        {
+          "ingestion_type": "redhat_doc",
+          "language": "en-US"
+        }
+      ]
+    },
+    {
+      "version_number": "4.9",
+      "store_directive": "create_or_keep",
+      "sources": [
+        {
+          "ingestion_type": "redhat_doc",
+          "language": "en-US"
+        }
+      ]
+    },
+    {
+      "version_number": "4.10",
+      "store_directive": "create_or_keep",
+      "sources": [
+        {
+          "ingestion_type": "redhat_doc",
+          "language": "en-US"
+        }
+      ]
+    },
+    {
+      "version_number": "4.11",
+      "store_directive": "create_or_keep",
+      "sources": [
+        {
+          "ingestion_type": "redhat_doc",
+          "language": "en-US"
+        }
+      ]
+    },
+    {
+      "version_number": "4.12",
+      "store_directive": "create_or_keep",
+      "sources": [
+        {
+          "ingestion_type": "redhat_doc",
+          "language": "en-US"
+        }
+      ]
+    },
+    {
+      "version_number": "4.13",
+      "store_directive": "create_or_keep",
+      "sources": [
+        {
+          "ingestion_type": "redhat_doc",
+          "language": "en-US"
+        }
+      ]
+    },
+    {
+      "version_number": "4.14",
+      "store_directive": "create_or_keep",
+      "sources": [
+        {
+          "ingestion_type": "redhat_doc",
+          "language": "en-US"
+        }
+      ]
+    },
+    {
+      "version_number": "4.15",
+      "store_directive": "create_or_keep",
+      "sources": [
+        {
+          "ingestion_type": "redhat_doc",
+          "language": "en-US"
+        }
+      ]
+    },
+    {
+      "version_number": "4.16",
+      "store_directive": "create_or_keep",
+      "sources": [
+        {
+          "ingestion_type": "redhat_doc",
+          "language": "en-US"
+        }
+      ]
+    },
+    {
+      "version_number": "4.17",
+      "store_directive": "create_or_keep",
+      "sources": [
+        {
+          "ingestion_type": "redhat_doc",
+          "language": "en-US"
+        }
+      ]
+    }
+  ]
+}
