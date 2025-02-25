@@ -3,7 +3,7 @@
 **/.env
 **/*.local
 .docs
-.vscode
+**/.vscode
 .gitignore
 **/.venv
 **/__pycache__

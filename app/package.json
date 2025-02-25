@@ -1,6 +1,6 @@
 {
   "name": "documentation-chatbot",
-  "version": "1.7.2",
+  "version": "2.0.0",
   "description": "Documentation Chabot.",
   "author": "",
   "license": "MIT",
@@ -34,7 +34,7 @@
     "postinstall:backend": "echo \"backend venv needs to be activated\"",
     "postinstall:frontend": "cd ./frontend && npm install",
     "start": "run-p start:*",
-    "start:backend": "cd ./backend && python3 -m gunicorn app:app --workers 4 --worker-class uvicorn.workers.UvicornWorker --bind 0.0.0.0:5000",
+    "start:backend": "cd ./backend && python3 app.py",
     "start:frontend": "echo \"...available at ./frontend/public\"",
     "test": "run-s test:backend test:frontend",
     "test:backend": "cd ./backend && npm run test",
