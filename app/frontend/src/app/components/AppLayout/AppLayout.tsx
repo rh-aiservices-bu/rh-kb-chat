@@ -45,7 +45,7 @@ interface IAppLayout {
 }
 
 const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
-  const [sidebarOpen, setSidebarOpen] = React.useState(true);
+  const [sidebarOpen, setSidebarOpen] = React.useState(false);
   const [selectedLanguage, setSelectedLanguage] = React.useState('en');
 
   const onChangeLanguage = (_event: React.FormEvent<HTMLSelectElement>, language: string) => {
@@ -111,17 +111,17 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
 
   const Header = (
     <Masthead>
-      <MastheadToggle>
+      <MastheadToggle hidden={true}>
         <Button variant="plain" onClick={() => setSidebarOpen(!sidebarOpen)} aria-label="Global navigation">
-          <BarsIcon />
+          <BarsIcon/>
         </Button>
       </MastheadToggle>
       <MastheadMain>
         <MastheadBrand>
-          <TextContent>
+          <Brand src={logo} alt="Patternfly Logo" heights={{ default: '36px' }} />
+          <TextContent style={{ marginLeft: '1rem' }}>
             <Text component={TextVariants.h3} className='title-text'>{t('app_header.powered_by')}</Text>
           </TextContent>
-          <Brand src={logo} alt="Patternfly Logo" heights={{ default: '36px' }} />
         </MastheadBrand>
       </MastheadMain>
       <MastheadContent>

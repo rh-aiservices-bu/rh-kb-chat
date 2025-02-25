@@ -4,7 +4,7 @@
     "chat_documentation": "Chat with the Documentation"
   },
   "app_header": {
-    "powered_by": "Powered by",
+    "powered_by": "Documentation Assistant Demo",
     "help": {
       "header": "Information",
       "body": "This application is not an official chatbot for Red Hat documentation. For demonstration purposes only.",
