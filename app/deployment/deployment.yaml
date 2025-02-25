@@ -1,0 +1,50 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: rh-kb-chatbot
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: rh-kb-chatbot
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: rh-kb-chatbot
+        deployment: rh-kb-chatbot
+    spec:
+      containers:
+        - name: rh-kb-chatbot
+          image: quay.io/rh-aiservices-bu/rh-kb-chat:2.0.0-alpha
+          ports:
+            - containerPort: 5000
+              protocol: TCP
+          env:
+            - name: CONFIG_FILE
+              value: '/opt/app-rot/src/config/config.json'
+          resources: {}
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+          imagePullPolicy: Always
+          volumeMounts:
+          - name: config-volume
+            mountPath: '/opt/app-rot/src/config'
+            readOnly: true
+      restartPolicy: Always
+      terminationGracePeriodSeconds: 30
+      dnsPolicy: ClusterFirst
+      securityContext: {}
+      schedulerName: default-scheduler
+      volumes:
+      - name: config-volume
+        secret:
+          secretName: kb-chatbot
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 25%
+      maxSurge: 25%
+  revisionHistoryLimit: 10
+  progressDeadlineSeconds: 600
