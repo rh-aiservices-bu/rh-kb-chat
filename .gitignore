@@ -44,3 +44,6 @@ package-lock.json
 # notebook checkpoints
 */*/.ipynb_checkpoints/*
 */*/*/.ipynb_checkpoints/*
+
+# config
+config.json

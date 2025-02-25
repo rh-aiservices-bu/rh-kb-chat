@@ -1,7 +1,7 @@
 {
-  "app_title": "Documentation Assistant",
+  "app_title": "Documentation Assistant Demo",
   "app_menu": {
-    "chat_documentation": "Chat with the Documentation"
+    "chat_documentation": "Documentation Assistant Demo"
   },
   "app_header": {
     "powered_by": "Documentation Assistant Demo",
@@ -16,7 +16,7 @@
   "chat": {
     "title": "Documentation Assistant",
     "filter": {
-      "product": "Product",
+      "product": "Red Hat Product",
       "version": "Version",
       "language": "Language"
     },

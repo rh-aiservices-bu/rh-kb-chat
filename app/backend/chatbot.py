@@ -101,7 +101,7 @@ class Chatbot:
         unique_list = []
         for item in sources_list:
             if item.metadata['source'] not in unique_list:
-                unique_list.append(item.metadata['source'])
+                unique_list.append([item.metadata['source'], item.metadata['score']])
         return unique_list
 
     async def stream(self, model, query, collection, collection_full_name, version, language):
@@ -193,14 +193,7 @@ class Chatbot:
         prompt_template = prompt_value.format(language=language_mapping.get(language, "English"))
         prompt = PromptTemplate.from_template(prompt_template)
 
-        translate_prompt = """
-        <s>[INST] <<SYS>>
-        Translate the following text to English. Only translate the text as concisely as possible. Don't add any comment or information.
-        If the text is already in English, don't change it or apologize, just copy it without any other mention.
-        <</SYS>>
-        Text to translate:
-        {query}
-        """
+        translate_prompt = next((item["translate_prompt"] for item in self.llms_config if item["name"] == translation_model), None)
 
         # Instantiate RAG chain
         combine_docs_chain = create_stuff_documents_chain(llm, prompt)
@@ -214,7 +207,7 @@ class Chatbot:
                 english_query = await loop.run_in_executor(
                     self.executor,
                     llm_translate.invoke,
-                    translate_prompt.format(query=query)
+                    translate_prompt.format(input=query)
                 )
                 english_query = str(english_query).replace("English:", "").replace("Answer:", "").replace("English translation:", "").replace("Translation:", "").strip().lstrip('\t')
             else:
@@ -233,7 +226,7 @@ class Chatbot:
             sources = self._format_sources(resp['context'])
             if len(sources) != 0:
                 for source in sources:
-                    data = {"type": "source", "source": source}
+                    data = {"type": "source", "source": source[0], "score": source[1]}
                     await q.put(data)
             await q.put(job_done)
 

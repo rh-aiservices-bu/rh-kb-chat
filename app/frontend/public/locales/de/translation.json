@@ -1,10 +1,10 @@
 {
-  "app_title": "Dokumentationsassistent",
+  "app_title": "Demo des Dokumentationsassistenten",
   "app_menu": {
-    "chat_documentation": "Chatten Sie mit der Dokumentation"
+    "chat_documentation": "Demo des Dokumentationsassistenten"
   },
   "app_header": {
-    "powered_by": "Bereitgestellt von",
+    "powered_by": "Demo des Dokumentationsassistenten",
     "help": {
       "header": "Information",
       "body": "Diese Anwendung ist kein offizieller Chatbot für Red Hat-Dokumentationen. Nur für Demonstrationszwecke.",
@@ -16,7 +16,7 @@
   "chat": {
     "title": "Dokumentationsassistent",
     "filter": {
-      "product": "Produkt",
+      "product": "Red Hat-Produkt",
       "version": "Version",
       "language": "Sprache"
     },

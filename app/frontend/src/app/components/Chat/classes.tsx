@@ -31,14 +31,25 @@ export class Answer {
   }
 }
 
+export class Source {
+  content: string;
+  score: number;
+
+  constructor(content: string, score: number) {
+    this.content = content;
+    this.score = score;
+  }
+}
+
 export class Sources {
-  content: string[];
+  content: Source[];
   type = 'Sources';
 
-  constructor(content: string[]) {
+  constructor(content: Source[]) {
     this.content = content;
   }
 }
+
 
 export class Message {
   content: Query | Answer | Sources;

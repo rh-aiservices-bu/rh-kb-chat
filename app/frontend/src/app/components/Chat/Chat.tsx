@@ -57,29 +57,28 @@ const Chat: React.FunctionComponent<ChatProps> = ({ selectedLanguage }) => {
   // ChatAnswer Refs
   const childRefs = React.useRef<(ChatAnswerRef | null)[]>([]);
 
+  // Maximum number of ChatAnswer instances
+  const searchParams = new URLSearchParams(window.location.search);
+  const maxChats = parseInt(searchParams.get('maxchat') || '4', 10);
+
   // ChatAnswer instances
   const [items, setItems] = React.useState<JSX.Element[]>([
     <ChatAnswer key={1} ref={(el) => (childRefs.current[1] = el)} />
   ]);
   const addItem = () => {
-    const newItem = (
-      <ChatAnswer key={items.length + 1} ref={(el) => (childRefs.current[items.length + 1] = el)} />
-    );
-    setItems([...items, newItem]);
+    if (items.length < maxChats) {
+      const newItem = (
+        <ChatAnswer key={items.length + 1} ref={(el) => (childRefs.current[items.length + 1] = el)} />
+      );
+      setItems([...items, newItem]);
+    }
   };
-
   const removeItem = () => {
     setItems(items.slice(0, -1));
   };
 
   //i18n
   const { t, i18n } = useTranslation();
-  /*   React.useEffect(() => {
-      console.log('selectedLanguage: ', selectedLanguage)
-      i18n.changeLanguage(selectedLanguage);
-      resetMessageHistory();
-    }, [selectedLanguage]); */
-
 
   // Collection elements
   const [collections, setCollections] = React.useState<Collection[]>([]); // The collections
@@ -124,7 +123,7 @@ const Chat: React.FunctionComponent<ChatProps> = ({ selectedLanguage }) => {
           childRef.sendQuery(query);
         }
       });
-    } 
+    }
   }
 
   /**
@@ -150,6 +149,11 @@ const Chat: React.FunctionComponent<ChatProps> = ({ selectedLanguage }) => {
     if (collection) {
       const version = collection.versions[0].version_number;
       updateCollection(collection, version);
+      childRefs.current.forEach((childRef) => {
+        if (childRef) {
+          childRef.changeCollectionOrVersion(collection, version);
+        }
+      });
     }
   }
 
@@ -165,6 +169,11 @@ const Chat: React.FunctionComponent<ChatProps> = ({ selectedLanguage }) => {
     if (collection) {
       const version = value;
       updateCollection(collection, version);
+      childRefs.current.forEach((childRef) => {
+        if (childRef) {
+          childRef.changeCollectionOrVersion(collection, version);
+        }
+      });
     }
   }
 
@@ -186,9 +195,9 @@ const Chat: React.FunctionComponent<ChatProps> = ({ selectedLanguage }) => {
             <Flex>
               <FlexItem>
                 <Flex direction={{ default: 'row' }}>
-                  <FlexItem>
+                  <FlexItem className='collection-version-language-legends' >
                     <TextContent>
-                      <Text component={TextVariants.h3} >{t('chat.filter.product')}</Text>
+                      <Text component={TextVariants.h3} >{t('chat.filter.product')}:</Text>
                     </TextContent>
                   </FlexItem>
                   <FlexItem>
@@ -200,7 +209,7 @@ const Chat: React.FunctionComponent<ChatProps> = ({ selectedLanguage }) => {
                       className="collection-select"
                     >
                       {collections && collections.map((collection, index) => (
-                        <FormSelectOption key={index} value={collection.collection_base_name} label={collection.collection_full_name} />
+                        <FormSelectOption key={index} value={collection.collection_full_name} label={collection.collection_full_name} />
                       ))}
                     </FormSelect>
                   </FlexItem>
@@ -208,9 +217,9 @@ const Chat: React.FunctionComponent<ChatProps> = ({ selectedLanguage }) => {
               </FlexItem>
               <FlexItem>
                 <Flex direction={{ default: 'row' }}>
-                  <FlexItem>
+                  <FlexItem className='collection-version-language-legends'>
                     <TextContent>
-                      <Text component={TextVariants.h3} >{t('chat.filter.version')}</Text>
+                      <Text component={TextVariants.h3} >{t('chat.filter.version')}:</Text>
                     </TextContent>
                   </FlexItem>
                   <FlexItem>
@@ -228,18 +237,6 @@ const Chat: React.FunctionComponent<ChatProps> = ({ selectedLanguage }) => {
                   </FlexItem>
                 </Flex>
               </FlexItem>
-              <FlexItem className='pf-c-flex__item pf-m-fill'></FlexItem>
-              {/* Number of chats selector */}
-              <FlexItem>
-                <div style={{ marginBottom: "16px", display: "flex", gap: "8px" }}>
-                  <Button onClick={addItem} variant="primary">
-                    Add Answer Model
-                  </Button>
-                  <Button onClick={removeItem} variant="danger" isDisabled={items.length === 0}>
-                    Remove Last Model
-                  </Button>
-                </div>
-              </FlexItem>
             </Flex>
           </FlexItem>
 
@@ -247,21 +244,41 @@ const Chat: React.FunctionComponent<ChatProps> = ({ selectedLanguage }) => {
           <FlexItem className='flex-chat'>
             <Card isRounded className='chat-card'>
               <CardHeader className='chat-card-header'>
-                <TextContent>
-                  <Text component={TextVariants.h3} className='chat-card-header-title'><FontAwesomeIcon icon={faCommentDots} />&nbsp;{t('chat.title')}</Text>
-                </TextContent>
+                <Flex justifyContent={{ default: 'justifyContentSpaceBetween' }}>
+                  <FlexItem>
+                    {/* Empty item to center title */}
+                  </FlexItem>
+                  <FlexItem>
+                    <TextContent>
+                      <Text component={TextVariants.h3} className='chat-card-header-title'>
+                        <FontAwesomeIcon icon={faCommentDots} />&nbsp;{t('chat.title')}
+                      </Text>
+                    </TextContent>
+                  </FlexItem>
+                  <FlexItem>
+                    <Flex>
+                      <FlexItem>
+                        <Button onClick={addItem} variant="primary">
+                          Add LLM
+                        </Button>
+                      </FlexItem>
+                      <FlexItem>
+                        <Button onClick={removeItem} variant="danger" isDisabled={items.length === 0}>
+                          Remove last LLM
+                        </Button>
+                      </FlexItem>
+                    </Flex>
+                  </FlexItem>
+                </Flex>
               </CardHeader>
               <CardBody className='chat-card-body'>
                 <Stack>
                   {/* ChatbotAnswer panels */}
-                  <StackItem isFilled className='chat-bot-answer'>
+                  <StackItem isFilled className='chat-bot-answer' id='chatBotAnswer'>
                     <Grid hasGutter
-                      span={items.length === 1 ? 12 : 6}
-                      style={{
-                        gap: '16px',
-                      }}>
+                      className="chat-grid">
                       {items.map((item, index) => (
-                        <GridItem key={index}>
+                        <GridItem key={index} className='chat-grid-item' span={Math.floor(12 / (items.length)) as any}>
                           {/* Replace with your ChatAnswer component */}
                           {item}
                         </GridItem>

@@ -5,6 +5,7 @@ import requests
 from pymilvus import MilvusClient
 
 from classes import Collection, Source, VersionInfo
+from packaging import version as pkg_version
 
 
 class CollectionsLoader:
@@ -81,6 +82,15 @@ class CollectionsLoader:
                         collections.append(collection)
         return collections
     
+    def _version_key(self, version_obj):
+        """Key function for sorting versions"""
+        try:
+            # Return a tuple with priority flag and parsed version
+            return (True, pkg_version.parse(version_obj.version_number))
+        except pkg_version.InvalidVersion:
+            # Return a tuple with lower priority flag and original string
+            return (False, version_obj.version_number)
+    
     def _filter_collections(self):
         """Filter collections based on them being available in Milvus"""
         milvus_uri = self.vectorstore_config.get('uri', 'localhost')
@@ -113,6 +123,8 @@ class CollectionsLoader:
                 if milvus_collection_name in milvus_collections:
                     new_versions.append(version)
             if len(new_versions) > 0:
+                # Sort versions in descending order using semantic versioning
+                new_versions.sort(key=self._version_key, reverse=True)                
                 collection.versions = new_versions
                 new_collections.append(collection)
         self.collections = new_collections
@@ -129,6 +141,20 @@ class CollectionsLoader:
                 self.collections_git_repo_path,
                 self.collections_git_repo_branch
             )
+
+        # Keep only collections that are available in Milvus
         self._filter_collections()
+
+        # Sort collections by collection_full_name
+        self.collections.sort(key=lambda x: x.collection_full_name)
+
+        # Add an empty collection at the beginning of the array
+        empty_collection = Collection(
+            collection_base_name="none",
+            collection_full_name="None",
+            versions=[""],
+            common_sources=[]
+        )
+        self.collections.insert(0, empty_collection)
 
         return self.collections
