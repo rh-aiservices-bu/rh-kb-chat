@@ -1,0 +1,67 @@
+{
+  "collection_base_name": "red_hat_build_of_eclipse_vert.x",
+  "collection_full_name": "Red Hat build of Eclipse Vert.x",
+  "common_sources": [],
+  "versions": [
+    {
+      "version_number": "4.3",
+      "store_directive": "create_or_keep",
+      "sources": [
+        {
+          "ingestion_type": "redhat_doc",
+          "language": "en-US"
+        }
+      ]
+    },
+    {
+      "version_number": "4.2",
+      "store_directive": "create_or_keep",
+      "sources": [
+        {
+          "ingestion_type": "redhat_doc",
+          "language": "en-US"
+        }
+      ]
+    },
+    {
+      "version_number": "4.1",
+      "store_directive": "delete",
+      "sources": [
+        {
+          "ingestion_type": "redhat_doc",
+          "language": "en-US"
+        }
+      ]
+    },
+    {
+      "version_number": "4.0",
+      "store_directive": "delete",
+      "sources": [
+        {
+          "ingestion_type": "redhat_doc",
+          "language": "en-US"
+        }
+      ]
+    },
+    {
+      "version_number": "3.9",
+      "store_directive": "delete",
+      "sources": [
+        {
+          "ingestion_type": "redhat_doc",
+          "language": "en-US"
+        }
+      ]
+    },
+    {
+      "version_number": "3.8",
+      "store_directive": "delete",
+      "sources": [
+        {
+          "ingestion_type": "redhat_doc",
+          "language": "en-US"
+        }
+      ]
+    }
+  ]
+}

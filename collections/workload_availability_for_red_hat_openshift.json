@@ -1,0 +1,87 @@
+{
+  "collection_base_name": "workload_availability_for_red_hat_openshift",
+  "collection_full_name": "Workload Availability for Red Hat OpenShift",
+  "common_sources": [],
+  "versions": [
+    {
+      "version_number": "25.1",
+      "store_directive": "create_or_keep",
+      "sources": [
+        {
+          "ingestion_type": "redhat_doc",
+          "language": "en-US"
+        }
+      ]
+    },
+    {
+      "version_number": "24.4",
+      "store_directive": "create_or_keep",
+      "sources": [
+        {
+          "ingestion_type": "redhat_doc",
+          "language": "en-US"
+        }
+      ]
+    },
+    {
+      "version_number": "24.3",
+      "store_directive": "delete",
+      "sources": [
+        {
+          "ingestion_type": "redhat_doc",
+          "language": "en-US"
+        }
+      ]
+    },
+    {
+      "version_number": "24.2",
+      "store_directive": "delete",
+      "sources": [
+        {
+          "ingestion_type": "redhat_doc",
+          "language": "en-US"
+        }
+      ]
+    },
+    {
+      "version_number": "24.1",
+      "store_directive": "delete",
+      "sources": [
+        {
+          "ingestion_type": "redhat_doc",
+          "language": "en-US"
+        }
+      ]
+    },
+    {
+      "version_number": "23.3",
+      "store_directive": "delete",
+      "sources": [
+        {
+          "ingestion_type": "redhat_doc",
+          "language": "en-US"
+        }
+      ]
+    },
+    {
+      "version_number": "23.2",
+      "store_directive": "delete",
+      "sources": [
+        {
+          "ingestion_type": "redhat_doc",
+          "language": "en-US"
+        }
+      ]
+    },
+    {
+      "version_number": "23.1",
+      "store_directive": "delete",
+      "sources": [
+        {
+          "ingestion_type": "redhat_doc",
+          "language": "en-US"
+        }
+      ]
+    }
+  ]
+}

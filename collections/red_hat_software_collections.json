@@ -1,0 +1,37 @@
+{
+  "collection_base_name": "red_hat_software_collections",
+  "collection_full_name": "Red Hat Software Collections",
+  "common_sources": [],
+  "versions": [
+    {
+      "version_number": "3",
+      "store_directive": "create_or_keep",
+      "sources": [
+        {
+          "ingestion_type": "redhat_doc",
+          "language": "en-US"
+        }
+      ]
+    },
+    {
+      "version_number": "2",
+      "store_directive": "create_or_keep",
+      "sources": [
+        {
+          "ingestion_type": "redhat_doc",
+          "language": "en-US"
+        }
+      ]
+    },
+    {
+      "version_number": "1",
+      "store_directive": "delete",
+      "sources": [
+        {
+          "ingestion_type": "redhat_doc",
+          "language": "en-US"
+        }
+      ]
+    }
+  ]
+}
