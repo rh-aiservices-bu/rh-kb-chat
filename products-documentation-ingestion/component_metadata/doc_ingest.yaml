@@ -1,0 +1,33 @@
+# PIPELINE DEFINITION
+# Name: doc-ingest
+components:
+  comp-doc-ingest:
+    executorLabel: exec-doc-ingest
+deploymentSpec:
+  executors:
+    exec-doc-ingest:
+      container:
+        args:
+        - --executor_input
+        - '{{$}}'
+        - --function_to_execute
+        - doc_ingest
+        command:
+        - python3
+        - -m
+        - kfp.dsl.executor_main
+        image: quay.io/rh-aiservices-bu/rh-kb-doc-ingestion:1.0
+pipelineInfo:
+  name: doc-ingest
+root:
+  dag:
+    tasks:
+      doc-ingest:
+        cachingOptions:
+          enableCache: true
+        componentRef:
+          name: comp-doc-ingest
+        taskInfo:
+          name: doc-ingest
+schemaVersion: 2.1.0
+sdkVersion: kfp-2.11.0

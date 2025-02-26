@@ -1,0 +1,73 @@
+---
+apiVersion: tekton.dev/v1
+kind: Pipeline
+metadata:
+  name: doc-ingestion
+spec:
+  workspaces:
+    - name: shared-workspace
+  params:
+    - name: APPLICATION_NAME
+      type: string
+      default: ""
+    - name: GIT_URL
+      type: string
+      default: ""
+    - name: GIT_BRANCH
+      type: string
+      default: ""
+  tasks:
+    # Clone the repository
+    - name: fetch-ds-pipeline-repository
+      taskRef:
+        resolver: cluster
+        params:
+          - name: kind
+            value: task
+          - name: name
+            value: git-clone
+          - name: namespace
+            value: openshift-pipelines 
+      workspaces:
+        - name: output
+          workspace: shared-workspace
+      params:
+        - name: URL
+          value: "$(params.GIT_URL)"
+        - name: REVISION
+          value: "$(params.GIT_BRANCH)"
+        - name: SUBDIRECTORY
+          value: "$(params.APPLICATION_NAME)/$(params.GIT_BRANCH)"
+        - name: DELETE_EXISTING
+          value: "true"
+        - name: SSL_VERIFY
+          value: "false"
+    # Execute Doc Ingestion Data Science Pipeline
+    - name: execute-doc-ingestion-pipeline
+      taskRef:
+        name: execute-doc-ingestion-pipeline
+        kind: Task
+      workspaces:
+        - name: output
+          workspace: shared-workspace
+      params:
+        - name: WORK_DIRECTORY
+          value: "$(params.APPLICATION_NAME)/$(params.GIT_BRANCH)/products-documentation-ingestion"
+        - name: APPLICATION_NAME
+          value: "$(params.APPLICATION_NAME)"
+      runAfter:
+        - fetch-ds-pipeline-repository
+    - name: doc-process-status
+      taskRef:
+        name: doc-process-status
+        kind: Task
+      params:
+        - name: KFP_RUN_ID
+          value: "$(tasks.execute-doc-ingestion-pipeline.results.KFP_RUN_ID)"
+      runAfter:
+        - execute-doc-ingestion-pipeline
+      timeout: 10h0m0s
+  results:
+    - name: KFP_RUN_ID
+      description: Run ID of the Data Science Pipeline
+      value: "$(tasks.execute-doc-ingestion-pipeline.results.KFP_RUN_ID)"

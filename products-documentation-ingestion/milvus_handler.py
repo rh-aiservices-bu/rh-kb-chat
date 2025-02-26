@@ -83,7 +83,7 @@ class MilvusHandler:
             )
 
 
-    def ingest_documentation(self, collection, version, chunk_size=768, chunk_overlap=128, drop_old=True):
+    def ingest_documentation(self, collection, version, chunk_size=768, chunk_overlap=128, drop_old=True, batch_size=600):
         """Ingest documentation into Milvus"""
 
         collection_name = (
@@ -123,7 +123,13 @@ class MilvusHandler:
             f"Calculating embeddings and uploading documents to collection {collection_name}"
         )
 
-        vector_store.add_documents(splits, batch_size=1)
+        # Process in batches of 600
+        total_splits = len(splits)
+        for i in range(0, total_splits, batch_size):
+            end_idx = min(i + batch_size, total_splits)
+            current_batch = splits[i:end_idx]
+            print(f"Processing batch {i//batch_size + 1}/{(total_splits + batch_size - 1)//batch_size}: documents {i} to {end_idx-1}")
+            vector_store.add_documents(current_batch, batch_size=self.milvus_batch_size)
 
         print("Ingestion finished!")
 
