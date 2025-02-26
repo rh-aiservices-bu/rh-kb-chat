@@ -51,15 +51,11 @@ spec:
           ssl_ca_cert=ssl_ca_cert
       )
 
-      # with open('default_parameters.json') as f:
-      #     default_parameters = json.load(f)
-      
       # start a run
       print("🏃‍♂️ start a run")
       run_id = client.create_run_from_pipeline_func(
           doc_ingestion_pipeline,
-          # arguments=default_parameters,
-          experiment_name="$(params.APPLICATION_NAME)-doc-ingestion", # commit message somewhere maybe? or PR number?
+          experiment_name="$(params.APPLICATION_NAME)-doc-ingestion", 
           namespace=namespace,
           enable_caching=True
       )
