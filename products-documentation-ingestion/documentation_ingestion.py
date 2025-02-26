@@ -59,39 +59,74 @@ def doc_ingest():
         embeddings_model_name
     )
 
+
+    # At the start of processing, log total counts
+    print(f"\n==== STARTING DOCUMENT PROCESSING ====")
+    print(f"Found {len(collections)} collections to process")
+    total_versions = sum(len(collection.versions) for collection in collections)
+    print(f"Total document versions to process: {total_versions}\n")
+
+    # Counter for progress tracking
+    processed_count = 0
+
     for collection in collections:
+        print(f"\n📚 COLLECTION: {collection.collection_full_name}")
+        print(f"Base name: {collection.collection_base_name}")
+        print(f"Contains {len(collection.versions)} version(s)")
+        
         for version in collection.versions:
-            print('-----------------------------------')
-            print(f'Processing "{collection.collection_full_name}", Version: "{version.version_number}", Directive: "{version.store_directive}"')
+            processed_count += 1
+            progress = (processed_count / total_versions) * 100
+            
+            print('\n' + '=' * 80)
+            print(f"⏳ PROCESSING [{processed_count}/{total_versions}] ({progress:.1f}%)")
+            print(f"Collection: \"{collection.collection_full_name}\"")
+            print(f"Version: \"{version.version_number}\"")
+            print(f"Directive: \"{version.store_directive}\"")
+            
             collection_name = (
                 f"{collection.collection_base_name}_{version.version_number}"
                 .replace("-", "_")
                 .replace(".", "_")
             )
+            
+            # If you have URLs to process, show them clearly
+            if hasattr(version, 'urls') and version.urls:
+                print("\nProcessing URLs:")
+                for idx, url in enumerate(version.urls, 1):
+                    print(f"  {idx}. {url}")
+            
             if (version.store_directive == 'create_or_keep'):
                 if (milvus_handler.collection_check(collection_name) is None):
-                    print("Collection not present, creating it...")
+                    print("\n▶️ Collection not present, creating it...")
                     try:
-                        print(f'Creating "{collection.collection_full_name}" at version {version.version_number}')
+                        print(f'▶️ Creating "{collection.collection_full_name}" at version {version.version_number}')
                         milvus_handler.ingest_documentation(collection, version, chunk_size, chunk_overlap)
+                        print("✅ Successfully created collection")
                     except Exception as e:
-                        print(f'Error processing "{collection.collection_full_name}" at version {version.version_number}')
-                        print(f'{e}')
+                        print(f'❌ Error processing "{collection.collection_full_name}" at version {version.version_number}')
+                        print(f'❌ {e}')
                 else:
-                    print("Collection already present, skipping")
-            if (version.store_directive == 'update'):
-                print("No check needed, creating/replacing the collection anyway...")
+                    print("\n⏭️ Collection already present, skipping")
+            elif (version.store_directive == 'update'):
+                print("\n🔄 No check needed, creating/replacing the collection anyway...")
                 try:
-                    print(f'Updating "{collection.collection_full_name}" at version {version.version_number}')
+                    print(f'🔄 Updating "{collection.collection_full_name}" at version {version.version_number}')
                     milvus_handler.ingest_documentation(collection, version, chunk_size, chunk_overlap)
+                    print("✅ Successfully updated collection")
                 except Exception as e:
-                    print(f'Error processing "{collection.collection_full_name}" at version {version.version_number}')
-                    print(f'{e}')
-            if (version.store_directive == 'delete'):
+                    print(f'❌ Error processing "{collection.collection_full_name}" at version {version.version_number}')
+                    print(f'❌ {e}')
+            elif (version.store_directive == 'delete'):
                 if (milvus_handler.collection_check(collection_name) is None):
-                    print("No collection present already, skipping")
+                    print("\n⏭️ No collection present already, skipping")
                 else:
-                    print("Let's delete it")
+                    print("\n🗑️ Let's delete it")
                     milvus_handler.collection_delete(collection_name)
+                    print("✅ Successfully deleted collection")
+            
+            print(f"Completed processing [{processed_count}/{total_versions}]")
 
+    print("\n==== DOCUMENT PROCESSING COMPLETE ====")
+    print(f"Processed {processed_count} document versions across {len(collections)} collections")
     print("Done!")
