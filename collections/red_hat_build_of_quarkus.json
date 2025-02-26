@@ -1,10 +1,10 @@
 {
-  "collection_base_name": "red_hat_advanced_cluster_management_for_kubernetes",
-  "collection_full_name": "Red Hat Advanced Cluster Management for Kubernetes",
+  "collection_base_name": "red_hat_build_of_quarkus",
+  "collection_full_name": "Red Hat build of Quarkus",
   "common_sources": [],
   "versions": [
     {
-      "version_number": "2.12",
+      "version_number": "3.15",
       "store_directive": "create_or_keep",
       "sources": [
         {
@@ -14,7 +14,7 @@
       ]
     },
     {
-      "version_number": "2.11",
+      "version_number": "3.8",
       "store_directive": "create_or_keep",
       "sources": [
         {
@@ -24,7 +24,7 @@
       ]
     },
     {
-      "version_number": "2.10",
+      "version_number": "3.2",
       "store_directive": "delete",
       "sources": [
         {
@@ -34,17 +34,7 @@
       ]
     },
     {
-      "version_number": "2.9",
-      "store_directive": "delete",
-      "sources": [
-        {
-          "ingestion_type": "redhat_doc",
-          "language": "en-US"
-        }
-      ]
-    },
-    {
-      "version_number": "2.8",
+      "version_number": "2.13",
       "store_directive": "delete",
       "sources": [
         {
@@ -64,46 +54,6 @@
       ]
     },
     {
-      "version_number": "2.6",
-      "store_directive": "delete",
-      "sources": [
-        {
-          "ingestion_type": "redhat_doc",
-          "language": "en-US"
-        }
-      ]
-    },
-    {
-      "version_number": "2.5",
-      "store_directive": "delete",
-      "sources": [
-        {
-          "ingestion_type": "redhat_doc",
-          "language": "en-US"
-        }
-      ]
-    },
-    {
-      "version_number": "2.4",
-      "store_directive": "delete",
-      "sources": [
-        {
-          "ingestion_type": "redhat_doc",
-          "language": "en-US"
-        }
-      ]
-    },
-    {
-      "version_number": "2.3",
-      "store_directive": "delete",
-      "sources": [
-        {
-          "ingestion_type": "redhat_doc",
-          "language": "en-US"
-        }
-      ]
-    },
-    {
       "version_number": "2.2",
       "store_directive": "delete",
       "sources": [
@@ -114,7 +64,7 @@
       ]
     },
     {
-      "version_number": "2.1",
+      "version_number": "1.11",
       "store_directive": "delete",
       "sources": [
         {
@@ -124,7 +74,17 @@
       ]
     },
     {
-      "version_number": "2.0",
+      "version_number": "1.7",
+      "store_directive": "delete",
+      "sources": [
+        {
+          "ingestion_type": "redhat_doc",
+          "language": "en-US"
+        }
+      ]
+    },
+    {
+      "version_number": "1.3",
       "store_directive": "delete",
       "sources": [
         {

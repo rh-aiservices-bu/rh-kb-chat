@@ -1,0 +1,37 @@
+{
+  "collection_base_name": "red_hat_build_of_apache_camel",
+  "collection_full_name": "Red Hat build of Apache Camel",
+  "common_sources": [],
+  "versions": [
+    {
+      "version_number": "4.8",
+      "store_directive": "create_or_keep",
+      "sources": [
+        {
+          "ingestion_type": "redhat_doc",
+          "language": "en-US"
+        }
+      ]
+    },
+    {
+      "version_number": "4.4",
+      "store_directive": "create_or_keep",
+      "sources": [
+        {
+          "ingestion_type": "redhat_doc",
+          "language": "en-US"
+        }
+      ]
+    },
+    {
+      "version_number": "4.0",
+      "store_directive": "delete",
+      "sources": [
+        {
+          "ingestion_type": "redhat_doc",
+          "language": "en-US"
+        }
+      ]
+    }
+  ]
+}

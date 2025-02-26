@@ -1,10 +1,10 @@
 {
-  "collection_base_name": "red_hat_3scale_api_management",
-  "collection_full_name": "Red Hat 3scale API Management",
+  "collection_base_name": "red_hat_jboss_web_server",
+  "collection_full_name": "Red Hat JBoss Web Server",
   "common_sources": [],
   "versions": [
     {
-      "version_number": "2-saas",
+      "version_number": "6.0",
       "store_directive": "create_or_keep",
       "sources": [
         {
@@ -14,7 +14,7 @@
       ]
     },
     {
-      "version_number": "2.15",
+      "version_number": "5.8",
       "store_directive": "create_or_keep",
       "sources": [
         {
@@ -24,17 +24,7 @@
       ]
     },
     {
-      "version_number": "2.14",
-      "store_directive": "create_or_keep",
-      "sources": [
-        {
-          "ingestion_type": "redhat_doc",
-          "language": "en-US"
-        }
-      ]
-    },
-    {
-      "version_number": "2.13",
+      "version_number": "5.7",
       "store_directive": "delete",
       "sources": [
         {
@@ -44,7 +34,7 @@
       ]
     },
     {
-      "version_number": "2.12",
+      "version_number": "5.6",
       "store_directive": "delete",
       "sources": [
         {
@@ -54,7 +44,7 @@
       ]
     },
     {
-      "version_number": "2.11",
+      "version_number": "5.5",
       "store_directive": "delete",
       "sources": [
         {
@@ -64,7 +54,7 @@
       ]
     },
     {
-      "version_number": "2.10",
+      "version_number": "5.4",
       "store_directive": "delete",
       "sources": [
         {
@@ -74,7 +64,7 @@
       ]
     },
     {
-      "version_number": "2.9",
+      "version_number": "5.3",
       "store_directive": "delete",
       "sources": [
         {
@@ -84,7 +74,7 @@
       ]
     },
     {
-      "version_number": "2.8",
+      "version_number": "5.2",
       "store_directive": "delete",
       "sources": [
         {
@@ -94,7 +84,7 @@
       ]
     },
     {
-      "version_number": "2.7",
+      "version_number": "5.1",
       "store_directive": "delete",
       "sources": [
         {
@@ -104,7 +94,7 @@
       ]
     },
     {
-      "version_number": "2.6",
+      "version_number": "5.0",
       "store_directive": "delete",
       "sources": [
         {
@@ -114,7 +104,7 @@
       ]
     },
     {
-      "version_number": "2.5",
+      "version_number": "3.1",
       "store_directive": "delete",
       "sources": [
         {
@@ -124,27 +114,7 @@
       ]
     },
     {
-      "version_number": "2.4",
-      "store_directive": "delete",
-      "sources": [
-        {
-          "ingestion_type": "redhat_doc",
-          "language": "en-US"
-        }
-      ]
-    },
-    {
-      "version_number": "2.3",
-      "store_directive": "delete",
-      "sources": [
-        {
-          "ingestion_type": "redhat_doc",
-          "language": "en-US"
-        }
-      ]
-    },
-    {
-      "version_number": "2.2",
+      "version_number": "3",
       "store_directive": "delete",
       "sources": [
         {
@@ -164,7 +134,17 @@
       ]
     },
     {
-      "version_number": "2.0",
+      "version_number": "2",
+      "store_directive": "delete",
+      "sources": [
+        {
+          "ingestion_type": "redhat_doc",
+          "language": "en-US"
+        }
+      ]
+    },
+    {
+      "version_number": "1.0",
       "store_directive": "delete",
       "sources": [
         {
