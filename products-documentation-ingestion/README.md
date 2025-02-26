@@ -13,7 +13,7 @@ The pipeline processes documentation collections, generates embeddings, and stor
 - Connects to a Data Science Pipelines Application server
 - Executes the document ingestion task with necessary secrets
 
-### Document Processor (`doc_processing_docling_server.py`)
+### Document Processor (`doc_processing_docling.py`)
 - KFP component that handles the actual document ingestion process
 - Loads collections from either a local path or Git repository
 - Processes documents according to their storage directives
@@ -23,7 +23,7 @@ The pipeline processes documentation collections, generates embeddings, and stor
 ## Requirements
 
 ### Custom Image
-The pipeline requires a custom image built from the [Containerfile](./Containerfile) in this directory. The image is published at: `quay.io/rh-aiservices-bu/rh-kb-doc-ingestion:1.0`
+The pipeline requires a custom image built from the [Containerfile](./Containerfile) in this directory. The image is published at: `quay.io/rh-aiservices-bu/rh-kb-doc-ingestion`
 
 ### Required Secret
 The pipeline requires a Kubernetes secret named `doc-ingestion` containing the following keys:

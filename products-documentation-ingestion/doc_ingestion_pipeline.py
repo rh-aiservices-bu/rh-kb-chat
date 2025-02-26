@@ -10,7 +10,7 @@ from kfp import kubernetes
 import os
 
 # Component imports
-from doc_processing_docling_server import doc_ingest
+from documentation_ingestion import doc_ingest
 
 ######### Pipeline definition #########
 
