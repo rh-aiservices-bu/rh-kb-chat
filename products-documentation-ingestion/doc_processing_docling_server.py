@@ -16,6 +16,7 @@ def doc_ingest():
 
     import collections_loader as cl
     import milvus_handler
+    import traceback
 
     load_dotenv()
 
@@ -105,6 +106,7 @@ def doc_ingest():
                     except Exception as e:
                         print(f'❌ Error processing "{collection.collection_full_name}" at version {version.version_number}')
                         print(f'❌ {e}')
+                        traceback.print_exc()
                 else:
                     print("\n⏭️ Collection already present, skipping")
             elif (version.store_directive == 'update'):
@@ -116,6 +118,7 @@ def doc_ingest():
                 except Exception as e:
                     print(f'❌ Error processing "{collection.collection_full_name}" at version {version.version_number}')
                     print(f'❌ {e}')
+                    traceback.print_exc()
             elif (version.store_directive == 'delete'):
                 if (milvus_handler.collection_check(collection_name) is None):
                     print("\n⏭️ No collection present already, skipping")
