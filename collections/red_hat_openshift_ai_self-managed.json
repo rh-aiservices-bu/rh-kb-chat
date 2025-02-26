@@ -50,7 +50,7 @@
     },
     {
       "version_number": "2.13",
-      "store_directive": "delete",
+      "store_directive": "create_or_keep",
       "sources": [
         {
           "ingestion_type": "redhat_doc",
