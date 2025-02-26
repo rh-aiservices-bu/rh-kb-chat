@@ -1,0 +1,75 @@
+---
+apiVersion: tekton.dev/v1
+kind: Task
+metadata:
+  name: execute-doc-ingestion-pipeline
+spec:
+  workspaces:
+    - name: output
+  params:
+    - name: WORK_DIRECTORY
+      description: Directory to start build in (handle multiple branches)
+      type: string
+    - name: APPLICATION_NAME
+      description: Name of the model
+      type: string
+  results:
+    - name: KFP_RUN_ID
+      description: Run ID of the Data Science Pipeline
+  steps:
+  - name: execute-doc-ingestion
+    workingDir: $(workspaces.output.path)/$(params.WORK_DIRECTORY)
+    image: quay.io/rlundber/mlops-ct-cicd:0.4
+    command: ["/bin/sh", "-c"]
+    args:
+    - |
+      python3 -m pip install kfp.kubernetes
+      cat << 'EOF' | python3
+      import kfp
+      import json
+      from doc_ingestion_pipeline import doc_ingestion_pipeline
+
+      namespace_file_path =\
+          '/var/run/secrets/kubernetes.io/serviceaccount/namespace'
+      with open(namespace_file_path, 'r') as namespace_file:
+          namespace = namespace_file.read()
+
+      kubeflow_endpoint =\
+          f'https://ds-pipeline-dspa.{namespace}.svc:8443'
+
+      sa_token_file_path = '/var/run/secrets/kubernetes.io/serviceaccount/token'
+      with open(sa_token_file_path, 'r') as token_file:
+          bearer_token = token_file.read()
+
+      ssl_ca_cert =\
+          '/var/run/secrets/kubernetes.io/serviceaccount/service-ca.crt'
+
+      print(f'Connecting to Data Science Pipelines: {kubeflow_endpoint}')
+      client = kfp.Client(
+          host=kubeflow_endpoint,
+          existing_token=bearer_token,
+          ssl_ca_cert=ssl_ca_cert
+      )
+
+      # with open('default_parameters.json') as f:
+      #     default_parameters = json.load(f)
+      
+      # start a run
+      print("🏃‍♂️ start a run")
+      run_id = client.create_run_from_pipeline_func(
+          doc_ingestion_pipeline,
+          # arguments=default_parameters,
+          experiment_name="$(params.APPLICATION_NAME)-doc-ingestion", # commit message somewhere maybe? or PR number?
+          namespace=namespace,
+          enable_caching=True
+      )
+
+      # save run id to query the logs
+      KFP_RUN_ID = run_id.run_id
+      path = "$(results.KFP_RUN_ID.path)"
+      with open(path, "w") as file:
+          file.write(KFP_RUN_ID)
+
+      # print("🎉 job finished 🙌")
+      EOF
+
