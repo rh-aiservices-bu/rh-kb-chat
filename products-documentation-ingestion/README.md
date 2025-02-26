@@ -10,7 +10,7 @@ The pipeline processes documentation collections, generates embeddings, and stor
 
 ### Main Pipeline (`doc_ingestion_pipeline.py`)
 - Defines a Kubeflow Pipeline for document ingestion
-- Connects to a Data Science Pipelines instance
+- Connects to a Data Science Pipelines Application server
 - Executes the document ingestion task with necessary secrets
 
 ### Document Processor (`doc_processing_docling_server.py`)
@@ -51,9 +51,10 @@ This pipeline is typically triggered by the Tekton pipeline when changes are det
 The pipeline will:
 1. Load collections from the specified source
 2. Process each collection according to its directive (create, update, delete)
-3. Generate embeddings for the content
-4. Store the indexed content in Milvus
-5. Log detailed progress information
+3. Split documents into chunks with configurable size and overlap
+4. Generate embeddings for the content chunks
+5. Store the indexed content in Milvus
+6. Log detailed progress information
 
 ## Supported Operations
 
