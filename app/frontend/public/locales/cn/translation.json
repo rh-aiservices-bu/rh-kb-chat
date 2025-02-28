@@ -1,10 +1,10 @@
 {
-  "app_title": "文档助手",
+  "app_title": "文档助理演示",
   "app_menu": {
-    "chat_documentation": "与文档聊天"
+    "chat_documentation": "文档助理演示"
   },
   "app_header": {
-    "powered_by": "技术支持",
+    "powered_by": "文档助理演示",
     "help": {
       "header": "信息",
       "body": "此应用程序不是Red Hat文档的官方聊天机器人。仅用于演示目的。",
@@ -14,9 +14,9 @@
     "anonymous_user": "匿名用户"
   },
   "chat": {
-    "title": "文档助手",
+    "title": "文档助理",
     "filter": {
-      "product": "产品",
+      "product": "红帽产品",
       "version": "版本",
       "language": "语言"
     },
@@ -26,7 +26,7 @@
     "disclaimer1": "此助手由AI提供支持。它可能会显示不准确的信息，请务必仔细检查响应。",
     "disclaimer2": "不是Red Hat文档的官方聊天机器人。仅用于演示目的。",
     "content": {
-      "greeting": "你好！我是你的文档助手。我今天能帮你什么吗？",
+      "greeting": "你好！我是你的文档助理演示。我今天能帮你什么吗？",
       "change_product_prompt_start": "好的，我们现在谈论的是",
       "change_product_prompt_version": "版本",
       "change_product_prompt_none": "好的，我们没有谈论任何特定的产品。",
