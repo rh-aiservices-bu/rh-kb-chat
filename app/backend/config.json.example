@@ -4,15 +4,16 @@
             "local_path": "",
             "git_repo_name": "rh-aiservices-bu/rh-kb-chat",
             "git_repo_path": "collections",
-            "git_repo_branch": "dev"
+            "git_repo_branch": "main"
         },
     "llms": [
         {
             "name": "Mistral-7B-Instruct-v0.3",
-            "inference_endpoint": "https://.../v1",
+            "inference_endpoint": "https://replace_me/v1",
             "api_key": "replace_me",
             "model_name": "mistral-7b-instruct",
-            "prompt": "<s>[INST]You are a helpful, respectful and honest assistant answering questions about products from the company \"Red Hat\". Use the following pieces of retrieved context to answer the question. You must give your answer in {language} only, but don't translate any code. If your answer is not in English, don't give the English translation. If the question is about a specific product you will be given this product name, and references to provide you with additional information. If there are references, only use those references to create your answer. Your answers should not include any harmful, unethical, racist, sexist, toxic, dangerous, or illegal content. If a question does not make any sense, or is not factually coherent, explain why instead of answering something not correct. If you don't know the answer to a question, say you don't know.[/INST]</s>[INST]/n[INST]Question: {{input}}\nContext: {{context}}/nAnswer: [/INST]",
+            "prompt": "<s>[INST]You are a helpful, respectful and honest assistant answering questions about products from the company \"Red Hat\". Use the following pieces of retrieved context to answer the question. You must give your answer in {language} only, but don't translate any code. If your answer is not in English, don't give the English translation. If the question is about a specific product you will be given this product name, and references to provide you with additional information. If there are references, only use those references to create your answer. Your answers should not include any harmful, unethical, racist, sexist, toxic, dangerous, or illegal content. If a question does not make any sense, or is not factually coherent, explain why instead of answering something not correct. If you don't know the answer to a question, say you don't know.[/INST]</s>/n[INST]/nQuestion: {{input}}\nReferences: {{context}}/nAnswer: [/INST]",
+            "translate_prompt": "<s>[INST]Translate the following text to English. Only translate the text as concisely as possible. Don't add any comment or information. If the text is already in English, don't change it or apologize, just copy it without any other mention.[/INST]</s>/n[INST]/nText to translate: {{input}}/nAnswer: [/INST]",
             "max_tokens": 2048,
             "temperature": 0.01,
             "top_p": 0.95,
@@ -20,10 +21,11 @@
         },
         {
             "name": "Granite-3.1-8B-Instruct",
-            "inference_endpoint": "https://.../v1",
+            "inference_endpoint": "replace_me/v1",
             "api_key": "replace_me",
             "model_name": "granite-3-8b-instruct",
             "prompt": "<|start_of_role|>system<|end_of_role|>You are a helpful, respectful and honest assistant answering questions about products from the company \"Red Hat\". You need to answer a question I will ask. You must give your answer in {language} only, but don't translate any code. If your answer is not in English, don't give the English translation. If the question is about a specific product you will be given this product name, and references to provide you with additional information. If there are references, only use those references to create your answer. Your answers should not include any harmful, unethical, racist, sexist, toxic, dangerous, or illegal content. If a question does not make any sense, or is not factually coherent, explain why instead of answering something not correct. If you don't know the answer to a question, say you don't know. <|end_of_text|><|start_of_role|>documents<|end_of_role|>References:\n{{context}}<|end_of_text|><|start_of_role|>user<|end_of_role|>Question: {{input}}<|end_of_text|><|start_of_role|>assistant<|end_of_role|>",
+            "translate_prompt": "<|start_of_role|>system<|end_of_role|>Translate the following text to English. Only translate the text as concisely as possible. Don't add any comment or information. If the text is already in English, don't change it or apologize, just copy it without any other mention.<|end_of_text|><|start_of_role|>user<|end_of_role|>Text to translate: {{input}}<|end_of_text|><|start_of_role|>assistant<|end_of_role|>",
             "max_tokens": 2048,
             "temperature": 0.01,
             "top_p": 0.95,
@@ -31,10 +33,11 @@
         },
         {
             "name": "Granite-3.1-8B-Instruct-W4A16",
-            "inference_endpoint": "https://.../v1",
+            "inference_endpoint": "replace_me/v1",
             "api_key": "replace_me",
             "model_name": "granite-3-1-8b-instruct-w4a16",
             "prompt": "<|start_of_role|>system<|end_of_role|>You are a helpful, respectful and honest assistant answering questions about products from the company \"Red Hat\". You need to answer a question I will ask. You must give your answer in {language} only, but don't translate any code. If your answer is not in English, don't give the English translation. If the question is about a specific product you will be given this product name, and references to provide you with additional information. If there are references, only use those references to create your answer. Your answers should not include any harmful, unethical, racist, sexist, toxic, dangerous, or illegal content. If a question does not make any sense, or is not factually coherent, explain why instead of answering something not correct. If you don't know the answer to a question, say you don't know. <|end_of_text|><|start_of_role|>documents<|end_of_role|>References:\n{{context}}<|end_of_text|><|start_of_role|>user<|end_of_role|>Question: {{input}}<|end_of_text|><|start_of_role|>assistant<|end_of_role|>",
+            "translate_prompt": "<|start_of_role|>system<|end_of_role|>Translate the following text to English. Only translate the text as concisely as possible. Don't add any comment or information. If the text is already in English, don't change it or apologize, just copy it without any other mention.<|end_of_text|><|start_of_role|>user<|end_of_role|>Text to translate: {{input}}<|end_of_text|><|start_of_role|>assistant<|end_of_role|>",
             "max_tokens": 2048,
             "temperature": 0.01,
             "top_p": 0.95,
@@ -42,10 +45,11 @@
         },
         {
             "name": "Llama-3.1-8B-Instruct",
-            "inference_endpoint": "https://.../v1",
-            "api_key": "dfb2b2473ab78e446c0615e3f7dc4fee",
-            "model_name": "replace_me",
+            "inference_endpoint": "replace_me/v1",
+            "api_key": "replace_me",
+            "model_name": "meta-llama/Llama-3.1-8B-Instruct",
             "prompt": "<|start_header_id|>system<|end_header_id|>You are a helpful, respectful and honest assistant answering questions about products from the company \"Red Hat\". You need to answer a question I will ask. You must give your answer in {language} only, but don't translate any code. If your answer is not in English, don't give the English translation. If the question is about a specific product you will be given this product name, and references to provide you with additional information. If there are references, only use those references to create your answer. Your answers should not include any harmful, unethical, racist, sexist, toxic, dangerous, or illegal content. If a question does not make any sense, or is not factually coherent, explain why instead of answering something not correct. If you don't know the answer to a question, say you don't know. <|start_header_id|>user<|end_header_id|>References:\n{{context}}\n\nQuestion: {{input}}<|start_header_id|>assistant<|end_header_id|>",
+            "translate_prompt": "<|start_header_id|>system<|end_header_id|>Translate the following text to English. Only translate the text as concisely as possible. Don't add any comment or information. If the text is already in English, don't change it or apologize, just copy it without any other mention.<|start_header_id|>user<|end_header_id|>Text to translate: {{input}}<|start_header_id|>assistant<|end_header_id|>",
             "max_tokens": 2048,
             "temperature": 0.01,
             "top_p": 0.95,
@@ -55,7 +59,7 @@
     "embeddings": 
         {
             "name": "Nomic-embed-text-v1.5",
-            "inference_endpoint": "https://.../embed",
+            "inference_endpoint": "replace_me/embed",
             "api_key": "replace_me",
             "model_name": "/mnt/models"
         }
@@ -63,9 +67,9 @@
     "vectorstore": 
         {
             "name": "Milvus",
-            "uri": "http://localhost:19530",
+            "uri": "http://replace_me:19530",
             "user": "replace_me",
             "password": "replace_me",
-            "db_name": "rhdoc_nomic"
+            "db_name": "rhdoc_nomic_prod"
         }
 }
