@@ -1,17 +1,12 @@
-import userAvatar from '@app/assets/bgimages/avatar-user.svg';
-import orb from '@app/assets/bgimages/orb.svg';
 import config from '@app/config';
 import { faCommentDots, faPaperPlane } from '@fortawesome/free-regular-svg-icons';
 import { faPlusCircle } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Button, Card, CardBody, CardHeader, Flex, FlexItem, FormSelect, FormSelectOption, Grid, GridItem, Page, PageSection, Panel, PanelMain, PanelMainBody, Stack, StackItem, Text, TextArea, TextContent, TextVariants, Tooltip } from '@patternfly/react-core';
 import * as React from 'react';
-import Markdown from 'react-markdown';
-import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
-import { dracula } from 'react-syntax-highlighter/dist/cjs/styles/prism';
-import rehypeRaw from 'rehype-raw';
-import remarkGfm from 'remark-gfm';
 import { useTranslation } from 'react-i18next';
+import { Query, Message } from './classes';
+import ChatAnswer, { ChatAnswerRef } from './ChatAnswer'
 
 interface ChatProps {
   selectedLanguage: string;
@@ -25,49 +20,6 @@ interface ChatProps {
  * @returns {JSX.Element} The rendered Chat component.
  */
 const Chat: React.FunctionComponent<ChatProps> = ({ selectedLanguage }) => {
-
-  class Query {
-    content: string;
-    type = 'Query';
-
-    constructor(content: string) {
-      this.content = content;
-    }
-  }
-
-  class Answer {
-    content: string[];
-    type = 'Answer';
-
-    constructor(content: string[]) {
-      this.content = content;
-    }
-  }
-
-  class Sources {
-    content: string[];
-    type = 'Sources';
-
-    constructor(content: string[]) {
-      this.content = content;
-    }
-  }
-
-  class Message {
-    content: Query | Answer | Sources;
-
-    constructor(content: Query | Answer | Sources) {
-      this.content = content;
-    }
-  }
-
-  class MessageHistory {
-    content: Message[];
-
-    constructor(content: Message[]) {
-      this.content = content;
-    }
-  }
 
   class UiLanguage {
     code: string;
@@ -87,10 +39,14 @@ const Chat: React.FunctionComponent<ChatProps> = ({ selectedLanguage }) => {
     }
   }
 
+  type CollectionVersion = {
+    version_number: string;
+  }
+
   type Collection = {
-    product: string;
-    product_full_name: string;
-    version: string[];
+    collection_base_name: string;
+    collection_full_name: string;
+    versions: CollectionVersion[];
     language: string;
   };
 
@@ -98,37 +54,42 @@ const Chat: React.FunctionComponent<ChatProps> = ({ selectedLanguage }) => {
     children: string;
   };
 
+  // ChatAnswer Refs
+  const childRefs = React.useRef<(ChatAnswerRef | null)[]>([]);
+
+  // Maximum number of ChatAnswer instances
+  const searchParams = new URLSearchParams(window.location.search);
+  const maxChats = parseInt(searchParams.get('maxchat') || '4', 10);
+
+  // ChatAnswer instances
+  const [items, setItems] = React.useState<JSX.Element[]>([
+    <ChatAnswer key={1} ref={(el) => (childRefs.current[1] = el)} />
+  ]);
+  const addItem = () => {
+    if (items.length < maxChats) {
+      const newItem = (
+        <ChatAnswer key={items.length + 1} ref={(el) => (childRefs.current[items.length + 1] = el)} />
+      );
+      setItems([...items, newItem]);
+    }
+  };
+  const removeItem = () => {
+    setItems(items.slice(0, -1));
+  };
+
   //i18n
   const { t, i18n } = useTranslation();
-  /*   React.useEffect(() => {
-      console.log('selectedLanguage: ', selectedLanguage)
-      i18n.changeLanguage(selectedLanguage);
-      resetMessageHistory();
-    }, [selectedLanguage]); */
-
-  // Websocket
-  const wsUrl = config.backend_api_url.replace(/http/, 'ws').replace(/\/api$/, '/ws'); // WebSocket URL
-  const connection = React.useRef<WebSocket | null>(null); // WebSocket connection
-  const uuid = Math.floor(Math.random() * 1000000000); // Generate a random number between 0 and 999999999
 
   // Collection elements
   const [collections, setCollections] = React.useState<Collection[]>([]); // The collections
-  const [product, setProduct] = React.useState<string>('None'); // The selected product
-  const [versions, setVersions] = React.useState<string[]>([]); // The versions for this product
+  const [collectionFullName, setCollectionFullName] = React.useState<string>('None'); // The selected collection name
+  const [versions, setVersions] = React.useState<CollectionVersion[]>([]); // The versions for this collection
   const [selectedVersion, setSelectedVersion] = React.useState<string>(''); // The selected version
-  const [language, setLanguage] = React.useState<string>(''); // The selected language
   const [selectedCollection, setSelectedCollection] = React.useState<string>('none'); // Default collection name
 
   // Chat elements
   const [queryText, setQueryText] = React.useState<Query>(new Query('')); // The query text
-  const [answerText, setAnswerText] = React.useState<Answer>(new Answer([''])); // The answer text
-  const [answerSources, setAnswerSources] = React.useState<Sources>(new Sources([])); // Array of sources for the answer
-  const [messageHistory, setMessageHistory] = React.useState<MessageHistory>(
-    new MessageHistory([
-      new Message(new Answer([t('chat.content.greeting')]))
-    ])
-  ); // The message history
-  const chatBotAnswer = document.getElementById('chatBotAnswer'); // The chat bot answer element
+
 
   // Loads the collections from the backend on startup
   React.useEffect(() => {
@@ -136,50 +97,13 @@ const Chat: React.FunctionComponent<ChatProps> = ({ selectedLanguage }) => {
       const response = await fetch(`${config.backend_api_url}/collections`);
       const data = await response.json();
       setCollections(data);
+      setCollectionFullName(data[0].collection_full_name);
+      setVersions(data[0].versions);
+      setSelectedVersion(data[0].versions[0].version_number);
+      setSelectedCollection((data[0].collection_base_name + '_' + data[0].versions[0].version_number).replace(/[.-]/g, '_'));
     }
     fetchCollections();
   }, []);
-
-  // Open a WebSocket connection and listen for messages
-  React.useEffect(() => {
-    const ws = new WebSocket(wsUrl + '/query/' + uuid) || {};
-
-    ws.onopen = () => {
-      console.log('opened ws connection')
-    }
-    ws.onclose = (e) => {
-      console.log('close ws connection: ', e.code, e.reason)
-    }
-
-    ws.onmessage = (event) => {
-      const data = JSON.parse(event.data);
-      if (data['type'] === 'token') {
-        setAnswerText(answerText => new Answer([...answerText.content, data['token']]));
-        return;
-      } else if (data['type'] === 'source') {
-        setAnswerSources(answerSources => new Sources([...answerSources.content, data['source']]));
-        return;
-      }
-    }
-
-    connection.current = ws;
-
-    // Clean up function
-    return () => {
-      if (connection.current) {
-        connection.current.close();
-        console.log('WebSocket connection closed');
-      }
-    };
-  }, [])
-
-  // Scroll to the bottom of the chat window when the answer changes
-  React.useEffect(() => {
-    if (chatBotAnswer) {
-      chatBotAnswer.scrollTop = chatBotAnswer.scrollHeight;
-    }
-  }, [answerText, answerSources]);  // Dependency array
-
 
 
   /**
@@ -189,65 +113,18 @@ const Chat: React.FunctionComponent<ChatProps> = ({ selectedLanguage }) => {
    * If the query text is empty, sets the previous response to ['Please enter a query...'].
    */
   const sendQueryText = () => {
-    if (connection.current?.readyState === WebSocket.OPEN) {
-      const previousAnswer = new Message(new Answer(answerText.content)); // Save the previous response, needed because states are updated asynchronously
-      const previousSources = new Message(new Sources(answerSources.content)); // Save the previous sources
-      const previousQuery = new Message(new Query(queryText.content)); // Save the previous query
-      const previousMessageHistory = new MessageHistory(messageHistory.content); // Save the previous message history
-      setMessageHistory(new MessageHistory([...previousMessageHistory.content, previousAnswer, previousSources, previousQuery])); // Add the previous response to the message history
-      setQueryText(new Query('')); // Clear the query text
-      setAnswerText(new Answer([])); // Clear the previous response
-      setAnswerSources(new Sources([])); // Clear the previous sources
-      // Put the query in a JSON object so that we can add other info later
-      if (queryText.content !== "") {
-        var product_full_name = "";
-        if (selectedCollection !== 'none') {
-          product_full_name = collections.find(collection => collection.product === product)?.product_full_name ?? "";
-        } else {
-          product_full_name = "None";
-        }
-        let data = {
-          query: queryText.content,
-          collection: selectedCollection,
-          product_full_name: product_full_name,
-          version: selectedVersion,
-          language: i18n.language
-        };
-        connection.current?.send(JSON.stringify(data)); // Send the query to the server
-      } else {
-        setAnswerText(new Answer([t('chat.content.empty_query')]));
-      }
-    };
-  }
+    const previousQuery = new Message(new Query(queryText.content)); // Save the previous query
+    setQueryText(new Query('')); // Clear the query text
+    const query = new Query(queryText.content, selectedCollection, collectionFullName, selectedVersion, i18n.language);
 
-  /**
-   * Resets the message history, answer sources, and answer text.
-   * If a selected collection is provided, it sets the message history with a message about the selected collection and version.
-   * If no collection is selected, it sets the message history with a default greeting message.
-   */
-  const resetMessageHistory = () => {
-    setMessageHistory(new MessageHistory([]));
-    setAnswerSources(new Sources([]));
-    setAnswerText(new Answer(['']));
-    const collection = collections.find(collection => collection.product === product);
-    if (collection?.product_full_name !== "None" && collection?.product_full_name !== undefined) {
-      console.log('collection: ', collection);
-      setMessageHistory(new MessageHistory([
-        new Message(
-          new Answer(
-            [t('chat.content.new_chat_product') + ' **' + collection?.product_full_name + '** ' + t('chat.content.new_chat_version') + '**' + selectedVersion + '**. Ask me any question!']
-          )
-        )
-      ]));
-    } else {
-      setMessageHistory(new MessageHistory([
-        new Message(
-          new Answer([t('chat.content.new_chat_no_product')])
-        )
-      ])
-      );
+    if (query.content !== "") {
+      childRefs.current.forEach((childRef) => {
+        if (childRef) {
+          childRef.sendQuery(query);
+        }
+      });
     }
-  };
+  }
 
   /**
    * Updates the collection based on the selected collection and version.
@@ -255,42 +132,10 @@ const Chat: React.FunctionComponent<ChatProps> = ({ selectedLanguage }) => {
    * @param selectedVersion - The selected version.
    */
   const updateCollection = (selectedCollection: Collection, selectedVersion: string) => {
-    setVersions(selectedCollection.version);
+    setVersions(selectedCollection.versions);
     setSelectedVersion(selectedVersion);
-    setLanguage(selectedCollection.language);
-    let collection_name = selectedCollection.product + '_' + selectedCollection.language + '_' + selectedVersion;
+    let collection_name = selectedCollection.collection_base_name + '_' + selectedVersion;
     setSelectedCollection(collection_name.replace(/[.-]/g, '_'));
-    const previousAnswer = new Message( // Save the previous response, needed because states are updated asynchronously
-      new Answer(answerText.content)
-    );
-    const previousSources = new Message( // Save the previous sources
-      new Sources(answerSources.content)
-    );
-    const previousMessageHistory = new MessageHistory(messageHistory.content); // Save the previous message history
-    if (selectedCollection.product_full_name !== "None") {
-      setMessageHistory(new MessageHistory(
-        [...previousMessageHistory.content,
-          previousAnswer,
-          previousSources,
-        new Message(new Answer(
-          [t('chat.content.change_product_prompt_start') + ' **' + selectedCollection.product_full_name + '** ' + t('chat.content.change_product_prompt_version') + ' **' + selectedVersion + '**.']
-        ))
-        ]
-      ));
-    } else {
-      setMessageHistory(new MessageHistory(
-        [...previousMessageHistory.content,
-          previousAnswer,
-          previousSources,
-        new Message(new Answer(
-          [t('chat.content.change_product_prompt_none')]
-        ))
-        ]
-      ));
-    }
-
-    setAnswerText(new Answer([])); // Clear the previous response
-    setAnswerSources(new Sources([])); // Clear the previous sources
   }
 
   /**
@@ -299,11 +144,16 @@ const Chat: React.FunctionComponent<ChatProps> = ({ selectedLanguage }) => {
    * @param value - The selected value from the product select element.
    */
   const onChangeProduct = (_event: React.FormEvent<HTMLSelectElement>, value: string) => {
-    setProduct(value);
-    const collection = collections.find(collection => collection.product === value);
+    setCollectionFullName(value);
+    const collection = collections.find(collection => collection.collection_full_name === value);
     if (collection) {
-      const version = collection.version[0];
+      const version = collection.versions[0].version_number;
       updateCollection(collection, version);
+      childRefs.current.forEach((childRef) => {
+        if (childRef) {
+          childRef.changeCollectionOrVersion(collection, version);
+        }
+      });
     }
   }
 
@@ -315,56 +165,25 @@ const Chat: React.FunctionComponent<ChatProps> = ({ selectedLanguage }) => {
    */
   const onChangeVersion = (_event: React.FormEvent<HTMLSelectElement>, value: string) => {
     setSelectedVersion(value);
-    const collection = collections.find(collection => collection.product === product);
+    const collection = collections.find(collection => collection.collection_full_name === collectionFullName);
     if (collection) {
       const version = value;
       updateCollection(collection, version);
+      childRefs.current.forEach((childRef) => {
+        if (childRef) {
+          childRef.changeCollectionOrVersion(collection, version);
+        }
+      });
     }
   }
 
-  /**
-   * Handles the change event of the language select element.
-   * @param event - The change event.
-   * @param value - The selected value.
-   */
-  const onChangeLanguage = (event: React.FormEvent<HTMLSelectElement>, value: string) => {
-    setLanguage(value);
-    let collection_name = product + '_' + language + '_' + selectedVersion;
-    setSelectedCollection(collection_name.replace(/[.-]/g, '_'));
+  function resetMessageHistory(): void {
+    childRefs.current.forEach((childRef) => {
+      if (childRef) {
+        childRef.resetMessageHistory();
+      }
+    });
   }
-
-  /**
-   * Renders markdown content with syntax highlighting for code blocks.
-   * 
-   * @param markdown - The markdown content to render.
-   * @returns The rendered markdown content.
-   */
-  const MarkdownRenderer = ({ children: markdown }: MarkdownRendererProps) => {
-    return (
-      <Markdown className='chat-question-text'
-        remarkPlugins={[remarkGfm]}
-        rehypePlugins={[rehypeRaw]}
-        components={{
-          code({ node, inline, className, children, ...props }: any) {
-            const match = /language-(\w+)/.exec(className || '');
-
-            return !inline && match ? (
-              <SyntaxHighlighter style={dracula} PreTag="div" language={match[1]} {...props}>
-                {String(children).replace(/\n$/, '')}
-              </SyntaxHighlighter>
-            ) : (
-              <code className='chat-question-text' {...props}>
-                {children}
-              </code>
-            );
-          },
-        }}
-      >
-        {markdown}
-      </Markdown>
-    );
-  }
-
 
   return (
     <Page>
@@ -375,32 +194,32 @@ const Chat: React.FunctionComponent<ChatProps> = ({ selectedLanguage }) => {
           <FlexItem>
             <Flex>
               <FlexItem>
-                <Flex direction={{ default: 'column' }}>
-                  <FlexItem>
+                <Flex direction={{ default: 'row' }}>
+                  <FlexItem className='collection-version-language-legends' >
                     <TextContent>
-                      <Text component={TextVariants.h3} >{t('chat.filter.product')}</Text>
+                      <Text component={TextVariants.h3} >{t('chat.filter.product')}:</Text>
                     </TextContent>
                   </FlexItem>
                   <FlexItem>
                     <FormSelect
-                      value={product}
+                      value={collectionFullName}
                       onChange={onChangeProduct}
                       aria-label="FormSelect Input"
                       ouiaId="BasicFormSelectCategory"
                       className="collection-select"
                     >
                       {collections && collections.map((collection, index) => (
-                        <FormSelectOption key={index} value={collection.product} label={collection.product_full_name} />
+                        <FormSelectOption key={index} value={collection.collection_full_name} label={collection.collection_full_name} />
                       ))}
                     </FormSelect>
                   </FlexItem>
                 </Flex>
               </FlexItem>
               <FlexItem>
-                <Flex direction={{ default: 'column' }}>
-                  <FlexItem>
+                <Flex direction={{ default: 'row' }}>
+                  <FlexItem className='collection-version-language-legends'>
                     <TextContent>
-                      <Text component={TextVariants.h3} >{t('chat.filter.version')}</Text>
+                      <Text component={TextVariants.h3} >{t('chat.filter.version')}:</Text>
                     </TextContent>
                   </FlexItem>
                   <FlexItem>
@@ -412,40 +231,12 @@ const Chat: React.FunctionComponent<ChatProps> = ({ selectedLanguage }) => {
                       className='version-language-select'
                     >
                       {versions && versions.map((version, index) => (
-                        <FormSelectOption key={index} value={version} label={version} />
+                        <FormSelectOption key={index} value={version.version_number} label={version.version_number} />
                       ))}
                     </FormSelect>
                   </FlexItem>
                 </Flex>
               </FlexItem>
-              <FlexItem hidden={true}>
-                <Flex direction={{ default: 'column' }}>
-                  <FlexItem>
-                    <TextContent>
-                      <Text component={TextVariants.h3} >Language</Text>
-                    </TextContent>
-                  </FlexItem>
-                  <FlexItem>
-                    <FormSelect
-                      value={language}
-                      onChange={onChangeLanguage}
-                      aria-label="FormSelect Input"
-                      ouiaId="BasicFormSelectCategory"
-                      className='version-language-select'
-                    >
-                      <FormSelectOption key={0} value={language} label={language} />
-                    </FormSelect>
-                  </FlexItem>
-                </Flex>
-              </FlexItem>
-              {/* Uncomment the following code to display the collection name */}
-              {/*                     <FlexItem>
-                                <TextContent>
-                                    <Text component={TextVariants.p} className=''>
-                                        {collection}
-                                    </Text>
-                                </TextContent>
-                            </FlexItem> */}
             </Flex>
           </FlexItem>
 
@@ -453,114 +244,46 @@ const Chat: React.FunctionComponent<ChatProps> = ({ selectedLanguage }) => {
           <FlexItem className='flex-chat'>
             <Card isRounded className='chat-card'>
               <CardHeader className='chat-card-header'>
-                <TextContent>
-                  <Text component={TextVariants.h3} className='chat-card-header-title'><FontAwesomeIcon icon={faCommentDots} />&nbsp;{t('chat.title')}</Text>
-                </TextContent>
+                <Flex justifyContent={{ default: 'justifyContentSpaceBetween' }}>
+                  <FlexItem>
+                    {/* Empty item to center title */}
+                  </FlexItem>
+                  <FlexItem>
+                    <TextContent>
+                      <Text component={TextVariants.h3} className='chat-card-header-title'>
+                        <FontAwesomeIcon icon={faCommentDots} />&nbsp;{t('chat.title')}
+                      </Text>
+                    </TextContent>
+                  </FlexItem>
+                  <FlexItem>
+                    <Flex>
+                      <FlexItem>
+                        <Button onClick={addItem} variant="primary">
+                          Add LLM
+                        </Button>
+                      </FlexItem>
+                      <FlexItem>
+                        <Button onClick={removeItem} variant="danger" isDisabled={items.length === 0}>
+                          Remove last LLM
+                        </Button>
+                      </FlexItem>
+                    </Flex>
+                  </FlexItem>
+                </Flex>
               </CardHeader>
               <CardBody className='chat-card-body'>
                 <Stack>
+                  {/* ChatbotAnswer panels */}
                   <StackItem isFilled className='chat-bot-answer' id='chatBotAnswer'>
-                    <TextContent>
-
-                      {/* Message History rendering */}
-                      {messageHistory.content.map((message: Message, index) => {
-                        const renderMessage = () => {
-                          if (message.content.content.length != 0) {
-                            if (message.content.type === "Query" && message.content.content != "") { // If the message is a query
-                              return <Grid className='chat-item'>
-                                <GridItem span={1} className='grid-item-orb'>
-                                  <img src={userAvatar} className='user-avatar' />
-                                </GridItem>
-                                <GridItem span={11}>
-                                  <Text component={TextVariants.p} className='chat-question-text'>{message.content.content}</Text>
-                                </GridItem>
-                              </Grid>
-                            } else if (message.content.type === "Answer" && (message.content.content as string[]).join("") != "") { // If the message is a response
-                              return <Grid className='chat-item'>
-                                <GridItem span={1} className='grid-item-orb'>
-                                  <img src={orb} className='orb' />
-                                </GridItem>
-                                <GridItem span={11}>
-                                  <MarkdownRenderer>{(message.content.content as string[]).join("")}</MarkdownRenderer>
-                                </GridItem>
-                              </Grid>
-                            } else if (message.content.type === "Sources") { // If the message is a source
-                              return <Grid className='chat-item'>
-                                <GridItem span={1} className='grid-item-orb'>&nbsp;</GridItem>
-                                <GridItem span={11}>
-                                  <Text component={TextVariants.p} className='chat-source-text'>{t('chat.content.references') + ": "}</Text>
-                                  {message.content && (message.content.content as string[]).map((source, index) => {
-                                    const renderSource = () => {
-                                      if (source.startsWith('http')) {
-                                        return <Text component={TextVariants.p} className='chat-source-text'>
-                                          <a href={source} target="_blank" className='chat-source-link'>{source}</a>
-                                        </Text>
-                                      } else {
-                                        return <Text component={TextVariants.p} className='chat-source-text'>{source}</Text>
-                                      }
-                                    };
-                                    return (
-                                      <React.Fragment key={index}>
-                                        {renderSource()}
-                                      </React.Fragment>
-                                    );
-                                  })}
-                                </GridItem>
-                              </Grid>
-                            } else {
-                              console.log('Unknown message type.');
-                              return;
-                            }
-                          } else {
-                            console.log('Empty message');
-                            return;
-                          }
-                        }
-
-                        return (
-                          <React.Fragment key={index}>
-                            {renderMessage()}
-                          </React.Fragment>
-                        );
-                      })}
-
-                      {/* New Answer rendering */}
-                      {answerText.content.join("") !== "" && (
-                        <div>
-                          <Grid className='chat-item'>
-                            <GridItem span={1} className='grid-item-orb'>
-                              <img src={orb} className='orb' />
-                            </GridItem>
-                            <GridItem span={11}>
-                              <MarkdownRenderer>{answerText.content.join("")}</MarkdownRenderer>
-                            </GridItem>
-                          </Grid>
-                          <Grid className='chat-item'>
-                            <GridItem span={1} className='grid-item-orb'>&nbsp;</GridItem>
-                            <GridItem span={11}>
-                              <Text component={TextVariants.p} className='chat-source-text'>{answerSources.content.length != 0 && (t('chat.content.references') + ": ")}</Text>
-                              {answerSources && answerSources.content.map((source, index) => {
-                                const renderSource = () => {
-                                  if (source.startsWith('http')) {
-                                    return <Text component={TextVariants.p} className='chat-source-text'>
-                                      <a href={source} target="_blank" className='chat-source-link'>{source}</a>
-                                    </Text>
-                                  } else {
-                                    return <Text component={TextVariants.p} className='chat-source-text'>{source}</Text>
-                                  }
-                                };
-                                return (
-                                  <React.Fragment key={index}>
-                                    {renderSource()}
-                                  </React.Fragment>
-                                );
-                              })}
-
-                            </GridItem>
-                          </Grid>
-                        </div>
-                      )}
-                    </TextContent>
+                    <Grid hasGutter
+                      className="chat-grid">
+                      {items.map((item, index) => (
+                        <GridItem key={index} className='chat-grid-item' span={Math.floor(12 / (items.length)) as any}>
+                          {/* Replace with your ChatAnswer component */}
+                          {item}
+                        </GridItem>
+                      ))}
+                    </Grid>
                   </StackItem>
 
                   {/* Input section */}

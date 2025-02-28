@@ -1,10 +1,10 @@
 {
-  "app_title": "ドキュメンテーションアシスタント",
+  "app_title": "ドキュメントアシスタントのデモ",
   "app_menu": {
-    "chat_documentation": "ドキュメントとチャットする"
+    "chat_documentation": "ドキュメントアシスタントのデモ"
   },
   "app_header": {
-    "powered_by": "提供",
+    "powered_by": "ドキュメントアシスタントのデモ",
     "help": {
       "header": "情報",
       "body": "このアプリケーションはRed Hatのドキュメントの公式チャットボットではありません。デモンストレーション目的のみです。",
@@ -16,7 +16,7 @@
   "chat": {
     "title": "ドキュメンテーションアシスタント",
     "filter": {
-      "product": "製品",
+      "product": "レッドハット製品",
       "version": "バージョン",
       "language": "言語"
     },

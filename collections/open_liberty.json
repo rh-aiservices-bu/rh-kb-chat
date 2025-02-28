@@ -1,0 +1,37 @@
+{
+  "collection_base_name": "open_liberty",
+  "collection_full_name": "Open Liberty",
+  "common_sources": [],
+  "versions": [
+    {
+      "version_number": "24.0.0.12",
+      "store_directive": "create_or_keep",
+      "sources": [
+        {
+          "ingestion_type": "redhat_doc",
+          "language": "en-US"
+        }
+      ]
+    },
+    {
+      "version_number": "24.0.0.9",
+      "store_directive": "create_or_keep",
+      "sources": [
+        {
+          "ingestion_type": "redhat_doc",
+          "language": "en-US"
+        }
+      ]
+    },
+    {
+      "version_number": "24.0.0.6",
+      "store_directive": "delete",
+      "sources": [
+        {
+          "ingestion_type": "redhat_doc",
+          "language": "en-US"
+        }
+      ]
+    }
+  ]
+}

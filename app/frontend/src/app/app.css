@@ -36,7 +36,11 @@ body,
   padding-right: 10px;
 }
 
-.product-select {
+.collection-version-language-legends {
+  margin-right: 5px !important;
+}
+
+.collection-select {
   width: 500px;
 }
 
@@ -69,17 +73,18 @@ body,
   flex-direction: column;
   justify-content: space-between;
   align-items: center;
-  padding-top: 20px;
+  padding-top: 5px;
 }
 
 .chat-card {
   border-radius: 10px !important;
-  width: 95%;
-  height: 75vh;
+  width: 99%;
+  height: calc(100vh - 185px);
+  flex-grow: 1;
 }
 
 .chat-card-header {
-  background-color: #056ac7;
+  background-color: #0084ff;
   border-top-left-radius: 10px !important;
   border-top-right-radius: 10px !important;
   border-bottom-left-radius: 0px !important;
@@ -97,6 +102,12 @@ body,
 .chat-card-body {
   padding: 0px;
   height: 65vh;
+}
+
+.chat-llm-select {
+  width: fit-content;
+  margin-top: 10px;
+  margin-left: 20px;
 }
 
 .chat-bot-answer {
@@ -149,6 +160,65 @@ body,
   font-family: 'RedHatText', helvetica, arial, sans-serif !important;
 }
 
+.chat-grid {
+  grid-gap: 10px;
+  height: 100% !important;
+}
+
+
+.chat-grid-item {
+  height: 100%;
+  position: relative;
+}
+
+.chat-grid-item::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  right: 0;
+  width: 1px;
+  background: linear-gradient(
+    to bottom,
+    red,
+    orange,
+    yellow,
+    green,
+    blue,
+    indigo,
+    violet
+  );
+  background-size: 100% 400%;
+  animation: rainbow-border 20s linear infinite;
+
+  /* Apply the mask to the pseudo-element */
+  mask: linear-gradient(
+    to bottom,
+    transparent 5%,
+    black 5%,
+    black 95%,
+    transparent 95%
+  );
+}
+
+
+@keyframes rainbow-border {
+  0% {
+    background-position: 0% 0%;
+  }
+  100% {
+    background-position: 0% 400%;
+  }
+}
+
+.chat-grid-item:only-child::before {
+  display: none;
+}
+
+.chat-grid-item:last-child::before {
+  display: none;
+}
+
 .chat-source-text {
   font-style: italic;
   padding-top: 0px;
@@ -169,8 +239,8 @@ body,
 }
 
 .grid-item-orb {
-  text-align: center;
-  padding-left: 50px;
+  text-align: right;
+  padding-right: 5px;
 }
 
 .orb {
@@ -188,4 +258,9 @@ body,
   width: 50px;
   height: 50px;
   padding-right: 10px;
+}
+
+.token-metrics {
+  font-family: RedHatMono, "Liberation Mono", consolas, SFMono-Regular, menlo, monaco, "Courier New", monospace;
+  color: rgb(100,100,100);
 }

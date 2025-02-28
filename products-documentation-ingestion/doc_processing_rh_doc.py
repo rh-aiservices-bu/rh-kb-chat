@@ -2,7 +2,10 @@ from typing import List
 
 from bs4 import BeautifulSoup
 from langchain_community.document_loaders.web_base import WebBaseLoader
+from langchain_community.document_transformers import Html2TextTransformer
 from langchain_core.documents import Document
+
+import md_splitter
 
 
 class RedHatDocumentationLoader(WebBaseLoader):
@@ -101,3 +104,75 @@ class RedHatDocumentationLoader(WebBaseLoader):
         metadata = {"source": self.web_path, "title": title}
 
         return [Document(page_content=text, metadata=metadata)]
+
+
+def get_pages(product, version, language):
+    """Get the list of pages from the Red Hat product documentation."""
+
+    # Load the Red Hat documentation page
+    url = [
+        "https://access.redhat.com/documentation/"
+        + language
+        + "/"
+        + product
+        + "/"
+        + version
+    ]
+    loader = WebBaseLoader(url)
+    soup = loader.scrape()
+
+    # Select only the element titles that contain the links to the documentation pages
+    filtered_elements = soup.find_all("h3", attrs={"slot": "headline"})
+    new_soup = BeautifulSoup("", "lxml")
+    for element in filtered_elements:
+        new_soup.append(element)
+    for match in new_soup.findAll("h3"):
+        match.unwrap()
+
+    # Extract all the links
+    links = []
+    for match in new_soup.findAll("a"):
+        links.append(match.get("href"))
+    links = [
+        url for url in links if url.startswith("/en/documentation")
+    ]  # Filter out unwanted links
+    pages = [
+        link.replace("/html/", "/html-single/") for link in links if "/html/" in link
+    ]  # We want single pages html
+
+    return pages
+
+
+def split_document(product, version, language, page, product_full_name, chunk_size, chunk_overlap):
+    """Split a Red Hat documentation page into smaller sections."""
+
+    # Load, parse, and transform to Markdown
+    document_url = ["https://docs.redhat.com" + page]
+    print(f"Processing: {document_url}")
+    loader = RedHatDocumentationLoader(document_url)
+    docs = loader.load()
+    html2text = Html2TextTransformer()
+    md_docs = html2text.transform_documents(docs)
+
+    splits = md_splitter.split(md_docs, product, product_full_name, version=version, language=language, chunk_size=chunk_size, chunk_overlap=chunk_overlap)
+
+    return splits
+
+
+def generate_splits(product, product_full_name, version, language, chunk_size, chunk_overlap):
+    """Generate the splits for a Red Hat documentation product."""
+
+    # Find all the pages.
+    pages = get_pages(product, version, language)
+    print(f"Found {len(pages)} pages:")
+    print(pages)
+
+    # Generate the splits.
+    print("Generating splits for Red Hat doc...")
+    all_splits = []
+    for page in pages:
+        splits = split_document(product, version, language, page, product_full_name, chunk_size, chunk_overlap)
+        all_splits.extend(splits)
+    print(f"Generated {len(all_splits)} splits.")
+
+    return all_splits

@@ -1,10 +1,10 @@
 {
-  "app_title": "Assistant de Documentation",
+  "app_title": "Démo Assistant Documentaire",
   "app_menu": {
-    "chat_documentation": "Chattez avec la Documentation"
+    "chat_documentation": "Démo Assistant Documentaire"
   },
   "app_header": {
-    "powered_by": "Propulsé par",
+    "powered_by": "Démo Assistant Documentaire",
     "help": {
       "header": "Information",
       "body": "Cette application n'est pas un chatbot officiel pour la documentation Red Hat. À des fins de démonstration uniquement.",
@@ -14,9 +14,9 @@
     "anonymous_user": "Utilisateur anonyme"
   },
   "chat": {
-    "title": "Assistant de Documentation",
+    "title": "Assistant Documentaire",
     "filter": {
-      "product": "Produit",
+      "product": "Produit Red Hat",
       "version": "Version",
       "language": "Langue"
     },
@@ -26,7 +26,7 @@
     "disclaimer1": "Cet assistant est alimenté par une IA. Il peut afficher des informations inexactes, veuillez donc vérifier les réponses.",
     "disclaimer2": "Cette application n'est pas un chatbot officiel pour la documentation Red Hat. À des fins de démonstration uniquement.",
     "content": {
-      "greeting": "Bonjour! Je suis votre assistant de documentation. Comment puis-je vous aider aujourd'hui ?",
+      "greeting": "Bonjour! Je suis votre assistant documentaire. Comment puis-je vous aider aujourd'hui ?",
       "change_product_prompt_start": "D'accord, nous parlons maintenant de",
       "change_product_prompt_version": "version",
       "change_product_prompt_none": "Ok, we are not talking about any specific product.",

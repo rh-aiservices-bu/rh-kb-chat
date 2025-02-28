@@ -1,0 +1,81 @@
+---
+apiVersion: triggers.tekton.dev/v1beta1
+kind: EventListener
+metadata:
+  name: doc-ingestion-listener
+spec:
+  triggers:
+    - triggerRef: doc-ingestion-trigger
+---
+kind: Route
+apiVersion: route.openshift.io/v1
+metadata:
+  name: el-doc-ingestion-listener
+spec:
+  to:
+    kind: Service
+    name: el-doc-ingestion-listener
+    weight: 100
+  port:
+    targetPort: http-listener
+  wildcardPolicy: None
+  tls:
+    termination: edge
+    insecureEdgeTerminationPolicy: Redirect
+---
+apiVersion: triggers.tekton.dev/v1beta1	
+kind: TriggerTemplate
+metadata:
+  name: doc-ingestion-trigger-template
+spec:
+  params:
+    - name: gitrepositoryurl
+      description: The git repository url
+    - name: git-repo-name
+      description: The name of the deployment to be created / patched
+    - name: git-branch
+      description: The git branch name
+  resourcetemplates:
+    - apiVersion: tekton.dev/v1
+      kind: PipelineRun
+      metadata:
+        generateName: doc-ingestion-
+      spec:
+        pipelineRef:
+          name: doc-ingestion
+        params:
+          - name: APPLICATION_NAME
+            value: $(tt.params.git-repo-name)
+          - name: GIT_URL
+            value: $(tt.params.gitrepositoryurl)
+          - name: GIT_BRANCH
+            value: $(tt.params.git-branch)
+        workspaces:
+        - name: shared-workspace
+          persistentVolumeClaim:
+            claimName: shared-workspace
+---
+apiVersion: triggers.tekton.dev/v1beta1 
+kind: Trigger 
+metadata:
+  name: doc-ingestion-trigger 
+spec:
+  interceptors:
+     - ref:
+         name: "cel" 
+       params:
+        - name: filter
+          value: (header.match('X-GitHub-Event', 'push') && body.ref.split('/')[2] == 'main' && body.commits.exists(c, c.modified.exists(m, m.contains('collections')) || c.added.exists(a, a.contains('collections')) || c.removed.exists(r, r.contains('collections'))))
+        - name: overlays
+          value:
+          - expression: body.ref.split('/')[2]
+            key: branch_name
+  bindings:
+    - name: git-branch
+      value: $(extensions.branch_name)
+    - name: gitrepositoryurl
+      value: $(body.repository.clone_url)
+    - name: git-repo-name
+      value: $(body.repository.name)
+  template: 
+     ref: doc-ingestion-trigger-template

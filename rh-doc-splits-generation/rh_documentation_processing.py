@@ -6,7 +6,7 @@ from langchain_text_splitters import (
     RecursiveCharacterTextSplitter,
 )
 
-from redhat_documentation import RedHatDocumentationLoader
+from rh_documentation_loader import RedHatDocumentationLoader
 
 
 def get_pages(product, version, language):

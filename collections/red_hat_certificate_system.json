@@ -1,0 +1,27 @@
+{
+  "collection_base_name": "red_hat_certificate_system",
+  "collection_full_name": "Red Hat Certificate System",
+  "common_sources": [],
+  "versions": [
+    {
+      "version_number": "10",
+      "store_directive": "create_or_keep",
+      "sources": [
+        {
+          "ingestion_type": "redhat_doc",
+          "language": "en-US"
+        }
+      ]
+    },
+    {
+      "version_number": "9",
+      "store_directive": "create_or_keep",
+      "sources": [
+        {
+          "ingestion_type": "redhat_doc",
+          "language": "en-US"
+        }
+      ]
+    }
+  ]
+}

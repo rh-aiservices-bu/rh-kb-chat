@@ -1,7 +1,7 @@
 {
   "name": "kbchat",
-  "version": "1.0.0",
-  "description": "Backend for the RAG Chatbot Patternfly.",
+  "version": "2.0.0",
+  "description": "Backend for the RAG Chatbot.",
   "repository": {
     "type": "git",
     "url": "git+https://https://github.com/rh-aiservices-bu/rh-kb-chat.git"

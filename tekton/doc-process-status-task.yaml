@@ -1,0 +1,65 @@
+---
+apiVersion: tekton.dev/v1
+kind: Task
+metadata:
+  name: doc-process-status
+spec:
+  params:
+    - name: KFP_RUN_ID
+      description: Run ID of the Data Science Pipeline
+      type: string
+  steps:
+    - name: doc-process-status
+      image: quay.io/openshift/origin-cli:4.14
+      script: |
+        #!/bin/bash
+
+        LABEL="pipeline/runid=$(params.KFP_RUN_ID)"
+        LOG_FILE="/tekton/results/pod-logs.txt"
+
+        echo "Waiting for the system-container-impl pod with label $LABEL to start running...🥱"
+
+        while true; do
+            POD_NAME=$(oc get pods -l $LABEL -o jsonpath='{.items[*].metadata.name}'  | tr ' ' '\n' | grep "system-container-impl")
+
+            if [[ -n "$POD_NAME" ]]; then
+                POD_STATUS=$(oc get pod "$POD_NAME" -o jsonpath='{.status.phase}' )
+
+                if [[ "$POD_STATUS" == "Running" ]]; then
+                    echo "Pod $POD_NAME is now Running. Starting log streaming...💪"
+                    break
+                fi
+            fi
+
+            echo "Waiting for the pod to start...🥱"
+            sleep 5
+        done
+
+        # Start `oc logs -f` in the background and redirect output to stdout
+        oc logs -f "$POD_NAME"  | grep --line-buffered -A2 PROCESSING  2>&1 &
+
+        # Wait until the pod reaches Succeeded (or Failed)
+        while true; do
+            POD_STATUS=$(oc get pod "$POD_NAME" -o jsonpath='{.status.phase}' )
+            
+            if [[ "$POD_STATUS" != "Running" ]]; then
+                echo "🙅‍♀️ Pod $POD_NAME is not running anymore. Stopping log streaming..."
+                break
+            fi
+
+            sleep 5
+        done
+
+        # Show the last 10 log lines
+        echo "🤓 Fetching the last 1 minute logs before exit:"
+        oc logs "$POD_NAME"  --since=1m
+
+        # Exit based on final pod status
+        if [[ "$POD_STATUS" == "Succeeded" ]]; then
+            echo "💚 Pod completed successfully. Exiting with success."
+            exit 0
+        else
+            echo "💔 Pod failed. Exiting with failure."
+            exit 1
+        fi
+

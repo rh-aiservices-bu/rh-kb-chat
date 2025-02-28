@@ -1,30 +1,29 @@
 """ Backend for Knowledge Base Chat App """
-import hashlib
+
+import json
 import logging
 import os
 import sys
-import time
-from typing import List
-import json
+import asyncio
 
-import boto3
-import chatbot
 import httpx
-from app_config import LOG_LEVELS, LOGGING_CONFIG
 from dotenv import dotenv_values, load_dotenv
-from fastapi import FastAPI, File, HTTPException, Request, UploadFile, WebSocket, WebSocketDisconnect
+from fastapi import FastAPI, HTTPException, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import Response, StreamingResponse
+from fastapi.responses import Response
 from fastapi.staticfiles import StaticFiles
-from uvicorn import run
-from fastapi import HTTPException
 from starlette.exceptions import HTTPException as StarletteHTTPException
+
+import chatbot
+import collections_loader as cl
+from helpers import logging_config
 
 # Load local env vars if present
 load_dotenv()
 
 # Initialize logger
-logger = logging.getLogger("app")
+logging_config()
+_logger = logging.getLogger(__name__)
 
 # Get config
 config = {
@@ -32,19 +31,36 @@ config = {
     **dotenv_values(".env.secret"),  # load sensitive variables
     **os.environ,  # override loaded values with environment variables
 }
-logger.info(f'Config loaded...')
+_logger.info(f"Config loaded...")
 
-# Load collections from JSON file
-with open(config['MILVUS_COLLECTIONS_FILE'], 'r') as file:
-    collections_data = json.load(file)
+# Load configuration from JSON file
+config_file = config.get("CONFIG_FILE")
+if config_file and os.path.exists(config_file):
+    with open(config_file, "r") as file:
+        config_data = json.load(file)
+        config.update(config_data)
+        _logger.info(f"Configuration loaded from {config_file}")
+else:
+    _logger.warning(f"Config file {config_file} not found or not specified")
 
-# Load Prompt template from txt file
-with open(config['PROMPT_FILE'], 'r') as file:
-    prompt_template = file.read()
-    config["PROMPT_TEMPLATE"] = prompt_template
+# Get collections, LLMs, vectorstore and embeddings config
+collections_config = config.get("collections")
+llms_config = config.get("llms")
+vectorstore_config = config.get("vectorstore")
+embeddings_config = config.get("embeddings")
+
+# Load collections
+collections_loader = cl.CollectionsLoader(
+    collections_config, vectorstore_config, _logger
+)
+collections = collections_loader.load_collections()
+total_milvus_collections = sum(len(collection.versions) for collection in collections)
+_logger.info(
+    f"Loaded {total_milvus_collections} versioned collection(s) across {len(collections)} collection(s)"
+)
 
 # Initialize Chatbot
-chatbot = chatbot.Chatbot(config, logger)
+chatbot = chatbot.Chatbot(config, _logger)
 
 # App creation
 app = FastAPI()
@@ -58,8 +74,9 @@ app.add_middleware(
     allow_origins=origins,
     allow_credentials=True,
     allow_methods=methods,
-    allow_headers=headers
+    allow_headers=headers,
 )
+
 
 # Connection Manager for Websockets
 class ConnectionManager:
@@ -83,36 +100,56 @@ class ConnectionManager:
 
 manager = ConnectionManager()
 
-############################# 
+#############################
 # API Endpoints definitions #
 #############################
+
 
 # Status
 @app.get("/health")
 async def health():
-    """ Basic status """
+    """Basic status"""
     return {"message": "Status:OK"}
+
+
+@app.get("/api/llms")
+async def get_llms():
+    """Get llms"""
+    return llms_config
+
 
 # Collections
 @app.get("/api/collections")
 async def get_collections():
-    """ Get collections """
-    return collections_data
+    """Get collections"""
+    return collections
 
-# Query (chatbot exchanges are handled through websocket for streaming)
+
+async def handle_client_request(websocket: WebSocket, data: dict):
+    async for next_item in chatbot.stream(
+        data["model"],
+        data["query"],
+        data["collection"],
+        data["collection_full_name"],
+        data["version"],
+        data["language"],
+    ):
+        answer = json.dumps(next_item)
+        await websocket.send_text(answer)
+
+
 @app.websocket("/ws/query/{client_id}")
 async def websocket_endpoint(websocket: WebSocket, client_id: int):
     await manager.connect(websocket)
     try:
-      while True:
-          data = await websocket.receive_text()
-          data = json.loads(data)
-          for next_item in chatbot.stream(data["query"], data["collection"], data["product_full_name"], data["version"], data["language"]):
-              answer = json.dumps(next_item)
-              await websocket.send_text(answer)
+        while True:
+            data = await websocket.receive_text()
+            data = json.loads(data)
+            asyncio.create_task(handle_client_request(websocket, data))
     except WebSocketDisconnect:
         manager.disconnect(websocket)
-        logger.info(f"Client {client_id} disconnected")
+        _logger.info(f"Client {client_id} disconnected")
+
 
 # Serve React App (frontend)
 class SPAStaticFiles(StaticFiles):
@@ -131,9 +168,12 @@ class SPAStaticFiles(StaticFiles):
                 else:
                     raise ex
 
+
 app.mount("/", SPAStaticFiles(directory="public", html=True), name="spa-static-files")
 
 # Launch the FastAPI server
 if __name__ == "__main__":
-    port = int(os.getenv('PORT', '5000'))
-    run(app, host="0.0.0.0", port=port)
+    from uvicorn import run
+
+    port = int(os.getenv("PORT", "5000"))
+    run("app:app", host="0.0.0.0", port=port)

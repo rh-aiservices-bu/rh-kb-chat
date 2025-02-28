@@ -1,4 +1,4 @@
-import imgAvatar from '@app/assets/bgimages/avatar-user.svg';
+import imgAvatar from '@app/assets/bgimages/default-user.svg';
 import logo from '@app/assets/bgimages/Logo-Red_Hat-OpenShift_AI-A-Reverse-RGB.svg';
 import { IAppRoute, IAppRouteGroup, routes } from '@app/routes';
 import {
@@ -45,7 +45,7 @@ interface IAppLayout {
 }
 
 const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
-  const [sidebarOpen, setSidebarOpen] = React.useState(true);
+  const [sidebarOpen, setSidebarOpen] = React.useState(false);
   const [selectedLanguage, setSelectedLanguage] = React.useState('en');
 
   const onChangeLanguage = (_event: React.FormEvent<HTMLSelectElement>, language: string) => {
@@ -58,6 +58,31 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
   React.useEffect(() => {
     i18n.changeLanguage(selectedLanguage);
   }, [selectedLanguage]);
+
+  // User
+  const [userName, setUserName] = React.useState<string>('');
+
+  React.useEffect(() => {
+    const fetchUserInfo = async () => {
+      try {
+        // Get headers from current page
+        const response = await fetch(window.location.href, { 
+          method: 'HEAD',
+          credentials: 'same-origin' // Include cookies in the request
+        });
+        
+        const entries = [...response.headers.entries()];
+        const gapAuthHeader = entries.find(entry => entry[0] === 'gap-auth');
+        const gapAuthValue = gapAuthHeader ? gapAuthHeader[1] : '';
+        setUserName(gapAuthValue);
+        
+      } catch (error) {
+        console.error('Error fetching user info:', error);
+      }
+    }
+    fetchUserInfo();
+  }, []);
+
 
   const headerToolbar = (
     <Toolbar id="toolbar" isFullHeight isStatic>
@@ -98,7 +123,7 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
         <ToolbarItem>
           <TextContent>
             <Text component={TextVariants.p} className='pf-v5-global--spacer--md'>
-              {t('app_header.anonymous_user')}
+              {userName}
             </Text>
           </TextContent>
         </ToolbarItem>
@@ -111,17 +136,17 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
 
   const Header = (
     <Masthead>
-      <MastheadToggle>
+      <MastheadToggle hidden={true}>
         <Button variant="plain" onClick={() => setSidebarOpen(!sidebarOpen)} aria-label="Global navigation">
-          <BarsIcon />
+          <BarsIcon/>
         </Button>
       </MastheadToggle>
       <MastheadMain>
         <MastheadBrand>
-          <TextContent>
+          <Brand src={logo} alt="Patternfly Logo" heights={{ default: '36px' }} />
+          <TextContent style={{ marginLeft: '1rem' }}>
             <Text component={TextVariants.h3} className='title-text'>{t('app_header.powered_by')}</Text>
           </TextContent>
-          <Brand src={logo} alt="Patternfly Logo" heights={{ default: '36px' }} />
         </MastheadBrand>
       </MastheadMain>
       <MastheadContent>

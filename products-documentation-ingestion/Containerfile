@@ -1,0 +1,13 @@
+FROM registry.redhat.io/ubi9/python-311@sha256:fc669a67a0ef9016c3376b2851050580b3519affd5ec645d629fd52d2a8b8e4a
+
+USER 0
+
+RUN dnf -y update && \
+    dnf -y clean all && \
+    rm -rf /var/cache/dnf
+
+USER 1001
+
+COPY . .
+
+RUN pip install --no-cache-dir -r requirements_frozen.txt 
