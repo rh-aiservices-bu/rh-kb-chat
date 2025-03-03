@@ -57,7 +57,7 @@ spec:
           doc_ingestion_pipeline,
           experiment_name="$(params.APPLICATION_NAME)-doc-ingestion", 
           namespace=namespace,
-          enable_caching=True
+          enable_caching=False
       )
 
       # save run id to query the logs
