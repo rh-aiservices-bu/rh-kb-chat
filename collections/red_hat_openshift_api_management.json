@@ -1,0 +1,17 @@
+{
+  "collection_base_name": "red_hat_openshift_api_management",
+  "collection_full_name": "Red Hat OpenShift API Management",
+  "common_sources": [],
+  "versions": [
+    {
+      "version_number": "1",
+      "store_directive": "create_or_keep",
+      "sources": [
+        {
+          "ingestion_type": "redhat_doc",
+          "language": "en-US"
+        }
+      ]
+    }
+  ]
+}
