@@ -1,0 +1,18 @@
+---
+apiVersion: tekton.dev/v1
+kind: Task
+metadata:
+  name: trigger-rollout-chatbot
+spec:
+  steps:
+  - name: trigger-rollout-chatbot
+    image: quay.io/openshift/origin-cli:4.14
+    command: ["/bin/sh", "-c"]
+    script: |
+      #!/bin/sh
+
+      # Start rollout for rh-kb-chatbot
+      oc rollout restart deployment/rh-kb-chatbot -n rh-kb-chatbot
+
+      # Check the status of rollout 
+      oc rollout status deployment/rh-kb-chatbot -n rh-kb-chatbot
