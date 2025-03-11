@@ -57,6 +57,7 @@ spec:
           value: "$(params.APPLICATION_NAME)"
       runAfter:
         - fetch-ds-pipeline-repository
+    # Check the status of document processing
     - name: doc-process-status
       taskRef:
         name: doc-process-status
@@ -67,6 +68,13 @@ spec:
       runAfter:
         - execute-doc-ingestion-pipeline
       timeout: 10h0m0s
+    # Trigger rollout for the Chatbot app
+    - name: trigger-rollout-chatbot
+      taskRef:
+        name: trigger-rollout-chatbot
+        kind: Task
+      runAfter:
+        - doc-process-status
   results:
     - name: KFP_RUN_ID
       description: Run ID of the Data Science Pipeline
