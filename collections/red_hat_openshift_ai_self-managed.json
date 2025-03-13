@@ -18,7 +18,6 @@
         "https://ai-on-openshift.io/odh-rhoai/custom-runtime-triton/",
         "https://ai-on-openshift.io/odh-rhoai/openshift-group-management/",
         "https://ai-on-openshift.io/tools-and-applications/minio/minio/",
-        "https://access.redhat.com/articles/rhoai-supported-configs",
         "https://ai-on-openshift.io/odh-rhoai/kueue-preemption/readme/",
         "https://ai-on-openshift.io/odh-rhoai/model-serving-type-modification/",
         "https://ai-on-openshift.io/odh-rhoai/kserve-uwm-dashboard-metrics/",
