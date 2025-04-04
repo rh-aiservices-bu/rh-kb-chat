@@ -1,7 +1,7 @@
 import userAvatar from '@app/assets/bgimages/avatar-user.svg';
 import orb from '@app/assets/bgimages/orb.svg';
 import config from '@app/config';
-import { Flex, FlexItem, FormSelect, FormSelectOption, Grid, GridItem, StackItem, Text, TextContent, TextVariants } from "@patternfly/react-core";
+import { Flex, FlexItem, FormSelect, FormSelectOption, Grid, GridItem, Content, ContentVariants } from "@patternfly/react-core";
 import { t } from "i18next";
 import React, { forwardRef, useImperativeHandle, Ref, useRef } from 'react';
 import Markdown from 'react-markdown';
@@ -280,18 +280,18 @@ const ChatAnswer = forwardRef((props: ChatAnswerProps, ref: Ref<ChatAnswerRef>) 
               <FormSelectOption key={index} value={llm.name} label={llm.name} />
             ))}
           </FormSelect>
-            <TextContent style={{ display: 'flex', alignItems: 'normal' }}>
+            <Content style={{ display: 'flex', alignItems: 'normal' }}>
           {ttft !== 0 && (            
-              <Text className="token-metrics">{ttft.toFixed(2)}s tft,</Text>
+              <Content component="p" className="token-metrics">{ttft.toFixed(2)}s tft,</Content>
           )}
           {tps !== 0 && (
-              <Text className="token-metrics">{tps.toFixed(2)} t/s</Text>
+              <Content component="p" className="token-metrics">{tps.toFixed(2)} t/s</Content>
           )}
-          </TextContent>
+          </Content>
         </Flex>
       </FlexItem>
       <FlexItem>
-        <TextContent id='chatBotAnswer'>
+        <Content id='chatBotAnswer'>
           {/* Message History rendering */}
           {messageHistory.content.map((message: Message, index) => {
             const renderMessage = () => {
@@ -302,7 +302,7 @@ const ChatAnswer = forwardRef((props: ChatAnswerProps, ref: Ref<ChatAnswerRef>) 
                       <img src={userAvatar} className='user-avatar' />
                     </GridItem>
                     <GridItem span={11}>
-                      <Text component={TextVariants.p} className='chat-question-text'>{Array.isArray(message.content.content) ? message.content.content.join(' ') : message.content.content}</Text>
+                      <Content component={ContentVariants.p} className='chat-question-text'>{Array.isArray(message.content.content) ? message.content.content.join(' ') : message.content.content}</Content>
                     </GridItem>
                   </Grid>
                 } else if (message.content.type === "Answer" && (message.content.content as string[]).join("") != "") { // If the message is a response
@@ -318,15 +318,15 @@ const ChatAnswer = forwardRef((props: ChatAnswerProps, ref: Ref<ChatAnswerRef>) 
                   return <Grid className='chat-item'>
                     <GridItem span={1} className='grid-item-orb'>&nbsp;</GridItem>
                     <GridItem span={11}>
-                      <Text component={TextVariants.p} className='chat-source-text'>{t('chat.content.references') + ": "}</Text>
+                      <Content component={ContentVariants.p} className='chat-source-text'>{t('chat.content.references') + ": "}</Content>
                       {message.content && (message.content.content as Source[]).map((source, index) => {
                         const renderSource = () => {
                           if (source.content.startsWith('http')) {
-                            return <Text component={TextVariants.p} className='chat-source-text'>
+                            return <Content component={ContentVariants.p} className='chat-source-text'>
                               <a href={source.content} target="_blank" className='chat-source-link'>{source.content}</a>
-                            </Text>
+                            </Content>
                           } else {
-                            return <Text component={TextVariants.p} className='chat-source-text'>{source.content}</Text>
+                            return <Content component={ContentVariants.p} className='chat-source-text'>{source.content}</Content>
                           }
                         };
                         return (
@@ -368,15 +368,15 @@ const ChatAnswer = forwardRef((props: ChatAnswerProps, ref: Ref<ChatAnswerRef>) 
               <Grid className='chat-item'>
                 <GridItem span={1} className='grid-item-orb'>&nbsp;</GridItem>
                 <GridItem span={11}>
-                  <Text component={TextVariants.p} className='chat-source-text'>{answerSources.content.length != 0 && (t('chat.content.references') + ": ")}</Text>
+                  <Content component={ContentVariants.p} className='chat-source-text'>{answerSources.content.length != 0 && (t('chat.content.references') + ": ")}</Content>
                   {answerSources && answerSources.content.map((source, index) => {
                     const renderSource = () => {
                       if (source.content.startsWith('http')) {
-                        return <Text component={TextVariants.p} className='chat-source-text'>
+                        return <Content component={ContentVariants.p} className='chat-source-text'>
                           <a href={source.content} target="_blank" className='chat-source-link'>{source.content}</a> ({cosineScoreToPercentage(source.score)}% match)
-                        </Text>
+                        </Content>
                       } else {
-                        return <Text component={TextVariants.p} className='chat-source-text'>{source.content} ({cosineScoreToPercentage(source.score)}% match)</Text>
+                        return <Content component={ContentVariants.p} className='chat-source-text'>{source.content} ({cosineScoreToPercentage(source.score)}% match)</Content>
                       }
                     };
                     return (
@@ -390,7 +390,7 @@ const ChatAnswer = forwardRef((props: ChatAnswerProps, ref: Ref<ChatAnswerRef>) 
               </Grid>
             </div>
           )}
-        </TextContent>
+        </Content>
       </FlexItem>
     </Flex>
   );

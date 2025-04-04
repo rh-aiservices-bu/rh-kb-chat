@@ -2,7 +2,7 @@ import config from '@app/config';
 import { faCommentDots, faPaperPlane } from '@fortawesome/free-regular-svg-icons';
 import { faPlusCircle } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { Button, Card, CardBody, CardHeader, Flex, FlexItem, FormSelect, FormSelectOption, Grid, GridItem, Page, PageSection, Panel, PanelMain, PanelMainBody, Stack, StackItem, Text, TextArea, TextContent, TextVariants, Tooltip } from '@patternfly/react-core';
+import { Button, Card, CardBody, CardHeader, Flex, FlexItem, FormSelect, FormSelectOption, Grid, GridItem, Page, PageSection, Panel, PanelMain, PanelMainBody, Stack, StackItem, Content, TextArea, ContentVariants, Tooltip } from '@patternfly/react-core';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Query, Message } from './classes';
@@ -187,7 +187,7 @@ const Chat: React.FunctionComponent<ChatProps> = ({ selectedLanguage }) => {
 
   return (
     <Page>
-      <PageSection>
+      <PageSection hasBodyWrapper={false}>
         <Flex direction={{ default: 'column' }}>
 
           {/* Product, version and language selectors */}
@@ -196,9 +196,9 @@ const Chat: React.FunctionComponent<ChatProps> = ({ selectedLanguage }) => {
               <FlexItem>
                 <Flex direction={{ default: 'row' }}>
                   <FlexItem className='collection-version-language-legends' >
-                    <TextContent>
-                      <Text component={TextVariants.h3} >{t('chat.filter.product')}:</Text>
-                    </TextContent>
+                    <Content>
+                      <Content component={ContentVariants.h3} >{t('chat.filter.product')}:</Content>
+                    </Content>
                   </FlexItem>
                   <FlexItem>
                     <FormSelect
@@ -218,9 +218,9 @@ const Chat: React.FunctionComponent<ChatProps> = ({ selectedLanguage }) => {
               <FlexItem>
                 <Flex direction={{ default: 'row' }}>
                   <FlexItem className='collection-version-language-legends'>
-                    <TextContent>
-                      <Text component={TextVariants.h3} >{t('chat.filter.version')}:</Text>
-                    </TextContent>
+                    <Content>
+                      <Content component={ContentVariants.h3} >{t('chat.filter.version')}:</Content>
+                    </Content>
                   </FlexItem>
                   <FlexItem>
                     <FormSelect
@@ -242,18 +242,18 @@ const Chat: React.FunctionComponent<ChatProps> = ({ selectedLanguage }) => {
 
           {/* Chat Window */}
           <FlexItem className='flex-chat'>
-            <Card isRounded className='chat-card'>
+            <Card  className='chat-card'>
               <CardHeader className='chat-card-header'>
                 <Flex justifyContent={{ default: 'justifyContentSpaceBetween' }}>
                   <FlexItem>
                     {/* Empty item to center title */}
                   </FlexItem>
                   <FlexItem>
-                    <TextContent>
-                      <Text component={TextVariants.h3} className='chat-card-header-title'>
+                    <Content>
+                      <Content component={ContentVariants.h3} className='chat-card-header-title'>
                         <FontAwesomeIcon icon={faCommentDots} />&nbsp;{t('chat.title')}
-                      </Text>
-                    </TextContent>
+                      </Content>
+                    </Content>
                   </FlexItem>
                   <FlexItem>
                     <Flex>
@@ -328,9 +328,9 @@ const Chat: React.FunctionComponent<ChatProps> = ({ selectedLanguage }) => {
                     </Panel>
                   </StackItem>
                   <StackItem>
-                    <TextContent>
-                      <Text className='chat-disclaimer'>{t('chat.disclaimer1')}<br />{t('chat.disclaimer2')}</Text>
-                    </TextContent>
+                    <Content>
+                      <Content component="p" className='chat-disclaimer'>{t('chat.disclaimer1')}<br />{t('chat.disclaimer2')}</Content>
+                    </Content>
                   </StackItem>
                 </Stack>
               </CardBody>

@@ -9,10 +9,10 @@ import {
   FormSelect,
   FormSelectOption,
   Masthead,
-  MastheadBrand,
+  MastheadLogo,
   MastheadContent,
   MastheadMain,
-  MastheadToggle,
+  MastheadToggle, MastheadBrand,
   Nav,
   NavExpandable,
   NavItem,
@@ -21,12 +21,9 @@ import {
   PageSidebar,
   PageSidebarBody,
   Popover,
-  Select,
-  SelectOption,
   SkipToContent,
-  Text,
-  TextContent,
-  TextVariants,
+  Content,
+  ContentVariants,
   Toolbar,
   ToolbarContent,
   ToolbarGroup,
@@ -88,9 +85,9 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
     <Toolbar id="toolbar" isFullHeight isStatic>
       <ToolbarContent>
         <ToolbarGroup
-          variant="icon-button-group"
-          align={{ default: 'alignRight' }}
-          spacer={{ default: 'spacerMd', md: 'spacerMd' }}
+          variant="action-group-plain"
+          align={{ default: "alignEnd" }}
+          gap={{ default: "gapMd", md: "gapMd" }}
         >
           <ToolbarItem>
             <FontAwesomeIcon icon={faLanguage} className='language-icon'/>
@@ -121,14 +118,14 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
           </ToolbarItem>
         </ToolbarGroup>
         <ToolbarItem>
-          <TextContent>
-            <Text component={TextVariants.p} className='pf-v5-global--spacer--md'>
+          <Content>
+            <Content component={ContentVariants.p} className='pf-v5-global--spacer--md'>
               {userName}
-            </Text>
-          </TextContent>
+            </Content>
+          </Content>
         </ToolbarItem>
         <ToolbarItem>
-          <Avatar src={imgAvatar} alt="" border='light' className='avatar' />
+          <Avatar src={imgAvatar} alt="" isBordered className='avatar' />
         </ToolbarItem>
       </ToolbarContent>
     </Toolbar>
@@ -136,18 +133,16 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
 
   const Header = (
     <Masthead>
-      <MastheadToggle hidden={true}>
-        <Button variant="plain" onClick={() => setSidebarOpen(!sidebarOpen)} aria-label="Global navigation">
-          <BarsIcon/>
-        </Button>
+      
+      <MastheadMain><MastheadToggle hidden={true}>
+        <Button icon={<BarsIcon/>} variant="plain" onClick={() => setSidebarOpen(!sidebarOpen)} aria-label="Global navigation" />
       </MastheadToggle>
-      <MastheadMain>
-        <MastheadBrand>
+        <MastheadBrand data-codemods><MastheadLogo data-codemods>
           <Brand src={logo} alt="Patternfly Logo" heights={{ default: '36px' }} />
-          <TextContent style={{ marginLeft: '1rem' }}>
-            <Text component={TextVariants.h3} className='title-text'>{t('app_header.powered_by')}</Text>
-          </TextContent>
-        </MastheadBrand>
+          <Content style={{ marginLeft: '1rem' }}>
+            <Content component={ContentVariants.h3} className='title-text'>{t('app_header.powered_by')}</Content>
+          </Content>
+        </MastheadLogo></MastheadBrand>
       </MastheadMain>
       <MastheadContent>
         {headerToolbar}
@@ -178,7 +173,7 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
   );
 
   const Navigation = (
-    <Nav id="nav-first-simple" theme="dark">
+    <Nav id="nav-first-simple" >
       <NavList id="nav-list-first-simple">
         {routes.map(
           (route, idx) => route.label && (!route.routes ? renderNavItem(route, idx) : renderNavGroup(route, idx))
@@ -188,7 +183,7 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
   );
 
   const Sidebar = (
-    <PageSidebar theme="dark" >
+    <PageSidebar  >
       <PageSidebarBody isFilled>
         {Navigation}
       </PageSidebarBody>
@@ -209,7 +204,7 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
   return (
     <Page
       mainContainerId={pageId}
-      header={Header}
+      masthead={Header}
       sidebar={sidebarOpen && Sidebar}
       skipToContent={PageSkipToContent}>
       {children}
