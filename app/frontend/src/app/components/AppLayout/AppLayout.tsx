@@ -26,6 +26,7 @@ import {
   NavItem,
   NavList,
   Page,
+  PageSection,
   PageSidebar,
   PageSidebarBody,
   Popover,

@@ -7,6 +7,10 @@ import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Query, Message } from './classes';
 import ChatAnswer, { ChatAnswerRef } from './ChatAnswer'
+import githubLogo from '@app/assets/bgimages/github-mark.svg';
+import githubLogoWhite from '@app/assets/bgimages/github-mark-white.svg';
+import starLogo from '@app/assets/bgimages/star.svg';
+import starLogoWhite from '@app/assets/bgimages/star-white.svg';
 
 interface ChatProps {
 }
@@ -30,6 +34,20 @@ const Chat: React.FunctionComponent<ChatProps> = () => {
     versions: CollectionVersion[];
     language: string;
   };
+
+  const [isDarkTheme, setIsDarkTheme] = React.useState<boolean>(document.documentElement.classList.contains('pf-v6-theme-dark'));
+  React.useEffect(() => {
+    // Create a MutationObserver to watch for changes to the class list of the body element
+    const observer = new MutationObserver(() => {
+      setIsDarkTheme(document.documentElement.classList.contains('pf-v6-theme-dark'));
+    });
+
+    // Observe the body element for class attribute changes
+    observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
+
+    // Cleanup the observer when the component unmounts
+    return () => observer.disconnect();
+  }, []);
 
   // ChatAnswer Refs
   const childRefs = React.useRef<(ChatAnswerRef | null)[]>([]);
@@ -56,6 +74,19 @@ const Chat: React.FunctionComponent<ChatProps> = () => {
 
   //i18n
   const { t, i18n } = useTranslation();
+
+  // Fetch GitHub stars and forks 
+  const [repoStars, setRepoStars] = React.useState<number | null>(null);
+  React.useEffect(() => {
+    fetch('https://api.github.com/repos/rh-aiservices-bu/rh-kb-chat')
+      .then((response) => response.json())
+      .then((data) => {
+        setRepoStars(data.stargazers_count);
+      })
+      .catch((error) => {
+        console.error('Failed to fetch GitHub stars:', error);
+      });
+  }, []);
 
   // Collection elements
   const [collections, setCollections] = React.useState<Collection[]>([]); // The collections
@@ -304,8 +335,14 @@ const Chat: React.FunctionComponent<ChatProps> = () => {
                   </Panel>
                 </StackItem>
                 <StackItem>
-                  <Content>
-                    <Content component="p" className='chat-disclaimer'>{t('chat.disclaimer1')}<br />{t('chat.disclaimer2')}</Content>
+                  <Content component="p" className='chat-disclaimer'>{t('chat.disclaimer1')} {t('chat.disclaimer2')}<br />
+                    PoC App by <a href='http://red.ht/cai-team' target='_blank'>red.ht/cai-team</a>&nbsp;&nbsp;-&nbsp;&nbsp;
+                    <a href='https://github.com/rh-aiservices-bu/rh-kb-chat' target='_blank'>Source</a>&nbsp;&nbsp;
+                      <img src={isDarkTheme ? githubLogoWhite : githubLogo} alt="GitHub Logo" style={{ height: '15px', marginRight: '0.5rem', verticalAlign: 'text-top' }} />
+                        <span style={{ textDecoration: 'none', color: 'inherit' }}>{repoStars !== null ? `${repoStars}` : ''}&nbsp;</span>
+                      {repoStars !== null &&
+                        <img src={isDarkTheme ? starLogoWhite : starLogo} alt="Star Logo" style={{ height: '15px', marginRight: '0.5rem', verticalAlign: 'text-top' }} />
+                      }
                   </Content>
                 </StackItem>
               </Stack>
