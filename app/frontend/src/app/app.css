@@ -139,10 +139,10 @@ body,
   text-align: center;
   font-style: italic;
   font-size: small;
-  color: #4b4b4b;
   padding-bottom: 3px;
   padding-left: 10px;
   padding-right: 10px;
+  opacity: 0.8;
 }
 
 
