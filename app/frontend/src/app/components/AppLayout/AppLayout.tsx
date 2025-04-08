@@ -1,18 +1,26 @@
 import imgAvatar from '@app/assets/bgimages/default-user.svg';
-import logo from '@app/assets/bgimages/Logo-Red_Hat-OpenShift_AI-A-Reverse-RGB.svg';
+import logoStd from '@app/assets/bgimages/Logo-Red_Hat-AI-A-Standard-RGB.svg';
+import logoReverse from '@app/assets/bgimages/Logo-Red_Hat-AI-A-Reverse-RGB.svg';
 import { IAppRoute, IAppRouteGroup, routes } from '@app/routes';
 import {
   Avatar,
   Brand,
   Button,
   ButtonVariant,
-  FormSelect,
-  FormSelectOption,
+  Content,
+  ContentVariants,
+  Dropdown,
+  DropdownGroup,
+  DropdownItem,
+  DropdownList,
+  Flex,
   Masthead,
-  MastheadLogo,
+  MastheadBrand,
   MastheadContent,
+  MastheadLogo,
   MastheadMain,
-  MastheadToggle, MastheadBrand,
+  MastheadToggle,
+  MenuToggle,
   Nav,
   NavExpandable,
   NavItem,
@@ -22,20 +30,20 @@ import {
   PageSidebarBody,
   Popover,
   SkipToContent,
-  Content,
-  ContentVariants,
+  ToggleGroup,
+  ToggleGroupItem,
   Toolbar,
   ToolbarContent,
   ToolbarGroup,
-  ToolbarItem
+  ToolbarItem,
 } from '@patternfly/react-core';
 import { BarsIcon, QuestionCircleIcon } from '@patternfly/react-icons';
+import MoonIcon from '@patternfly/react-icons/dist/esm/icons/moon-icon';
+import SunIcon from '@patternfly/react-icons/dist/esm/icons/sun-icon';
 import * as React from 'react';
-import { NavLink, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import { NavLink, useLocation } from 'react-router-dom';
 import { supportedLngs } from '../../../i18n/config';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faLanguage } from '@fortawesome/free-solid-svg-icons';
 
 interface IAppLayout {
   children: React.ReactNode;
@@ -44,6 +52,7 @@ interface IAppLayout {
 const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
   const [sidebarOpen, setSidebarOpen] = React.useState(false);
   const [selectedLanguage, setSelectedLanguage] = React.useState('en');
+  const [isDarkTheme, setIsDarkTheme] = React.useState(false);
 
   const onChangeLanguage = (_event: React.FormEvent<HTMLSelectElement>, language: string) => {
     setSelectedLanguage(language);
@@ -63,16 +72,16 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
     const fetchUserInfo = async () => {
       try {
         // Get headers from current page
-        const response = await fetch(window.location.href, { 
+        const response = await fetch(window.location.href, {
           method: 'HEAD',
           credentials: 'same-origin' // Include cookies in the request
         });
-        
+
         const entries = [...response.headers.entries()];
         const gapAuthHeader = entries.find(entry => entry[0] === 'gap-auth');
         const gapAuthValue = gapAuthHeader ? gapAuthHeader[1] : '';
         setUserName(gapAuthValue);
-        
+
       } catch (error) {
         console.error('Error fetching user info:', error);
       }
@@ -80,72 +89,115 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
     fetchUserInfo();
   }, []);
 
+  const HeaderTools = ({
+    isDarkTheme,
+    setIsDarkTheme
+  }) => {
 
-  const headerToolbar = (
-    <Toolbar id="toolbar" isFullHeight isStatic>
-      <ToolbarContent>
-        <ToolbarGroup
-          variant="action-group-plain"
-          align={{ default: "alignEnd" }}
-          gap={{ default: "gapMd", md: "gapMd" }}
-        >
-          <ToolbarItem>
-            <FontAwesomeIcon icon={faLanguage} className='language-icon'/>
-          </ToolbarItem>
-          <ToolbarItem>
-            <FormSelect
-              value={selectedLanguage}
-              onChange={onChangeLanguage}
-              aria-label="FormSelect Input"
-              ouiaId="BasicFormSelectLanguage"
-              className='version-language-select'
-            >
-              {Object.entries(supportedLngs).map(([lngCode, lngName], index) => (
-                <FormSelectOption key={index} value={lngCode} label={lngName} />
-              ))}
-            </FormSelect>
-          </ToolbarItem>
-          <ToolbarItem>
-            <Popover
-              aria-label="Help"
-              position="right"
-              headerContent={t('app_header.help.header')}
-              bodyContent={t('app_header.help.body')}
-              footerContent={t('app_header.help.footer')}
-            >
-              <Button aria-label="Help" variant={ButtonVariant.plain} icon={<QuestionCircleIcon />} />
-            </Popover>
-          </ToolbarItem>
-        </ToolbarGroup>
-        <ToolbarItem>
-          <Content>
-            <Content component={ContentVariants.p} className='pf-v5-global--spacer--md'>
-              {userName}
-            </Content>
-          </Content>
-        </ToolbarItem>
-        <ToolbarItem>
-          <Avatar src={imgAvatar} alt="" isBordered className='avatar' />
-        </ToolbarItem>
-      </ToolbarContent>
-    </Toolbar>
-  );
+    const toggleDarkTheme = (_evt, selected) => {
+      const darkThemeToggleClicked = !selected === isDarkTheme;
+      const htmlElement = document.querySelector('html');
+      if (htmlElement) {
+        htmlElement.classList.toggle('pf-v6-theme-dark', darkThemeToggleClicked);
+      }
+      setIsDarkTheme(darkThemeToggleClicked);
+    };
+
+    const [isLanguageDropdownOpen, setLanguageDropdownOpen] = React.useState(false);
+
+    return (
+      <Toolbar isFullHeight>
+        <ToolbarContent>
+          <ToolbarGroup align={{ default: 'alignEnd' }}>
+            <ToolbarItem>
+              <ToggleGroup aria-label="Dark theme toggle group">
+                <ToggleGroupItem
+                  aria-label="light theme toggle"
+                  icon={<SunIcon />}
+                  isSelected={!isDarkTheme}
+                  onChange={toggleDarkTheme}
+                />
+                <ToggleGroupItem
+                  aria-label="dark theme toggle"
+                  icon={<MoonIcon />}
+                  isSelected={isDarkTheme}
+                  onChange={toggleDarkTheme}
+                />
+              </ToggleGroup>
+            </ToolbarItem>
+            <ToolbarItem>
+              <Dropdown
+                onSelect={() => setLanguageDropdownOpen(!isLanguageDropdownOpen)}
+                onOpenChange={(isOpen) => setLanguageDropdownOpen(isOpen)}
+                isOpen={isLanguageDropdownOpen}
+                toggle={(toggleRef) => (
+                  <MenuToggle
+                    ref={toggleRef}
+                    onClick={() => setLanguageDropdownOpen(!isLanguageDropdownOpen)}
+                    isExpanded={isLanguageDropdownOpen}
+                  >
+                  {supportedLngs[selectedLanguage] || 'en'}
+                  </MenuToggle>
+                )}
+                popperProps={{ position: 'right' }}
+              >
+                  <DropdownGroup key="Language" label="Language">
+                    <DropdownList>
+                      {Object.entries(supportedLngs).map(([lngCode, lngName], index) => (
+                        <DropdownItem key={index} value={lngCode} label={lngName} onClick={() => onChangeLanguage(null as any, lngCode)}>
+                          {lngName}
+                        </DropdownItem>
+                      ))}
+                    </DropdownList>
+                  </DropdownGroup>
+              </Dropdown>
+            </ToolbarItem>
+            <ToolbarItem>
+              <Popover
+                aria-label="Help"
+                position="right"
+                headerContent={t('app_header.help.header')}
+                bodyContent={t('app_header.help.body')}
+                footerContent={t('app_header.help.footer')}
+              >
+                <Button aria-label="Help" variant={ButtonVariant.plain} icon={<QuestionCircleIcon />} />
+              </Popover>
+            </ToolbarItem>
+            <ToolbarItem>
+              <Content>
+                <Content component={ContentVariants.p} className='pf-v5-global--spacer--md'>
+                  {userName}
+                </Content>
+              </Content>
+            </ToolbarItem>
+            <ToolbarItem>
+              <Avatar src={imgAvatar} alt="" isBordered className='avatar' />
+            </ToolbarItem>
+          </ToolbarGroup>
+        </ToolbarContent>
+      </Toolbar>
+    );
+  };
 
   const Header = (
     <Masthead>
-      
-      <MastheadMain><MastheadToggle hidden={true}>
-        <Button icon={<BarsIcon/>} variant="plain" onClick={() => setSidebarOpen(!sidebarOpen)} aria-label="Global navigation" />
-      </MastheadToggle>
-        <MastheadBrand data-codemods><MastheadLogo data-codemods>
-          <Brand src={logo} alt="Patternfly Logo" heights={{ default: '36px' }} />
-          <Content style={{ marginLeft: '1rem' }}>
-            <Content component={ContentVariants.h3} className='title-text'>{t('app_header.powered_by')}</Content>
-          </Content>
-        </MastheadLogo></MastheadBrand>
+      <MastheadMain>
+        <MastheadToggle hidden={true}>
+          <Button icon={<BarsIcon />} variant="plain" onClick={() => setSidebarOpen(!sidebarOpen)} aria-label="Global navigation" />
+        </MastheadToggle>
+        <MastheadBrand data-codemods>
+          <MastheadLogo data-codemods style={{ width: 'auto' }}>
+            <Flex direction={{ default: 'row' }} alignItems={{ default: 'alignItemsCenter' }} flexWrap={{ default: 'nowrap' }}>
+              <Brand src={!isDarkTheme?logoStd:logoReverse} alt="Patternfly Logo" heights={{ default: '32px' }} />
+              <Content style={{ marginLeft: '1rem' }}>
+                <Content component={ContentVariants.h3} className='title-text'>{t('app_header.powered_by')}</Content>
+              </Content>
+            </Flex>
+          </MastheadLogo>
+        </MastheadBrand>
       </MastheadMain>
       <MastheadContent>
-        {headerToolbar}
+        <HeaderTools isDarkTheme={isDarkTheme} setIsDarkTheme={setIsDarkTheme} />
       </MastheadContent>
     </Masthead>
   );
@@ -154,8 +206,8 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
 
 
   const renderNavItem = (route: IAppRoute, index: number) => (
-    <NavItem key={`${route.label}-${index}`} id={`${route.label}-${index}`} isActive={route.path === location.pathname} className='navitem-flex'>
-      <NavLink exact={route.exact} to={route.path} className={route.path !== '#' ? '' : 'disabled-link'}>
+    <NavItem key={`${route.label}-${index}`} id={`${route.label}-${index}`} isActive={route.path === location.pathname}>
+      <NavLink to={route.path} className={route.path !== '#' ? '' : 'disabled-link'}>
         {t(route.label as string)}
       </NavLink>
     </NavItem>
