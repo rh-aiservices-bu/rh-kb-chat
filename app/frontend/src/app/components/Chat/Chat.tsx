@@ -9,7 +9,6 @@ import { Query, Message } from './classes';
 import ChatAnswer, { ChatAnswerRef } from './ChatAnswer'
 
 interface ChatProps {
-  selectedLanguage: string;
 }
 
 /**
@@ -19,7 +18,7 @@ interface ChatProps {
  * @param {Object} props - The component props.
  * @returns {JSX.Element} The rendered Chat component.
  */
-const Chat: React.FunctionComponent<ChatProps> = ({ selectedLanguage }) => {
+const Chat: React.FunctionComponent<ChatProps> = () => {
 
   class UiLanguage {
     code: string;
