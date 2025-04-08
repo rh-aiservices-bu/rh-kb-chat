@@ -20,24 +20,6 @@ interface ChatProps {
  */
 const Chat: React.FunctionComponent<ChatProps> = () => {
 
-  class UiLanguage {
-    code: string;
-    displayName: string;
-
-    constructor(code: string, displayName: string) {
-      this.code = code;
-      this.displayName = displayName;
-    }
-  }
-
-  class UiLanguages {
-    content: UiLanguage[];
-
-    constructor(content: UiLanguage[]) {
-      this.content = content;
-    }
-  }
-
   type CollectionVersion = {
     version_number: string;
   }
@@ -47,10 +29,6 @@ const Chat: React.FunctionComponent<ChatProps> = () => {
     collection_full_name: string;
     versions: CollectionVersion[];
     language: string;
-  };
-
-  type MarkdownRendererProps = {
-    children: string;
   };
 
   // ChatAnswer Refs
@@ -185,159 +163,157 @@ const Chat: React.FunctionComponent<ChatProps> = () => {
   }
 
   return (
-    <Page>
-      <PageSection hasBodyWrapper={false}>
-        <Flex direction={{ default: 'column' }}>
+    <PageSection hasBodyWrapper={false}>
+      <Flex direction={{ default: 'column' }}>
 
-          {/* Product, version and language selectors */}
-          <FlexItem>
-            <Flex>
-              <FlexItem>
-                <Flex direction={{ default: 'row' }}>
-                  <FlexItem className='collection-version-language-legends' >
-                    <Content>
-                      <Content component={ContentVariants.h3} >{t('chat.filter.product')}:</Content>
-                    </Content>
-                  </FlexItem>
-                  <FlexItem>
-                    <FormSelect
-                      value={collectionFullName}
-                      onChange={onChangeProduct}
-                      aria-label="FormSelect Input"
-                      ouiaId="BasicFormSelectCategory"
-                      className="collection-select"
-                    >
-                      {collections && collections.map((collection, index) => (
-                        <FormSelectOption key={index} value={collection.collection_full_name} label={collection.collection_full_name} />
-                      ))}
-                    </FormSelect>
-                  </FlexItem>
-                </Flex>
-              </FlexItem>
-              <FlexItem>
-                <Flex direction={{ default: 'row' }}>
-                  <FlexItem className='collection-version-language-legends'>
-                    <Content>
-                      <Content component={ContentVariants.h3} >{t('chat.filter.version')}:</Content>
-                    </Content>
-                  </FlexItem>
-                  <FlexItem>
-                    <FormSelect
-                      value={selectedVersion}
-                      onChange={onChangeVersion}
-                      aria-label="FormSelect Input"
-                      ouiaId="BasicFormSelectCategory"
-                      className='version-language-select'
-                    >
-                      {versions && versions.map((version, index) => (
-                        <FormSelectOption key={index} value={version.version_number} label={version.version_number} />
-                      ))}
-                    </FormSelect>
-                  </FlexItem>
-                </Flex>
-              </FlexItem>
-            </Flex>
-          </FlexItem>
+        {/* Product, version and language selectors */}
+        <FlexItem>
+          <Flex>
+            <FlexItem>
+              <Flex direction={{ default: 'row' }}>
+                <FlexItem className='collection-version-language-legends' >
+                  <Content>
+                    <Content component={ContentVariants.h3} >{t('chat.filter.product')}:</Content>
+                  </Content>
+                </FlexItem>
+                <FlexItem>
+                  <FormSelect
+                    value={collectionFullName}
+                    onChange={onChangeProduct}
+                    aria-label="FormSelect Input"
+                    ouiaId="BasicFormSelectCategory"
+                    className="collection-select"
+                  >
+                    {collections && collections.map((collection, index) => (
+                      <FormSelectOption key={index} value={collection.collection_full_name} label={collection.collection_full_name} />
+                    ))}
+                  </FormSelect>
+                </FlexItem>
+              </Flex>
+            </FlexItem>
+            <FlexItem>
+              <Flex direction={{ default: 'row' }}>
+                <FlexItem className='collection-version-language-legends'>
+                  <Content>
+                    <Content component={ContentVariants.h3} >{t('chat.filter.version')}:</Content>
+                  </Content>
+                </FlexItem>
+                <FlexItem>
+                  <FormSelect
+                    value={selectedVersion}
+                    onChange={onChangeVersion}
+                    aria-label="FormSelect Input"
+                    ouiaId="BasicFormSelectCategory"
+                    className='version-language-select'
+                  >
+                    {versions && versions.map((version, index) => (
+                      <FormSelectOption key={index} value={version.version_number} label={version.version_number} />
+                    ))}
+                  </FormSelect>
+                </FlexItem>
+              </Flex>
+            </FlexItem>
+          </Flex>
+        </FlexItem>
 
-          {/* Chat Window */}
-          <FlexItem className='flex-chat'>
-            <Card  className='chat-card'>
-              <CardHeader className='chat-card-header'>
-                <Flex justifyContent={{ default: 'justifyContentSpaceBetween' }}>
-                  <FlexItem>
-                    {/* Empty item to center title */}
-                  </FlexItem>
-                  <FlexItem>
-                    <Content>
-                      <Content component={ContentVariants.h3} className='chat-card-header-title'>
-                        <FontAwesomeIcon icon={faCommentDots} />&nbsp;{t('chat.title')}
-                      </Content>
+        {/* Chat Window */}
+        <FlexItem className='flex-chat'>
+          <Card className='chat-card'>
+            <CardHeader className='chat-card-header'>
+              <Flex justifyContent={{ default: 'justifyContentSpaceBetween' }}>
+                <FlexItem>
+                  {/* Empty item to center title */}
+                </FlexItem>
+                <FlexItem>
+                  <Content>
+                    <Content component={ContentVariants.h3} className='chat-card-header-title'>
+                      <FontAwesomeIcon icon={faCommentDots} />&nbsp;{t('chat.title')}
                     </Content>
-                  </FlexItem>
-                  <FlexItem>
-                    <Flex>
-                      <FlexItem>
-                        <Button onClick={addItem} variant="primary">
-                          Add LLM
-                        </Button>
-                      </FlexItem>
-                      <FlexItem>
-                        <Button onClick={removeItem} variant="danger" isDisabled={items.length === 0}>
-                          Remove last LLM
-                        </Button>
-                      </FlexItem>
-                    </Flex>
-                  </FlexItem>
-                </Flex>
-              </CardHeader>
-              <CardBody className='chat-card-body'>
-                <Stack>
-                  {/* ChatbotAnswer panels */}
-                  <StackItem isFilled className='chat-bot-answer' id='chatBotAnswer'>
-                    <Grid hasGutter
-                      className="chat-grid">
-                      {items.map((item, index) => (
-                        <GridItem key={index} className='chat-grid-item' span={Math.floor(12 / (items.length)) as any}>
-                          {/* Replace with your ChatAnswer component */}
-                          {item}
-                        </GridItem>
-                      ))}
-                    </Grid>
-                  </StackItem>
+                  </Content>
+                </FlexItem>
+                <FlexItem>
+                  <Flex>
+                    <FlexItem>
+                      <Button onClick={addItem} variant="primary">
+                        Add LLM
+                      </Button>
+                    </FlexItem>
+                    <FlexItem>
+                      <Button onClick={removeItem} variant="danger" isDisabled={items.length === 0}>
+                        Remove last LLM
+                      </Button>
+                    </FlexItem>
+                  </Flex>
+                </FlexItem>
+              </Flex>
+            </CardHeader>
+            <CardBody className='chat-card-body'>
+              <Stack>
+                {/* ChatbotAnswer panels */}
+                <StackItem isFilled className='chat-bot-answer' id='chatBotAnswer'>
+                  <Grid hasGutter
+                    className="chat-grid">
+                    {items.map((item, index) => (
+                      <GridItem key={index} className='chat-grid-item' span={Math.floor(12 / (items.length)) as any}>
+                        {/* Replace with your ChatAnswer component */}
+                        {item}
+                      </GridItem>
+                    ))}
+                  </Grid>
+                </StackItem>
 
-                  {/* Input section */}
-                  <StackItem className='chat-input-panel'>
-                    <Panel variant="raised">
-                      <PanelMain>
-                        <PanelMainBody className='chat-input-panel-body'>
-                          <TextArea
-                            value={queryText.content}
-                            type="text"
-                            onChange={event => {
-                              setQueryText({ ...queryText, content: event.target.value });
-                            }}
-                            aria-label="query text input"
-                            placeholder={t('chat.placeholder')}
-                            onKeyDown={event => {
-                              if (event.key === 'Enter') {
-                                event.preventDefault();
-                                sendQueryText();
-                              }
-                            }}
-                          />
-                          <Flex>
-                            <FlexItem>
-                              <Tooltip
-                                content={<div>{t('chat.new_chat')}</div>}
-                              >
-                                <Button variant="link" onClick={resetMessageHistory} aria-label='StartNewChat'><FontAwesomeIcon icon={faPlusCircle} /></Button>
-                              </Tooltip>
-                            </FlexItem>
-                            <FlexItem align={{ default: 'alignRight' }}>
-                              <Tooltip
-                                content={<div>{t('chat.send')}</div>}
-                              >
-                                <Button variant="link" onClick={sendQueryText} aria-label='SendQuery'><FontAwesomeIcon icon={faPaperPlane} /></Button>
-                              </Tooltip>
-                            </FlexItem>
+                {/* Input section */}
+                <StackItem className='chat-input-panel'>
+                  <Panel variant="raised">
+                    <PanelMain>
+                      <PanelMainBody className='chat-input-panel-body'>
+                        <TextArea
+                          value={queryText.content}
+                          type="text"
+                          onChange={event => {
+                            setQueryText({ ...queryText, content: event.target.value });
+                          }}
+                          aria-label="query text input"
+                          placeholder={t('chat.placeholder')}
+                          onKeyDown={event => {
+                            if (event.key === 'Enter') {
+                              event.preventDefault();
+                              sendQueryText();
+                            }
+                          }}
+                        />
+                        <Flex>
+                          <FlexItem>
+                            <Tooltip
+                              content={<div>{t('chat.new_chat')}</div>}
+                            >
+                              <Button variant="link" onClick={resetMessageHistory} aria-label='StartNewChat'><FontAwesomeIcon icon={faPlusCircle} /></Button>
+                            </Tooltip>
+                          </FlexItem>
+                          <FlexItem align={{ default: 'alignRight' }}>
+                            <Tooltip
+                              content={<div>{t('chat.send')}</div>}
+                            >
+                              <Button variant="link" onClick={sendQueryText} aria-label='SendQuery'><FontAwesomeIcon icon={faPaperPlane} /></Button>
+                            </Tooltip>
+                          </FlexItem>
 
-                          </Flex>
-                        </PanelMainBody>
-                      </PanelMain>
-                    </Panel>
-                  </StackItem>
-                  <StackItem>
-                    <Content>
-                      <Content component="p" className='chat-disclaimer'>{t('chat.disclaimer1')}<br />{t('chat.disclaimer2')}</Content>
-                    </Content>
-                  </StackItem>
-                </Stack>
-              </CardBody>
-            </Card >
-          </FlexItem>
-        </Flex>
-      </PageSection>
-    </Page>
+                        </Flex>
+                      </PanelMainBody>
+                    </PanelMain>
+                  </Panel>
+                </StackItem>
+                <StackItem>
+                  <Content>
+                    <Content component="p" className='chat-disclaimer'>{t('chat.disclaimer1')}<br />{t('chat.disclaimer2')}</Content>
+                  </Content>
+                </StackItem>
+              </Stack>
+            </CardBody>
+          </Card >
+        </FlexItem>
+      </Flex>
+    </PageSection>
   );
 }
 

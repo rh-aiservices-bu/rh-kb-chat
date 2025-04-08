@@ -22,13 +22,13 @@ const NotFound: React.FunctionComponent = () => {
 
   return (
     <PageSection hasBodyWrapper={false}>
-    <EmptyState  headingLevel="h1" icon={ExclamationTriangleIcon}  titleText="404 Page not found" variant="full">
-      <EmptyStateBody>
-        We didn&apos;t find a page that matches the address you navigated to.
-      </EmptyStateBody><EmptyStateFooter>
-      <GoHomeBtn />
-    </EmptyStateFooter></EmptyState>
-  </PageSection>
+      <EmptyState titleText="404 Page not found" variant="full" icon={ExclamationTriangleIcon} >
+        <EmptyStateBody>
+          We didn&apos;t find a page that matches the address you navigated to.
+        </EmptyStateBody><EmptyStateFooter>
+        <GoHomeBtn />
+      </EmptyStateFooter></EmptyState>
+    </PageSection>
   )
 };
 
