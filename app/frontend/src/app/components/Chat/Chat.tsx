@@ -2,7 +2,7 @@ import config from '@app/config';
 import { faCommentDots, faPaperPlane } from '@fortawesome/free-regular-svg-icons';
 import { faPlusCircle } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { Button, Card, CardBody, CardHeader, Flex, FlexItem, FormSelect, FormSelectOption, Grid, GridItem, Page, PageSection, Panel, PanelMain, PanelMainBody, Stack, StackItem, Content, TextArea, ContentVariants, Tooltip } from '@patternfly/react-core';
+import { Button, Card, CardBody, CardHeader, Flex, FlexItem, FormSelect, FormSelectOption, Grid, GridItem, Page, PageSection, Panel, PanelMain, PanelMainBody, Stack, StackItem, Content, TextArea, ContentVariants, Tooltip, Bullseye, DropdownList, DropdownItem } from '@patternfly/react-core';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Query, Message } from './classes';
@@ -11,9 +11,10 @@ import githubLogo from '@app/assets/bgimages/github-mark.svg';
 import githubLogoWhite from '@app/assets/bgimages/github-mark-white.svg';
 import starLogo from '@app/assets/bgimages/star.svg';
 import starLogoWhite from '@app/assets/bgimages/star-white.svg';
-import { ChatbotFooter, ChatbotFootnote } from '@patternfly/chatbot/dist/dynamic/ChatbotFooter';
+import { ChatbotFooter, ChatbotFootnote, } from '@patternfly/chatbot/dist/dynamic/ChatbotFooter';
 import { MessageBar } from '@patternfly/chatbot/dist/dynamic/MessageBar';
-import { Chatbot } from '@patternfly/chatbot';
+import { Chatbot, ChatbotContent, ChatbotDisplayMode, ChatbotHeader, ChatbotHeaderActions, ChatbotHeaderMain, ChatbotHeaderSelectorDropdown, ChatbotHeaderTitle } from '@patternfly/chatbot';
+
 
 interface ChatProps {
 }
@@ -252,77 +253,73 @@ const Chat: React.FunctionComponent<ChatProps> = () => {
         </FlexItem>
 
         {/* Chat Window */}
-        <FlexItem className='flex-chat'>
-          <Card className='chat-card'>
-            <CardHeader className='chat-card-header'>
-              <Flex justifyContent={{ default: 'justifyContentSpaceBetween' }}>
-                <FlexItem>
-                  {/* Empty item to center title */}
-                </FlexItem>
-                <FlexItem>
-                  <Content>
-                    <Content component={ContentVariants.h3} className='chat-card-header-title'>
-                      <FontAwesomeIcon icon={faCommentDots} />&nbsp;{t('chat.title')}
+        <FlexItem>
+          <Chatbot displayMode={ChatbotDisplayMode.embedded} className='chat'>
+            <ChatbotHeader className='chat-header'>
+              <ChatbotHeaderMain>
+                <ChatbotHeaderTitle className='chat-header-title'>
+                  <Bullseye>
+                    <Content>
+                      <Content component={ContentVariants.h3} className='chat-header-title'>
+                        <FontAwesomeIcon icon={faCommentDots} />&nbsp;{t('chat.title')}
+                      </Content>
                     </Content>
-                  </Content>
-                </FlexItem>
-                <FlexItem>
-                  <Flex>
-                    <FlexItem>
-                      <Button onClick={addItem} variant="primary">
-                        Add LLM
-                      </Button>
-                    </FlexItem>
-                    <FlexItem>
-                      <Button onClick={removeItem} variant="danger" isDisabled={items.length === 0}>
-                        Remove last LLM
-                      </Button>
-                    </FlexItem>
-                  </Flex>
-                </FlexItem>
-              </Flex>
-            </CardHeader>
-            <CardBody className='chat-card-body'>
-              <Stack>
-                {/* ChatbotAnswer panels */}
-                <StackItem isFilled className='chat-bot-answer' id='chatBotAnswer'>
-                  <Grid hasGutter
-                    className="chat-grid">
-                    {items.map((item, index) => (
-                      <GridItem key={index} className='chat-grid-item' span={Math.floor(12 / (items.length)) as any}>
-                        {/* Replace with your ChatAnswer component */}
-                        {item}
-                      </GridItem>
-                    ))}
-                  </Grid>
-                </StackItem>
+                  </Bullseye>
+                </ChatbotHeaderTitle>
+              </ChatbotHeaderMain>
+              <ChatbotHeaderActions>
+                <Flex>
+                  <FlexItem>
+                    <Button onClick={addItem} variant="primary">
+                      Add LLM
+                    </Button>
+                  </FlexItem>
+                  <FlexItem>
+                    <Button onClick={removeItem} variant="danger" isDisabled={items.length === 0}>
+                      Remove last LLM
+                    </Button>
+                  </FlexItem>
+                </Flex>
+              </ChatbotHeaderActions>
+            </ChatbotHeader>
+            <ChatbotContent>
+              <Grid hasGutter
+                className="chat-grid">
+                {items.map((item, index) => (
+                  <GridItem key={index} className='chat-grid-item' span={Math.floor(12 / (items.length)) as any}>
+                    {/* Replace with your ChatAnswer component */}
+                    {item}
+                  </GridItem>
+                ))}
+              </Grid>
+            </ChatbotContent>
+            <ChatbotFooter className='chat-footer'>
+              <MessageBar
+                hasMicrophoneButton
+                hasAttachButton
+                onSendMessage={sendQueryText}
+              />
+            </ChatbotFooter>
+          </Chatbot>
+        </FlexItem>
+        <FlexItem>
+          <Stack>
+            {/* ChatbotAnswer panels */}
 
-                {/* Input section */}
-                <StackItem className='chat-input-panel'>
-                  <Chatbot>
-                    <ChatbotFooter>
-                      <MessageBar
-                        hasMicrophoneButton
-                        hasAttachButton
-                        onSendMessage={sendQueryText}
-                      />
-                    </ChatbotFooter>
-                  </Chatbot>
-                </StackItem>
-                <StackItem>
-                  <Content component="p" className='chat-disclaimer'>{t('chat.disclaimer1')} {t('chat.disclaimer2')}<br />
-                    PoC App by <a href='http://red.ht/cai-team' target='_blank'>red.ht/cai-team</a>&nbsp;&nbsp;-&nbsp;&nbsp;
-                    <a href='https://github.com/rh-aiservices-bu/rh-kb-chat' target='_blank'>Source</a>&nbsp;&nbsp;
-                    <img src={isDarkTheme ? githubLogoWhite : githubLogo} alt="GitHub Logo" style={{ height: '15px', marginRight: '0.5rem', verticalAlign: 'text-top' }} />
-                    <span style={{ textDecoration: 'none', color: 'inherit' }}>{repoStars !== null ? `${repoStars}` : ''}&nbsp;</span>
-                    {repoStars !== null &&
-                      <img src={isDarkTheme ? starLogoWhite : starLogo} alt="Star Logo" style={{ height: '15px', marginRight: '0.5rem', verticalAlign: 'text-top' }} />
-                    }
-                  </Content>
-                </StackItem>
-              </Stack>
-            </CardBody>
-          </Card >
+            {/* Disclaimer section */}
+            <StackItem>
+              <Content component="p" className='chat-disclaimer'>{t('chat.disclaimer1')} {t('chat.disclaimer2')}<br />
+                PoC App by <a href='http://red.ht/cai-team' target='_blank'>red.ht/cai-team</a>&nbsp;&nbsp;-&nbsp;&nbsp;
+                <a href='https://github.com/rh-aiservices-bu/rh-kb-chat' target='_blank'>Source</a>&nbsp;&nbsp;
+                <img src={isDarkTheme ? githubLogoWhite : githubLogo} alt="GitHub Logo" style={{ height: '15px', marginRight: '0.5rem', verticalAlign: 'text-top' }} />
+                <span style={{ textDecoration: 'none', color: 'inherit' }}>{repoStars !== null ? `${repoStars}` : ''}&nbsp;</span>
+                {repoStars !== null &&
+                  <img src={isDarkTheme ? starLogoWhite : starLogo} alt="Star Logo" style={{ height: '15px', marginRight: '0.5rem', verticalAlign: 'text-top' }} />
+                }
+              </Content>
+            </StackItem>
+          </Stack>
+
         </FlexItem>
       </Flex>
     </PageSection>

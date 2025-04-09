@@ -1,7 +1,6 @@
 import imgAvatar from '@app/assets/bgimages/default-user.svg';
 import logoStd from '@app/assets/bgimages/Logo-Red_Hat-AI-A-Standard-RGB.svg';
 import logoReverse from '@app/assets/bgimages/Logo-Red_Hat-AI-A-Reverse-RGB.svg';
-import { IAppRoute, IAppRouteGroup, routes } from '@app/routes';
 import {
   Avatar,
   Brand,
@@ -19,16 +18,8 @@ import {
   MastheadContent,
   MastheadLogo,
   MastheadMain,
-  MastheadToggle,
   MenuToggle,
-  Nav,
-  NavExpandable,
-  NavItem,
-  NavList,
   Page,
-  PageSection,
-  PageSidebar,
-  PageSidebarBody,
   Popover,
   SkipToContent,
   ToggleGroup,
@@ -38,12 +29,12 @@ import {
   ToolbarGroup,
   ToolbarItem,
 } from '@patternfly/react-core';
-import { BarsIcon, QuestionCircleIcon } from '@patternfly/react-icons';
+import { QuestionCircleIcon } from '@patternfly/react-icons';
 import MoonIcon from '@patternfly/react-icons/dist/esm/icons/moon-icon';
 import SunIcon from '@patternfly/react-icons/dist/esm/icons/sun-icon';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
-import { NavLink, useLocation } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 import { supportedLngs } from '../../../i18n/config';
 
 interface IAppLayout {
@@ -51,7 +42,6 @@ interface IAppLayout {
 }
 
 const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
-  const [sidebarOpen, setSidebarOpen] = React.useState(false);
   const [selectedLanguage, setSelectedLanguage] = React.useState('en');
   const [isDarkTheme, setIsDarkTheme] = React.useState(false);
 
@@ -183,9 +173,6 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
   const Header = (
     <Masthead>
       <MastheadMain>
-        <MastheadToggle hidden={true}>
-          <Button icon={<BarsIcon />} variant="plain" onClick={() => setSidebarOpen(!sidebarOpen)} aria-label="Global navigation" />
-        </MastheadToggle>
         <MastheadBrand data-codemods>
           <MastheadLogo data-codemods style={{ width: 'auto' }}>
             <Flex direction={{ default: 'row' }} alignItems={{ default: 'alignItemsCenter' }} flexWrap={{ default: 'nowrap' }}>
@@ -205,44 +192,6 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
 
   const location = useLocation();
 
-
-  const renderNavItem = (route: IAppRoute, index: number) => (
-    <NavItem key={`${route.label}-${index}`} id={`${route.label}-${index}`} isActive={route.path === location.pathname}>
-      <NavLink to={route.path} className={route.path !== '#' ? '' : 'disabled-link'}>
-        {t(route.label as string)}
-      </NavLink>
-    </NavItem>
-  );
-
-  const renderNavGroup = (group: IAppRouteGroup, groupIndex: number) => (
-    <NavExpandable
-      key={`${group.label}-${groupIndex}`}
-      id={`${group.label}-${groupIndex}`}
-      title={group.label}
-      isActive={group.routes.some((route) => route.path === location.pathname)}
-    >
-      {group.routes.map((route, idx) => route.label && renderNavItem(route, idx))}
-    </NavExpandable>
-  );
-
-  const Navigation = (
-    <Nav id="nav-first-simple" >
-      <NavList id="nav-list-first-simple">
-        {routes.map(
-          (route, idx) => route.label && (!route.routes ? renderNavItem(route, idx) : renderNavGroup(route, idx))
-        )}
-      </NavList>
-    </Nav>
-  );
-
-  const Sidebar = (
-    <PageSidebar  >
-      <PageSidebarBody isFilled>
-        {Navigation}
-      </PageSidebarBody>
-    </PageSidebar>
-  );
-
   const pageId = 'primary-app-container';
 
   const PageSkipToContent = (
@@ -258,7 +207,6 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
     <Page
       mainContainerId={pageId}
       masthead={Header}
-      sidebar={sidebarOpen && Sidebar}
       skipToContent={PageSkipToContent}>
       {children}
     </Page>
