@@ -200,7 +200,7 @@ const Chat: React.FunctionComponent<ChatProps> = () => {
 
   return (
     <PageSection hasBodyWrapper={false}>
-      <Flex direction={{ default: 'column' }} style={{ flex: '1 1 auto', overflow: 'hidden' }}>
+      <Flex direction={{ default: 'column' }}>
 
         {/* Product, version and language selectors */}
         <FlexItem>
@@ -253,8 +253,8 @@ const Chat: React.FunctionComponent<ChatProps> = () => {
         </FlexItem>
 
         {/* Chat Window */}
-        <FlexItem style={{ flex: '1 1 auto', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
-          <Chatbot displayMode={ChatbotDisplayMode.embedded} className='chat'>
+        <FlexItem className='chat'>
+          <Chatbot displayMode={ChatbotDisplayMode.embedded} >
             <ChatbotHeader className='chat-header'>
               <ChatbotHeaderMain>
                 <ChatbotHeaderTitle className='chat-header-title'>
@@ -283,7 +283,7 @@ const Chat: React.FunctionComponent<ChatProps> = () => {
               </ChatbotHeaderActions>
             </ChatbotHeader>
               <Grid hasGutter
-                className="chat-grid" style={{ height: '100%', overflow: 'auto' }}>
+                className="chat-grid">
                 {items.map((item, index) => (
                   <GridItem key={index} className='chat-grid-item' span={Math.floor(12 / (items.length)) as any}>
                     {/* Replace with your ChatAnswer component */}

@@ -267,7 +267,7 @@ const ChatAnswer = forwardRef((props: ChatAnswerProps, ref: Ref<ChatAnswerRef>) 
   }
 
   return (
-    <Flex direction={{ default: 'column' }}>
+    <Flex direction={{ default: 'column' }} className='chat-item'>
       <FlexItem >
         <Flex direction={{ default: 'row' }} className='chat-llm-select'>
           <Content component='h3' className='model-title'>Model:</Content>
