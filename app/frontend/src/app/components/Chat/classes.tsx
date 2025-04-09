@@ -51,7 +51,7 @@ export class Sources {
 }
 
 
-export class Message {
+export class MessageContent {
   content: Query | Answer | Sources;
 
   constructor(content: Query | Answer | Sources) {
@@ -60,9 +60,9 @@ export class Message {
 }
 
 export class MessageHistory {
-  content: Message[];
+  content: MessageContent[];
 
-  constructor(content: Message[]) {
+  constructor(content: MessageContent[]) {
     this.content = content;
   }
 }

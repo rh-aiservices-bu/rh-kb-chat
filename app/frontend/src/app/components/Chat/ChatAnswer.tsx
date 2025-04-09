@@ -1,4 +1,4 @@
-import userAvatar from '@app/assets/bgimages/avatar-user.svg';
+import userAvatar from '@app/assets/bgimages/default-user.svg';
 import orb from '@app/assets/bgimages/orb.svg';
 import config from '@app/config';
 import { Flex, FlexItem, FormSelect, FormSelectOption, Grid, GridItem, Content, ContentVariants, FormGroup, Form } from "@patternfly/react-core";
@@ -7,10 +7,11 @@ import React, { forwardRef, useImperativeHandle, Ref, useRef } from 'react';
 import Markdown from 'react-markdown';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { dracula } from 'react-syntax-highlighter/dist/cjs/styles/prism';
-import { Answer, Message, MessageHistory, Query, Sources, Models, Source } from './classes';
+import { Answer, MessageContent, MessageHistory, Query, Sources, Models, Source } from './classes';
 import rehypeRaw from 'rehype-raw';
 import remarkGfm from 'remark-gfm';
 import { version } from 'html-webpack-plugin';
+import { ChatbotContent, Message, MessageBox } from '@patternfly/chatbot';
 
 
 type MarkdownRendererProps = {
@@ -42,7 +43,7 @@ const ChatAnswer = forwardRef((props: ChatAnswerProps, ref: Ref<ChatAnswerRef>) 
   const [answerSources, setAnswerSources] = React.useState<Sources>(new Sources([])); // Array of sources for the answer
   const [messageHistory, setMessageHistory] = React.useState<MessageHistory>(
     new MessageHistory([
-      new Message(new Answer([t('chat.content.greeting')]))
+      new MessageContent(new Answer([t('chat.content.greeting')]))
     ])
   ); // The message history
   const chatBotAnswer = document.getElementById('chatBotAnswer'); // The chat bot answer element
@@ -159,9 +160,9 @@ const ChatAnswer = forwardRef((props: ChatAnswerProps, ref: Ref<ChatAnswerRef>) 
    */
   const sendQuery = (query: Query) => {
     if (connection.current?.readyState === WebSocket.OPEN) {
-      const previousAnswer = new Message(new Answer(answerText.content)); // Save the previous response, needed because states are updated asynchronously
-      const previousSources = new Message(new Sources(answerSources.content)); // Save the previous sources
-      const previousQuery = new Message(new Query(query.content)); // Save the previous query
+      const previousAnswer = new MessageContent(new Answer(answerText.content)); // Save the previous response, needed because states are updated asynchronously
+      const previousSources = new MessageContent(new Sources(answerSources.content)); // Save the previous sources
+      const previousQuery = new MessageContent(new Query(query.content)); // Save the previous query
       const previousMessageHistory = new MessageHistory(messageHistory.content); // Save the previous message history
       setMessageHistory(new MessageHistory([...previousMessageHistory.content, previousAnswer, previousSources, previousQuery])); // Add the previous response to the message history
       setAnswerText(new Answer([])); // Clear the previous response
@@ -194,17 +195,17 @@ const ChatAnswer = forwardRef((props: ChatAnswerProps, ref: Ref<ChatAnswerRef>) 
    */
   const resetMessageHistory = () => {
     setMessageHistory(new MessageHistory([
-      new Message(new Answer([t('chat.content.greeting')]))
+      new MessageContent(new Answer([t('chat.content.greeting')]))
     ]));
     setAnswerSources(new Sources([]));
     setAnswerText(new Answer(['']));
   };
 
   const changeCollectionOrVersion = (selectedCollection, selectedVersion) => {
-    const previousAnswer = new Message( // Save the previous response, needed because states are updated asynchronously
+    const previousAnswer = new MessageContent( // Save the previous response, needed because states are updated asynchronously
       new Answer(answerText.content)
     );
-    const previousSources = new Message( // Save the previous sources
+    const previousSources = new MessageContent( // Save the previous sources
       new Sources(answerSources.content)
     );
     const previousMessageHistory = new MessageHistory(messageHistory.content); // Save the previous message history
@@ -213,7 +214,7 @@ const ChatAnswer = forwardRef((props: ChatAnswerProps, ref: Ref<ChatAnswerRef>) 
         [...previousMessageHistory.content,
           previousAnswer,
           previousSources,
-        new Message(new Answer(
+        new MessageContent(new Answer(
           [t('chat.content.change_product_prompt_start') + ' **' + selectedCollection.collection_full_name + '** ' + t('chat.content.change_product_prompt_version') + ' **' + selectedVersion + '**.']
         ))
         ]
@@ -223,7 +224,7 @@ const ChatAnswer = forwardRef((props: ChatAnswerProps, ref: Ref<ChatAnswerRef>) 
         [...previousMessageHistory.content,
           previousAnswer,
           previousSources,
-        new Message(new Answer(
+        new MessageContent(new Answer(
           [t('chat.content.change_product_prompt_none')]
         ))
         ]
@@ -269,18 +270,18 @@ const ChatAnswer = forwardRef((props: ChatAnswerProps, ref: Ref<ChatAnswerRef>) 
     <Flex direction={{ default: 'column' }}>
       <FlexItem >
         <Flex direction={{ default: 'row' }} className='chat-llm-select'>
-              <Content component='h3' className='model-title'>Model:</Content>
-              <FormSelect
-                value={selectedLLM}
-                onChange={onChangeLlm}
-                aria-label="FormSelect Input"
-                ouiaId="BasicFormSelectCategory"
-                className='chat-llm-select'
-              >
-                {llms && llms.map((llm, index) => (
-                  <FormSelectOption key={index} value={llm.name} label={llm.name} />
-                ))}
-              </FormSelect>
+          <Content component='h3' className='model-title'>Model:</Content>
+          <FormSelect
+            value={selectedLLM}
+            onChange={onChangeLlm}
+            aria-label="FormSelect Input"
+            ouiaId="BasicFormSelectCategory"
+            className='chat-llm-select'
+          >
+            {llms && llms.map((llm, index) => (
+              <FormSelectOption key={index} value={llm.name} label={llm.name} />
+            ))}
+          </FormSelect>
 
           <Content style={{ display: 'flex', alignItems: 'normal' }}>
             {ttft !== 0 && (
@@ -292,30 +293,33 @@ const ChatAnswer = forwardRef((props: ChatAnswerProps, ref: Ref<ChatAnswerRef>) 
           </Content>
         </Flex>
       </FlexItem>
-      <FlexItem>
-        <Content id='chatBotAnswer'>
+      <FlexItem className='chat-bot-answer'>
+        <ChatbotContent className='chat-bot-answer-content'>
+        <MessageBox id='chatBotAnswer'>
           {/* Message History rendering */}
-          {messageHistory.content.map((message: Message, index) => {
+          {messageHistory.content.map((message: MessageContent, index) => {
             const renderMessage = () => {
               if (message.content.content.length != 0) {
                 if (message.content.type === "Query" && message.content.content != "") { // If the message is a query
-                  return <Grid className='chat-item'>
-                    <GridItem span={1} className='grid-item-orb'>
-                      <img src={userAvatar} className='user-avatar' />
-                    </GridItem>
-                    <GridItem span={11}>
-                      <Content component={ContentVariants.p} className='chat-question-text'>{Array.isArray(message.content.content) ? message.content.content.join(' ') : message.content.content}</Content>
-                    </GridItem>
-                  </Grid>
+                  return (
+                  <Message
+                  name="User"
+                  role="user"
+                  content={Array.isArray(message.content.content) ? message.content.content.join(' ') : message.content.content}
+                  timestamp="1 hour ago"
+                  avatar={userAvatar}
+                  />
+                  );
                 } else if (message.content.type === "Answer" && (message.content.content as string[]).join("") != "") { // If the message is a response
-                  return <Grid className='chat-item'>
-                    <GridItem span={1} className='grid-item-orb'>
-                      <img src={orb} className='orb' />
-                    </GridItem>
-                    <GridItem span={11}>
-                      <MarkdownRenderer>{(message.content.content as string[]).join("")}</MarkdownRenderer>
-                    </GridItem>
-                  </Grid>
+                  return(
+                    <Message
+                    name="Bot"
+                    role="bot"
+                    content={(message.content.content as string[]).join("")}
+                    timestamp="1 hour ago"
+                    avatar={orb}
+                    />
+                    );
                 } else if (message.content.type === "Sources") { // If the message is a source
                   return <Grid className='chat-item'>
                     <GridItem span={1} className='grid-item-orb'>&nbsp;</GridItem>
@@ -392,7 +396,8 @@ const ChatAnswer = forwardRef((props: ChatAnswerProps, ref: Ref<ChatAnswerRef>) 
               </Grid>
             </div>
           )}
-        </Content>
+        </MessageBox>
+        </ChatbotContent>
       </FlexItem>
     </Flex>
   );

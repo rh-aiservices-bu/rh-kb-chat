@@ -81,6 +81,7 @@ body,
   width: 100%;
   height: calc(100vh - 185px);
   flex-grow: 1;
+  overflow: auto;
 }
 
 .chat-header {
@@ -110,9 +111,11 @@ body,
 }
 
 .chat-bot-answer {
-  overflow-wrap: break-word;
-  overflow-y: auto;
   height: 100%;
+}
+
+chat-bot-answer-content {
+  overflow-y: auto;
 }
 
 .chat-question-text {
@@ -161,13 +164,11 @@ body,
 
 .chat-grid {
   grid-gap: 10px;
-  height: 100% !important;
-  width: 100% !important;
+  height: 100%;
 }
 
 
 .chat-grid-item {
-  height: 100%;
   position: relative;
 }
 

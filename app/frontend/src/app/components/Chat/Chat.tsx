@@ -5,7 +5,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Button, Card, CardBody, CardHeader, Flex, FlexItem, FormSelect, FormSelectOption, Grid, GridItem, Page, PageSection, Panel, PanelMain, PanelMainBody, Stack, StackItem, Content, TextArea, ContentVariants, Tooltip, Bullseye, DropdownList, DropdownItem } from '@patternfly/react-core';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
-import { Query, Message } from './classes';
+import { Query, MessageContent } from './classes';
 import ChatAnswer, { ChatAnswerRef } from './ChatAnswer'
 import githubLogo from '@app/assets/bgimages/github-mark.svg';
 import githubLogoWhite from '@app/assets/bgimages/github-mark-white.svg';
@@ -126,7 +126,7 @@ const Chat: React.FunctionComponent<ChatProps> = () => {
    */
   const sendQueryText = (message: string | number) => {
     const queryText = String(message);
-    const previousQuery = new Message(new Query(queryText)); // Save the previous query
+    const previousQuery = new MessageContent(new Query(queryText)); // Save the previous query
     setQueryText(new Query('')); // Clear the query text
     const query = new Query(queryText, selectedCollection, collectionFullName, selectedVersion, i18n.language);
 
@@ -282,7 +282,6 @@ const Chat: React.FunctionComponent<ChatProps> = () => {
                 </Flex>
               </ChatbotHeaderActions>
             </ChatbotHeader>
-            <ChatbotContent>
               <Grid hasGutter
                 className="chat-grid">
                 {items.map((item, index) => (
@@ -292,7 +291,6 @@ const Chat: React.FunctionComponent<ChatProps> = () => {
                   </GridItem>
                 ))}
               </Grid>
-            </ChatbotContent>
             <ChatbotFooter className='chat-footer'>
               <MessageBar
                 hasMicrophoneButton
@@ -304,8 +302,6 @@ const Chat: React.FunctionComponent<ChatProps> = () => {
         </FlexItem>
         <FlexItem>
           <Stack>
-            {/* ChatbotAnswer panels */}
-
             {/* Disclaimer section */}
             <StackItem>
               <Content component="p" className='chat-disclaimer'>{t('chat.disclaimer1')} {t('chat.disclaimer2')}<br />
