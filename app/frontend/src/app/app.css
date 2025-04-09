@@ -162,6 +162,7 @@ body,
 .chat-grid {
   grid-gap: 10px;
   height: 100% !important;
+  width: 100% !important;
 }
 
 
@@ -208,6 +209,10 @@ body,
   100% {
     background-position: 0% 400%;
   }
+}
+
+.model-title {
+  margin-right: 5px !important;
 }
 
 .chat-grid-item:only-child::before {

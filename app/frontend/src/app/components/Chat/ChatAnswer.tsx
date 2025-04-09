@@ -1,7 +1,7 @@
 import userAvatar from '@app/assets/bgimages/avatar-user.svg';
 import orb from '@app/assets/bgimages/orb.svg';
 import config from '@app/config';
-import { Flex, FlexItem, FormSelect, FormSelectOption, Grid, GridItem, Content, ContentVariants } from "@patternfly/react-core";
+import { Flex, FlexItem, FormSelect, FormSelectOption, Grid, GridItem, Content, ContentVariants, FormGroup, Form } from "@patternfly/react-core";
 import { t } from "i18next";
 import React, { forwardRef, useImperativeHandle, Ref, useRef } from 'react';
 import Markdown from 'react-markdown';
@@ -263,30 +263,32 @@ const ChatAnswer = forwardRef((props: ChatAnswerProps, ref: Ref<ChatAnswerRef>) 
 
     const clampedScore = Math.max(0, Math.min(2, score));
     return Math.round((1 - clampedScore / 2) * 100);
-}
+  }
 
   return (
     <Flex direction={{ default: 'column' }}>
       <FlexItem >
         <Flex direction={{ default: 'row' }} className='chat-llm-select'>
-          <FormSelect
-            value={selectedLLM}
-            onChange={onChangeLlm}
-            aria-label="FormSelect Input"
-            ouiaId="BasicFormSelectCategory"
-            className='chat-llm-select'
-          >
-            {llms && llms.map((llm, index) => (
-              <FormSelectOption key={index} value={llm.name} label={llm.name} />
-            ))}
-          </FormSelect>
-            <Content style={{ display: 'flex', alignItems: 'normal' }}>
-          {ttft !== 0 && (            
+              <Content component='h3' className='model-title'>Model:</Content>
+              <FormSelect
+                value={selectedLLM}
+                onChange={onChangeLlm}
+                aria-label="FormSelect Input"
+                ouiaId="BasicFormSelectCategory"
+                className='chat-llm-select'
+              >
+                {llms && llms.map((llm, index) => (
+                  <FormSelectOption key={index} value={llm.name} label={llm.name} />
+                ))}
+              </FormSelect>
+
+          <Content style={{ display: 'flex', alignItems: 'normal' }}>
+            {ttft !== 0 && (
               <Content component="p" className="token-metrics">{ttft.toFixed(2)}s tft,</Content>
-          )}
-          {tps !== 0 && (
+            )}
+            {tps !== 0 && (
               <Content component="p" className="token-metrics">{tps.toFixed(2)} t/s</Content>
-          )}
+            )}
           </Content>
         </Flex>
       </FlexItem>
@@ -338,11 +340,11 @@ const ChatAnswer = forwardRef((props: ChatAnswerProps, ref: Ref<ChatAnswerRef>) 
                     </GridItem>
                   </Grid>
                 } else {
-                  {/* If the message is of an unknown type */}
+                  {/* If the message is of an unknown type */ }
                   return;
                 }
               } else {
-                {/* If the message is empty */}
+                {/* If the message is empty */ }
                 return;
               }
             }
