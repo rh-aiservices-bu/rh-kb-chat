@@ -11,6 +11,9 @@ import githubLogo from '@app/assets/bgimages/github-mark.svg';
 import githubLogoWhite from '@app/assets/bgimages/github-mark-white.svg';
 import starLogo from '@app/assets/bgimages/star.svg';
 import starLogoWhite from '@app/assets/bgimages/star-white.svg';
+import { ChatbotFooter, ChatbotFootnote } from '@patternfly/chatbot/dist/dynamic/ChatbotFooter';
+import { MessageBar } from '@patternfly/chatbot/dist/dynamic/MessageBar';
+import { Chatbot } from '@patternfly/chatbot';
 
 interface ChatProps {
 }
@@ -120,12 +123,13 @@ const Chat: React.FunctionComponent<ChatProps> = () => {
    * Clears the query text, previous response, and previous sources.
    * If the query text is empty, sets the previous response to ['Please enter a query...'].
    */
-  const sendQueryText = () => {
-    const previousQuery = new Message(new Query(queryText.content)); // Save the previous query
+  const sendQueryText = (message: string | number) => {
+    const queryText = String(message);
+    const previousQuery = new Message(new Query(queryText)); // Save the previous query
     setQueryText(new Query('')); // Clear the query text
-    const query = new Query(queryText.content, selectedCollection, collectionFullName, selectedVersion, i18n.language);
+    const query = new Query(queryText, selectedCollection, collectionFullName, selectedVersion, i18n.language);
 
-    if (query.content !== "") {
+    if (queryText !== "") {
       childRefs.current.forEach((childRef) => {
         if (childRef) {
           childRef.sendQuery(query);
@@ -295,54 +299,25 @@ const Chat: React.FunctionComponent<ChatProps> = () => {
 
                 {/* Input section */}
                 <StackItem className='chat-input-panel'>
-                  <Panel variant="raised">
-                    <PanelMain>
-                      <PanelMainBody className='chat-input-panel-body'>
-                        <TextArea
-                          value={queryText.content}
-                          type="text"
-                          onChange={event => {
-                            setQueryText({ ...queryText, content: event.target.value });
-                          }}
-                          aria-label="query text input"
-                          placeholder={t('chat.placeholder')}
-                          onKeyDown={event => {
-                            if (event.key === 'Enter') {
-                              event.preventDefault();
-                              sendQueryText();
-                            }
-                          }}
-                        />
-                        <Flex>
-                          <FlexItem>
-                            <Tooltip
-                              content={<div>{t('chat.new_chat')}</div>}
-                            >
-                              <Button variant="link" onClick={resetMessageHistory} aria-label='StartNewChat'><FontAwesomeIcon icon={faPlusCircle} /></Button>
-                            </Tooltip>
-                          </FlexItem>
-                          <FlexItem align={{ default: 'alignRight' }}>
-                            <Tooltip
-                              content={<div>{t('chat.send')}</div>}
-                            >
-                              <Button variant="link" onClick={sendQueryText} aria-label='SendQuery'><FontAwesomeIcon icon={faPaperPlane} /></Button>
-                            </Tooltip>
-                          </FlexItem>
-
-                        </Flex>
-                      </PanelMainBody>
-                    </PanelMain>
-                  </Panel>
+                  <Chatbot>
+                    <ChatbotFooter>
+                      <MessageBar
+                        hasMicrophoneButton
+                        hasAttachButton
+                        onSendMessage={sendQueryText}
+                      />
+                    </ChatbotFooter>
+                  </Chatbot>
                 </StackItem>
                 <StackItem>
                   <Content component="p" className='chat-disclaimer'>{t('chat.disclaimer1')} {t('chat.disclaimer2')}<br />
                     PoC App by <a href='http://red.ht/cai-team' target='_blank'>red.ht/cai-team</a>&nbsp;&nbsp;-&nbsp;&nbsp;
                     <a href='https://github.com/rh-aiservices-bu/rh-kb-chat' target='_blank'>Source</a>&nbsp;&nbsp;
-                      <img src={isDarkTheme ? githubLogoWhite : githubLogo} alt="GitHub Logo" style={{ height: '15px', marginRight: '0.5rem', verticalAlign: 'text-top' }} />
-                        <span style={{ textDecoration: 'none', color: 'inherit' }}>{repoStars !== null ? `${repoStars}` : ''}&nbsp;</span>
-                      {repoStars !== null &&
-                        <img src={isDarkTheme ? starLogoWhite : starLogo} alt="Star Logo" style={{ height: '15px', marginRight: '0.5rem', verticalAlign: 'text-top' }} />
-                      }
+                    <img src={isDarkTheme ? githubLogoWhite : githubLogo} alt="GitHub Logo" style={{ height: '15px', marginRight: '0.5rem', verticalAlign: 'text-top' }} />
+                    <span style={{ textDecoration: 'none', color: 'inherit' }}>{repoStars !== null ? `${repoStars}` : ''}&nbsp;</span>
+                    {repoStars !== null &&
+                      <img src={isDarkTheme ? starLogoWhite : starLogo} alt="Star Logo" style={{ height: '15px', marginRight: '0.5rem', verticalAlign: 'text-top' }} />
+                    }
                   </Content>
                 </StackItem>
               </Stack>
