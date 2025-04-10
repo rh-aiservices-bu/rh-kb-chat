@@ -199,8 +199,8 @@ const Chat: React.FunctionComponent<ChatProps> = () => {
   }
 
   return (
-    <PageSection hasBodyWrapper={false}>
-      <Flex direction={{ default: 'column' }}>
+    <PageSection hasBodyWrapper={false} style={{ height: '85vh', overflow: 'hidden' }}>
+      <Flex direction={{ default: 'column' }} style={{ flex: 1, display: 'flex', flexDirection: 'column', height: '100%' }}>
 
         {/* Product, version and language selectors */}
         <FlexItem>
@@ -253,8 +253,8 @@ const Chat: React.FunctionComponent<ChatProps> = () => {
         </FlexItem>
 
         {/* Chat Window */}
-        <FlexItem className='chat'>
-          <Chatbot displayMode={ChatbotDisplayMode.embedded} >
+        <FlexItem style={{ flex: 1, minHeight: 0 }}>
+          <Chatbot displayMode={ChatbotDisplayMode.embedded} className='chat'>
             <ChatbotHeader className='chat-header'>
               <ChatbotHeaderMain>
                 <ChatbotHeaderTitle className='chat-header-title'>

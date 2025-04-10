@@ -267,7 +267,7 @@ const ChatAnswer = forwardRef((props: ChatAnswerProps, ref: Ref<ChatAnswerRef>) 
   }
 
   return (
-    <Flex direction={{ default: 'column' }} className='chat-item'>
+    <Flex direction={{ default: 'column' }} className='chat-item' style={{ flex: 1, minHeight: 0 }}>
       <FlexItem >
         <Flex direction={{ default: 'row' }} className='chat-llm-select'>
           <Content component='h3' className='model-title'>Model:</Content>
@@ -293,9 +293,9 @@ const ChatAnswer = forwardRef((props: ChatAnswerProps, ref: Ref<ChatAnswerRef>) 
           </Content>
         </Flex>
       </FlexItem>
-      <FlexItem className='chat-bot-answer'>
-        <ChatbotContent className='chat-bot-answer-content'>
-        <MessageBox id='chatBotAnswer'>
+      <FlexItem className='chat-bot-answer' style={{ flex: 1, overflowY: 'auto', minHeight: 0 }}>
+        <ChatbotContent className='chat-bot-answer-content' style={{ height: '100%' }}>
+        <MessageBox id='chatBotAnswer' style={{ height: '100%' }}>
           {/* Message History rendering */}
           {messageHistory.content.map((message: MessageContent, index) => {
             const renderMessage = () => {
