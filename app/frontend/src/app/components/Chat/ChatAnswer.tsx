@@ -54,38 +54,6 @@ const ChatAnswer = forwardRef((props: ChatAnswerProps, ref: Ref<ChatAnswerRef>) 
   const [ttft, setTtft] = React.useState<number>(0);
   const [tps, setTps] = React.useState<number>(0);
 
-  /**
-     * Renders markdown content with syntax highlighting for code blocks.
-     * 
-     * @param markdown - The markdown content to render.
-     * @returns The rendered markdown content.
-     */
-  const MarkdownRenderer = ({ children: markdown }: MarkdownRendererProps) => {
-    return (
-      <Markdown className='chat-question-text'
-        remarkPlugins={[remarkGfm]}
-        rehypePlugins={[rehypeRaw]}
-        components={{
-          code({ node, inline, className, children, ...props }: any) {
-            const match = /language-(\w+)/.exec(className || '');
-
-            return !inline && match ? (
-              <SyntaxHighlighter style={dracula} PreTag="div" language={match[1]} {...props}>
-                {String(children).replace(/\n$/, '')}
-              </SyntaxHighlighter>
-            ) : (
-              <code className='chat-question-text' {...props}>
-                {children}
-              </code>
-            );
-          },
-        }}
-      >
-        {markdown}
-      </Markdown>
-    );
-  }
-
   // Open a WebSocket connection and listen for messages
   React.useEffect(() => {
     const ws = new WebSocket(wsUrl + '/query/' + uuid) || {};
@@ -317,31 +285,18 @@ const ChatAnswer = forwardRef((props: ChatAnswerProps, ref: Ref<ChatAnswerRef>) 
                     content={(message.content.content as string[]).join("")}
                     timestamp="1 hour ago"
                     avatar={orb}
+                    {...(answerSources.content.length > 0 && {
+                      sources: {
+                        sources: answerSources.content
+                          .filter((source) => source && source.content && source.score !== undefined) // Ensure source is valid
+                          .map((source) => ({
+                            title: `${source.content.substring(source.content.lastIndexOf('/') + 1)} (${cosineScoreToPercentage(source.score)}%)`,
+                            link: source.content,
+                          })),
+                      },
+                    })}
                     />
                     );
-                } else if (message.content.type === "Sources") { // If the message is a source
-                  return <Grid className='chat-item'>
-                    <GridItem span={1} className='grid-item-orb'>&nbsp;</GridItem>
-                    <GridItem span={11}>
-                      <Content component={ContentVariants.p} className='chat-source-text'>{t('chat.content.references') + ": "}</Content>
-                      {message.content && (message.content.content as Source[]).map((source, index) => {
-                        const renderSource = () => {
-                          if (source.content.startsWith('http')) {
-                            return <Content component={ContentVariants.p} className='chat-source-text'>
-                              <a href={source.content} target="_blank" className='chat-source-link'>{source.content}</a>
-                            </Content>
-                          } else {
-                            return <Content component={ContentVariants.p} className='chat-source-text'>{source.content}</Content>
-                          }
-                        };
-                        return (
-                          <React.Fragment key={index}>
-                            {renderSource()}
-                          </React.Fragment>
-                        );
-                      })}
-                    </GridItem>
-                  </Grid>
                 } else {
                   {/* If the message is of an unknown type */ }
                   return;
@@ -351,7 +306,6 @@ const ChatAnswer = forwardRef((props: ChatAnswerProps, ref: Ref<ChatAnswerRef>) 
                 return;
               }
             }
-
             return (
               <React.Fragment key={index}>
                 {renderMessage()}
@@ -361,38 +315,23 @@ const ChatAnswer = forwardRef((props: ChatAnswerProps, ref: Ref<ChatAnswerRef>) 
 
           {/* New Answer rendering */}
           {answerText.content.join("") !== "" && (
-            <div>
             <Message
             name="Bot"
             role="bot"
             content={(answerText.content as string[]).join("")}
             timestamp="1 hour ago"
             avatar={orb}
+            {...(answerSources.content.length > 0 && {
+              sources: {
+                sources: answerSources.content
+                  .filter((source) => source && source.content && source.score !== undefined) // Ensure source is valid
+                  .map((source) => ({
+                    title: `${source.content.substring(source.content.lastIndexOf('/') + 1)} (${cosineScoreToPercentage(source.score)}%)`,
+                    link: source.content,
+                  })),
+              },
+            })}
             />
-              <Grid className='chat-item'>
-                <GridItem span={1} className='grid-item-orb'>&nbsp;</GridItem>
-                <GridItem span={11}>
-                  <Content component={ContentVariants.p} className='chat-source-text'>{answerSources.content.length != 0 && (t('chat.content.references') + ": ")}</Content>
-                  {answerSources && answerSources.content.map((source, index) => {
-                    const renderSource = () => {
-                      if (source.content.startsWith('http')) {
-                        return <Content component={ContentVariants.p} className='chat-source-text'>
-                          <a href={source.content} target="_blank" className='chat-source-link'>{source.content}</a> ({cosineScoreToPercentage(source.score)}% match)
-                        </Content>
-                      } else {
-                        return <Content component={ContentVariants.p} className='chat-source-text'>{source.content} ({cosineScoreToPercentage(source.score)}% match)</Content>
-                      }
-                    };
-                    return (
-                      <React.Fragment key={index}>
-                        {renderSource()}
-                      </React.Fragment>
-                    );
-                  })}
-
-                </GridItem>
-              </Grid>
-            </div>
           )}
         </MessageBox>
         </ChatbotContent>
