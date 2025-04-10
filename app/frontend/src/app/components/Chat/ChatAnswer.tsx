@@ -39,11 +39,12 @@ const ChatAnswer = forwardRef((props: ChatAnswerProps, ref: Ref<ChatAnswerRef>) 
   const uuid = Math.floor(Math.random() * 1000000000); // Generate a random number between 0 and 999999999
 
   // Chat elements
-  const [answerText, setAnswerText] = React.useState<Answer>(new Answer([''])); // The answer text
+  const [answerText, setAnswerText] = React.useState<Answer>(new Answer([''],[])); // The answer text
+  const [answer, setAnswer] = React.useState<Answer>(new Answer([''],[])); // The answer text
   const [answerSources, setAnswerSources] = React.useState<Sources>(new Sources([])); // Array of sources for the answer
   const [messageHistory, setMessageHistory] = React.useState<MessageHistory>(
     new MessageHistory([
-      new MessageContent(new Answer([t('chat.content.greeting')]))
+      new MessageContent(new Answer([t('chat.content.greeting')],[]))
     ])
   ); // The message history
   const chatBotAnswer = document.getElementById('chatBotAnswer'); // The chat bot answer element
@@ -80,10 +81,10 @@ const ChatAnswer = forwardRef((props: ChatAnswerProps, ref: Ref<ChatAnswerRef>) 
           }
           return newTokens;
         });
-        setAnswerText(answerText => new Answer([...answerText.content, data['token']]));
+        setAnswer(answer => new Answer([...answer.content, data['token']],[...answer.sources.sourcesArray]));
         return;
       } else if (data['type'] === 'source') {
-        setAnswerSources(answerSources => new Sources([...answerSources.content, new Source(data['source'], data['score'])]));
+        setAnswer(answer => new Answer([...answer.content],[...answer.sources.sourcesArray, new Source(data['source'], data['score'])]));
         return;
       }
     }
@@ -128,13 +129,11 @@ const ChatAnswer = forwardRef((props: ChatAnswerProps, ref: Ref<ChatAnswerRef>) 
    */
   const sendQuery = (query: Query) => {
     if (connection.current?.readyState === WebSocket.OPEN) {
-      const previousAnswer = new MessageContent(new Answer(answerText.content)); // Save the previous response, needed because states are updated asynchronously
-      const previousSources = new MessageContent(new Sources(answerSources.content)); // Save the previous sources
+      const previousAnswer = new MessageContent(new Answer(answer.content,answer.sources)); // Save the previous response, needed because states are updated asynchronously
       const previousQuery = new MessageContent(new Query(query.content)); // Save the previous query
-      const previousMessageHistory = new MessageHistory(messageHistory.content); // Save the previous message history
-      setMessageHistory(new MessageHistory([...previousMessageHistory.content, previousAnswer, previousSources, previousQuery])); // Add the previous response to the message history
-      setAnswerText(new Answer([])); // Clear the previous response
-      setAnswerSources(new Sources([])); // Clear the previous sources
+      const previousMessageHistory = new MessageHistory(messageHistory.message); // Save the previous message history
+      setMessageHistory(new MessageHistory([...previousMessageHistory.message, previousAnswer, previousQuery])); // Add the previous response to the message history
+      setAnswer(new Answer([],[])); // Clear the previous response
       setTokens(0);
       setTps(0);
       setTtft(0);
@@ -151,7 +150,7 @@ const ChatAnswer = forwardRef((props: ChatAnswerProps, ref: Ref<ChatAnswerRef>) 
         startTime.current = Date.now();
         connection.current?.send(JSON.stringify(data)); // Send the query to the server
       } else {
-        setAnswerText(new Answer([t('chat.content.empty_query')]));
+        setAnswerText(new Answer([t('chat.content.empty_query')],[]));
       }
     };
   }
@@ -163,43 +162,37 @@ const ChatAnswer = forwardRef((props: ChatAnswerProps, ref: Ref<ChatAnswerRef>) 
    */
   const resetMessageHistory = () => {
     setMessageHistory(new MessageHistory([
-      new MessageContent(new Answer([t('chat.content.greeting')]))
+      new MessageContent(new Answer([t('chat.content.greeting')],[]))
     ]));
-    setAnswerSources(new Sources([]));
-    setAnswerText(new Answer(['']));
+    setAnswerText(new Answer([''],[])); // Clear the previous response
   };
 
   const changeCollectionOrVersion = (selectedCollection, selectedVersion) => {
     const previousAnswer = new MessageContent( // Save the previous response, needed because states are updated asynchronously
-      new Answer(answerText.content)
+      new Answer(answer.content,answer.sources)
     );
-    const previousSources = new MessageContent( // Save the previous sources
-      new Sources(answerSources.content)
-    );
-    const previousMessageHistory = new MessageHistory(messageHistory.content); // Save the previous message history
+    const previousMessageHistory = new MessageHistory(messageHistory.message); // Save the previous message history
     if (selectedCollection.collection_full_name !== "None") {
       setMessageHistory(new MessageHistory(
-        [...previousMessageHistory.content,
+        [...previousMessageHistory.message,
           previousAnswer,
-          previousSources,
         new MessageContent(new Answer(
-          [t('chat.content.change_product_prompt_start') + ' **' + selectedCollection.collection_full_name + '** ' + t('chat.content.change_product_prompt_version') + ' **' + selectedVersion + '**.']
+          [t('chat.content.change_product_prompt_start') + ' **' + selectedCollection.collection_full_name + '** ' + t('chat.content.change_product_prompt_version') + ' **' + selectedVersion + '**.'],
+          []
         ))
         ]
       ));
     } else {
       setMessageHistory(new MessageHistory(
-        [...previousMessageHistory.content,
+        [...previousMessageHistory.message,
           previousAnswer,
-          previousSources,
         new MessageContent(new Answer(
-          [t('chat.content.change_product_prompt_none')]
+          [t('chat.content.change_product_prompt_none')],[]
         ))
         ]
       ));
     }
-    setAnswerText(new Answer([])); // Clear the previous response
-    setAnswerSources(new Sources([])); // Clear the previous sources
+    setAnswer(new Answer([],[])); // Clear the previous response
   }
 
   useImperativeHandle(ref, () => ({
@@ -264,35 +257,35 @@ const ChatAnswer = forwardRef((props: ChatAnswerProps, ref: Ref<ChatAnswerRef>) 
         <ChatbotContent className='chat-bot-answer-content'>
         <MessageBox id='chatBotAnswer'>
           {/* Message History rendering */}
-          {messageHistory.content.map((message: MessageContent, index) => {
+          {messageHistory.message.map((message: MessageContent, index) => {
             const renderMessage = () => {
-              if (message.content.content.length != 0) {
-                if (message.content.type === "Query" && message.content.content != "") { // If the message is a query
+              if (message.messageContent.content.length != 0) {
+                if (message.messageContent.type === "Query" && message.messageContent.content != "") { // If the message is a query
                   return (
                   <Message
-                  name="User"
-                  role="user"
-                  content={Array.isArray(message.content.content) ? message.content.content.join(' ') : message.content.content}
-                  timestamp="1 hour ago"
-                  avatar={userAvatar}
-                  />
-                  );
-                } else if (message.content.type === "Answer" && (message.content.content as string[]).join("") != "") { // If the message is a response
-                  return(
+                    name="User"
+                    role="user"
+                    content={Array.isArray(message.messageContent.content) ? message.messageContent.content.join(' ') : message.messageContent.content}
+                    timestamp="1 hour ago"
+                    avatar={userAvatar}
+                    />
+                    );
+                } else if (message.messageContent.type === "Answer" && (message.messageContent.content as string[]).join("") != "") { // If the message is a response
+                    return(
                     <Message
                     name="Bot"
                     role="bot"
-                    content={(message.content.content as string[]).join("")}
+                    content={(message.messageContent.content as string[]).join("")}
                     timestamp="1 hour ago"
                     avatar={orb}
-                    {...(answerSources.content.length > 0 && {
+                    {...(message.messageContent.type === "Answer" && 'sources' in message.messageContent && message.messageContent.sources?.sourcesArray?.length > 0 && {
                       sources: {
-                        sources: answerSources.content
-                          .filter((source) => source && source.content && source.score !== undefined) // Ensure source is valid
-                          .map((source) => ({
-                            title: `${source.content.substring(source.content.lastIndexOf('/') + 1)} (${cosineScoreToPercentage(source.score)}%)`,
-                            link: source.content,
-                          })),
+                      sources: message.messageContent.sources.sourcesArray
+                        .filter((source) => source && source.content && source.score !== undefined) // Ensure source is valid
+                        .map((source) => ({
+                        title: `${source.content.substring(source.content.lastIndexOf('/') + 1)} (${cosineScoreToPercentage(source.score)}%)`,
+                        link: source.content,
+                        })),
                       },
                     })}
                     />
@@ -314,21 +307,21 @@ const ChatAnswer = forwardRef((props: ChatAnswerProps, ref: Ref<ChatAnswerRef>) 
           })}
 
           {/* New Answer rendering */}
-          {answerText.content.join("") !== "" && (
+          {answer.content.join("") !== "" && (
             <Message
             name="Bot"
             role="bot"
-            content={(answerText.content as string[]).join("")}
+            content={(answer.content as string[]).join("")}
             timestamp="1 hour ago"
             avatar={orb}
-            {...(answerSources.content.length > 0 && {
+            {...(answer.type === "Answer" && 'sources' in answer && answer.sources?.sourcesArray?.length > 0 && {
               sources: {
-                sources: answerSources.content
-                  .filter((source) => source && source.content && source.score !== undefined) // Ensure source is valid
-                  .map((source) => ({
-                    title: `${source.content.substring(source.content.lastIndexOf('/') + 1)} (${cosineScoreToPercentage(source.score)}%)`,
-                    link: source.content,
-                  })),
+              sources: answer.sources.sourcesArray
+                .filter((source) => source && source.content && source.score !== undefined) // Ensure source is valid
+                .map((source) => ({
+                title: `${source.content.substring(source.content.lastIndexOf('/') + 1)} (${cosineScoreToPercentage(source.score)}%)`,
+                link: source.content,
+                })),
               },
             })}
             />

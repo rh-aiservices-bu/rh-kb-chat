@@ -4,7 +4,7 @@ export class Query {
   collectionFullName: string;
   selectedVersion: string;
   language: string;
-  type: string;
+  type = 'Query';
 
   constructor(
     content: string = '',
@@ -18,16 +18,17 @@ export class Query {
     this.collectionFullName = collectionFullName;
     this.selectedVersion = selectedVersion;
     this.language = language;
-    this.type = 'Query';
   }
 }
 
 export class Answer {
   content: string[];
+  sources: Sources;
   type = 'Answer';
 
-  constructor(content: string[]) {
+  constructor(content: string[], sources) {
     this.content = content;
+    this.sources = sources;
   }
 }
 
@@ -42,28 +43,27 @@ export class Source {
 }
 
 export class Sources {
-  content: Source[];
+  sourcesArray: Source[];
   type = 'Sources';
 
-  constructor(content: Source[]) {
-    this.content = content;
+  constructor(sources: Source[]) {
+    this.sourcesArray = sources;
   }
 }
 
-
 export class MessageContent {
-  content: Query | Answer | Sources;
+  messageContent: Query | Answer ;
 
-  constructor(content: Query | Answer | Sources) {
-    this.content = content;
+  constructor(messageContent: Query | Answer ) {
+    this.messageContent = messageContent;
   }
 }
 
 export class MessageHistory {
-  content: MessageContent[];
+  message: MessageContent[];
 
-  constructor(content: MessageContent[]) {
-    this.content = content;
+  constructor(message: MessageContent[]) {
+    this.message = message;
   }
 }
 
