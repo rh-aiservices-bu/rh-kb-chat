@@ -199,8 +199,10 @@ const Chat: React.FunctionComponent<ChatProps> = () => {
   }
 
   return (
-    <PageSection hasBodyWrapper={false} style={{ height: '85vh', overflow: 'hidden' }}>
-      <Flex direction={{ default: 'column' }} style={{ flex: 1, display: 'flex', flexDirection: 'column', height: '100%' }}>
+    <PageSection hasBodyWrapper={false}
+      style={{ height: '85vh', overflow: 'hidden' }}>
+      <Flex direction={{ default: 'column' }}
+        style={{ flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column' }}>
 
         {/* Product, version and language selectors */}
         <FlexItem>
