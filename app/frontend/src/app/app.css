@@ -71,7 +71,7 @@ body,
 .chat {
   border-radius: 10px !important;
   width: 100%;
-  height: calc(100vh - 225px);
+  height: 100%;
   flex: 1 1 auto;
   display: flex;
   flex-direction: column;
@@ -118,6 +118,7 @@ body,
   padding-bottom: 10px !important;
   margin-bottom: 0px !important;
   flex: 1 1 auto;
+  min-height: 0px;
   display: flex;
   flex-direction: column;
 }
@@ -132,6 +133,7 @@ body,
   width: 100% !important;
   flex: 1;
   overflow: auto;
+  min-height: 0px;
 }
 
 .chat-bot-answer-content {
