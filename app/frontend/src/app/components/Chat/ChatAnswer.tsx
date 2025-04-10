@@ -282,13 +282,12 @@ const ChatAnswer = forwardRef((props: ChatAnswerProps, ref: Ref<ChatAnswerRef>) 
               <FormSelectOption key={index} value={llm.name} label={llm.name} />
             ))}
           </FormSelect>
-
-          <Content style={{ display: 'flex', alignItems: 'normal' }}>
+          <Content className='chat-llm-stats'>
             {ttft !== 0 && (
-              <Content component="p" className="token-metrics">{ttft.toFixed(2)}s tft,</Content>
+              <Content component="p" className='chat-llm-stats'>{ttft.toFixed(2)}s tft,</Content>
             )}
             {tps !== 0 && (
-              <Content component="p" className="token-metrics">{tps.toFixed(2)} t/s</Content>
+              <Content component="p" className='chat-llm-stats'>{tps.toFixed(2)} t/s</Content>
             )}
           </Content>
         </Flex>
@@ -363,14 +362,13 @@ const ChatAnswer = forwardRef((props: ChatAnswerProps, ref: Ref<ChatAnswerRef>) 
           {/* New Answer rendering */}
           {answerText.content.join("") !== "" && (
             <div>
-              <Grid className='chat-item'>
-                <GridItem span={1} className='grid-item-orb'>
-                  <img src={orb} className='orb' />
-                </GridItem>
-                <GridItem span={11}>
-                  <MarkdownRenderer>{answerText.content.join("")}</MarkdownRenderer>
-                </GridItem>
-              </Grid>
+            <Message
+            name="Bot"
+            role="bot"
+            content={(answerText.content as string[]).join("")}
+            timestamp="1 hour ago"
+            avatar={orb}
+            />
               <Grid className='chat-item'>
                 <GridItem span={1} className='grid-item-orb'>&nbsp;</GridItem>
                 <GridItem span={11}>
