@@ -160,6 +160,15 @@ body,
   height: 100%;
 }
 
+.pf-chatbot__message-avatar {
+  width: 38px !important;
+  height: 38px !important;
+}
+
+.pf-chatbot__message {
+  padding-bottom: 20px !important;
+}
+
 .chat-question-text {
   padding-top: 5px;
   padding-left: 10px;

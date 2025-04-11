@@ -6,7 +6,7 @@ import { t } from "i18next";
 import React, { forwardRef, useImperativeHandle, Ref, useRef } from 'react';
 import { Answer, MessageContent, MessageHistory, Query, Models, Source } from './classes';
 import { ChatbotContent, Message, MessageBox } from '@patternfly/chatbot';
-
+import { useUser } from '@app/components/UserContext/UserContext';
 
 interface ChatAnswerProps {
 }
@@ -18,6 +18,9 @@ export interface ChatAnswerRef {
 }
 
 const ChatAnswer = forwardRef((props: ChatAnswerProps, ref: Ref<ChatAnswerRef>) => {
+  // User
+  const { userName } = useUser(); // Get the username from the context
+
   // Models
   const [llms, setLlms] = React.useState<Models[]>([]); // The list of models
   const [selectedLLM, setSelectedLlm] = React.useState<string>(''); // The selected model
@@ -269,7 +272,7 @@ const ChatAnswer = forwardRef((props: ChatAnswerProps, ref: Ref<ChatAnswerRef>) 
                 if (message.messageContent.type === "Query" && message.messageContent.content != "") { // If the message is a query
                   return (
                   <Message
-                    name="User"
+                    name={userName}
                     role="user"
                     content={Array.isArray(message.messageContent.content) ? message.messageContent.content.join(' ') : message.messageContent.content}
                     timestamp="1 hour ago"

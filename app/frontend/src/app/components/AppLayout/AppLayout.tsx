@@ -36,6 +36,7 @@ import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation } from 'react-router-dom';
 import { supportedLngs } from '../../../i18n/config';
+import { useUser } from '@app/components/UserContext/UserContext';
 
 interface IAppLayout {
   children: React.ReactNode;
@@ -57,7 +58,7 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
   }, [selectedLanguage]);
 
   // User
-  const [userName, setUserName] = React.useState<string>('');
+  const { userName, setUserName } = useUser();
 
   React.useEffect(() => {
     const fetchUserInfo = async () => {
@@ -70,9 +71,8 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
 
         const entries = [...response.headers.entries()];
         const gapAuthHeader = entries.find(entry => entry[0] === 'gap-auth');
-        const gapAuthValue = gapAuthHeader ? gapAuthHeader[1] : '';
+        const gapAuthValue = gapAuthHeader ? gapAuthHeader[1] : 'user@domain.com';
         setUserName(gapAuthValue);
-
       } catch (error) {
         console.error('Error fetching user info:', error);
       }
@@ -127,20 +127,20 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
                     onClick={() => setLanguageDropdownOpen(!isLanguageDropdownOpen)}
                     isExpanded={isLanguageDropdownOpen}
                   >
-                  {supportedLngs[selectedLanguage] || 'en'}
+                    {supportedLngs[selectedLanguage] || 'en'}
                   </MenuToggle>
                 )}
                 popperProps={{ position: 'right' }}
               >
-                  <DropdownGroup key="Language" label="Language">
-                    <DropdownList>
-                      {Object.entries(supportedLngs).map(([lngCode, lngName], index) => (
-                        <DropdownItem key={index} value={lngCode} label={lngName} onClick={() => onChangeLanguage(null as any, lngCode)}>
-                          {lngName}
-                        </DropdownItem>
-                      ))}
-                    </DropdownList>
-                  </DropdownGroup>
+                <DropdownGroup key="Language" label="Language">
+                  <DropdownList>
+                    {Object.entries(supportedLngs).map(([lngCode, lngName], index) => (
+                      <DropdownItem key={index} value={lngCode} label={lngName} onClick={() => onChangeLanguage(null as any, lngCode)}>
+                        {lngName}
+                      </DropdownItem>
+                    ))}
+                  </DropdownList>
+                </DropdownGroup>
               </Dropdown>
             </ToolbarItem>
             <ToolbarItem>
@@ -155,11 +155,11 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
               </Popover>
             </ToolbarItem>
             <ToolbarItem>
-              <Content>
-                <Content component={ContentVariants.p} className='pf-v5-global--spacer--md'>
+                <Flex direction={{ default: 'column' }} alignItems={{ default: 'alignItemsCenter' }} justifyContent={{ default: 'justifyContentCenter' }} className='pf-v5-global--spacer--md'>
+                <Content component={ContentVariants.p}>
                   {userName}
                 </Content>
-              </Content>
+                </Flex>
             </ToolbarItem>
             <ToolbarItem>
               <Avatar src={imgAvatar} alt="" isBordered className='avatar' />
@@ -176,7 +176,7 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
         <MastheadBrand data-codemods>
           <MastheadLogo data-codemods style={{ width: 'auto' }}>
             <Flex direction={{ default: 'row' }} alignItems={{ default: 'alignItemsCenter' }} flexWrap={{ default: 'nowrap' }}>
-              <Brand src={!isDarkTheme?logoStd:logoReverse} alt="Patternfly Logo" heights={{ default: '32px' }} />
+              <Brand src={!isDarkTheme ? logoStd : logoReverse} alt="Patternfly Logo" heights={{ default: '32px' }} />
               <Content style={{ marginLeft: '1rem' }}>
                 <Content component={ContentVariants.h3} className='title-text'>{t('app_header.powered_by')}</Content>
               </Content>
