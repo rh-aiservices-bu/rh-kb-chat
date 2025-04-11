@@ -60,7 +60,6 @@ const ChatAnswer = forwardRef((props: ChatAnswerProps, ref: Ref<ChatAnswerRef>) 
       new MessageContent(new Answer([t('chat.content.greeting')], [], new Date())),
     ])
   ); // The message history
-  const chatBotAnswer = document.getElementById('chatBotAnswer'); // The chat bot answer element
 
   // Stopwatch and timer#
   const startTime = useRef<number | null>(null);
@@ -149,10 +148,9 @@ const ChatAnswer = forwardRef((props: ChatAnswerProps, ref: Ref<ChatAnswerRef>) 
     , []);
 
   // Scroll to the bottom of the chat window when the answer changes
+  const scrollToBottomRef = React.useRef<HTMLDivElement>(null);
   React.useEffect(() => {
-    if (chatBotAnswer) {
-      chatBotAnswer.scrollTop = chatBotAnswer.scrollHeight;
-    }
+    scrollToBottomRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [answer, messageHistory]);  // Dependency array
 
 
@@ -335,7 +333,7 @@ const ChatAnswer = forwardRef((props: ChatAnswerProps, ref: Ref<ChatAnswerRef>) 
       </FlexItem>
       <FlexItem className='chat-bot-answer'>
         <ChatbotContent className='chat-bot-answer-content'>
-          <MessageBox id='chatBotAnswer' className='chat-bot-answer-box'>
+          <MessageBox className='chat-bot-answer-box'>
             {/* Message History rendering */}
             {messageHistory.message.map((message: MessageContent, index) => {
               const renderMessage = () => {
@@ -407,6 +405,7 @@ const ChatAnswer = forwardRef((props: ChatAnswerProps, ref: Ref<ChatAnswerRef>) 
               }
               return (
                 <React.Fragment key={index}>
+                  <div ref={scrollToBottomRef}></div>
                   {renderMessage()}
                 </React.Fragment>
               );
