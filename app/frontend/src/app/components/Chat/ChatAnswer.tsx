@@ -242,6 +242,14 @@ const ChatAnswer = forwardRef((props: ChatAnswerProps, ref: Ref<ChatAnswerRef>) 
     return Math.round((1 - clampedScore / 2) * 100);
   }
 
+  const copyToClipboard = (content: string) => {
+    navigator.clipboard.writeText(content).then(() => {
+      console.log('Content copied to clipboard');
+    }).catch(err => {
+      console.error('Failed to copy content: ', err);
+    });
+  };
+
   return (
     <Flex direction={{ default: 'column' }} className='chat-item'>
       <FlexItem >
@@ -283,6 +291,14 @@ const ChatAnswer = forwardRef((props: ChatAnswerProps, ref: Ref<ChatAnswerRef>) 
                     content={Array.isArray(message.messageContent.content) ? message.messageContent.content.join(' ') : message.messageContent.content}
                     timestamp={message.messageContent.timestamp ? message.messageContent.timestamp.toLocaleString() : ''}
                     avatar={userAvatar}
+                    actions={{
+                      copy: { onClick: () => copyToClipboard(
+                        Array.isArray(message.messageContent.content) 
+                          ? message.messageContent.content.join(' ') 
+                          : message.messageContent.content
+                      ) },
+                      listen: { onClick: () => console.log('Listen') }
+                    }}
                     />
                     );
                 } else if (message.messageContent.type === "Answer" && (message.messageContent.content as string[]).join("") != "") { // If the message is a response
