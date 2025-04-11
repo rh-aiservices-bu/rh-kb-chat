@@ -7,7 +7,7 @@ import React, { forwardRef, useImperativeHandle, Ref, useRef } from 'react';
 import Markdown from 'react-markdown';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { dracula } from 'react-syntax-highlighter/dist/cjs/styles/prism';
-import { Answer, MessageContent, MessageHistory, Query, Sources, Models, Source } from './classes';
+import { Answer, MessageContent, MessageHistory, Query, Models, Source } from './classes';
 import rehypeRaw from 'rehype-raw';
 import remarkGfm from 'remark-gfm';
 import { version } from 'html-webpack-plugin';
@@ -40,8 +40,7 @@ const ChatAnswer = forwardRef((props: ChatAnswerProps, ref: Ref<ChatAnswerRef>) 
 
   // Chat elements
   const [answerText, setAnswerText] = React.useState<Answer>(new Answer([''],[])); // The answer text
-  const [answer, setAnswer] = React.useState<Answer>(new Answer([''],[])); // The answer text
-  const [answerSources, setAnswerSources] = React.useState<Sources>(new Sources([])); // Array of sources for the answer
+  const [answer, setAnswer] = React.useState<Answer>(new Answer([],[])); // The answer text
   const [messageHistory, setMessageHistory] = React.useState<MessageHistory>(
     new MessageHistory([
       new MessageContent(new Answer([t('chat.content.greeting')],[]))
@@ -81,10 +80,16 @@ const ChatAnswer = forwardRef((props: ChatAnswerProps, ref: Ref<ChatAnswerRef>) 
           }
           return newTokens;
         });
-        setAnswer(answer => new Answer([...answer.content, data['token']],[...answer.sources.sourcesArray]));
+        setAnswer(answer => new Answer(
+          [...(answer?.content || []), data['token']],
+          [...(answer?.sources || [])]
+        ));
         return;
       } else if (data['type'] === 'source') {
-        setAnswer(answer => new Answer([...answer.content],[...answer.sources.sourcesArray, new Source(data['source'], data['score'])]));
+        setAnswer(answer => new Answer(
+          [...(answer?.content || [])],
+          [...(answer?.sources || []), new Source(data['source'], data['score'])]
+        ));
         return;
       }
     }
@@ -99,6 +104,10 @@ const ChatAnswer = forwardRef((props: ChatAnswerProps, ref: Ref<ChatAnswerRef>) 
       }
     };
   }, []);
+
+  React.useEffect(() => {
+    console.log('Updated answer: ', answer);
+  }, [answer]);
 
 
   // Load available models at startup
@@ -118,7 +127,7 @@ const ChatAnswer = forwardRef((props: ChatAnswerProps, ref: Ref<ChatAnswerRef>) 
     if (chatBotAnswer) {
       chatBotAnswer.scrollTop = chatBotAnswer.scrollHeight;
     }
-  }, [answerText, answerSources, messageHistory]);  // Dependency array
+  }, [answer, messageHistory]);  // Dependency array
 
 
   /**
@@ -278,11 +287,9 @@ const ChatAnswer = forwardRef((props: ChatAnswerProps, ref: Ref<ChatAnswerRef>) 
                     content={(message.messageContent.content as string[]).join("")}
                     timestamp="1 hour ago"
                     avatar={orb}
-                    {...(message.messageContent.type === "Answer" && 'sources' in message.messageContent && message.messageContent.sources?.sourcesArray?.length > 0 && {
+                    {...(message.messageContent.type === "Answer" && 'sources' in message.messageContent && message.messageContent.sources?.length > 0 && {
                       sources: {
-                      sources: message.messageContent.sources.sourcesArray
-                        .filter((source) => source && source.content && source.score !== undefined) // Ensure source is valid
-                        .map((source) => ({
+                      sources: message.messageContent.sources.map((source) => ({
                         title: `${source.content.substring(source.content.lastIndexOf('/') + 1)} (${cosineScoreToPercentage(source.score)}%)`,
                         link: source.content,
                         })),
@@ -314,11 +321,9 @@ const ChatAnswer = forwardRef((props: ChatAnswerProps, ref: Ref<ChatAnswerRef>) 
             content={(answer.content as string[]).join("")}
             timestamp="1 hour ago"
             avatar={orb}
-            {...(answer.type === "Answer" && 'sources' in answer && answer.sources?.sourcesArray?.length > 0 && {
+            {...(answer.sources?.length > 0 && {
               sources: {
-              sources: answer.sources.sourcesArray
-                .filter((source) => source && source.content && source.score !== undefined) // Ensure source is valid
-                .map((source) => ({
+              sources: answer.sources.map((source) => ({
                 title: `${source.content.substring(source.content.lastIndexOf('/') + 1)} (${cosineScoreToPercentage(source.score)}%)`,
                 link: source.content,
                 })),

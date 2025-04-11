@@ -23,7 +23,7 @@ export class Query {
 
 export class Answer {
   content: string[];
-  sources: Sources;
+  sources: Source[];
   type = 'Answer';
 
   constructor(content: string[], sources) {
@@ -39,15 +39,6 @@ export class Source {
   constructor(content: string, score: number) {
     this.content = content;
     this.score = score;
-  }
-}
-
-export class Sources {
-  sourcesArray: Source[];
-  type = 'Sources';
-
-  constructor(sources: Source[]) {
-    this.sourcesArray = sources;
   }
 }
 
