@@ -295,7 +295,7 @@ const Chat: React.FunctionComponent<ChatProps> = () => {
             <ChatbotFooter className='chat-footer'>
               <MessageBar
                 hasMicrophoneButton
-                hasAttachButton
+                hasAttachButton={false}
                 onSendMessage={sendQueryText}
                 buttonProps={{
                   microphone: { language: t('language_code') }
