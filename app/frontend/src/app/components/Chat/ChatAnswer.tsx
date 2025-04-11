@@ -107,11 +107,6 @@ const ChatAnswer = forwardRef((props: ChatAnswerProps, ref: Ref<ChatAnswerRef>) 
     };
   }, []);
 
-  React.useEffect(() => {
-    console.log('Updated answer: ', answer);
-  }, [answer]);
-
-
   // Load available models at startup
   React.useEffect(() => {
     const fetchLLMs = async () => {
@@ -266,7 +261,7 @@ const ChatAnswer = forwardRef((props: ChatAnswerProps, ref: Ref<ChatAnswerRef>) 
       </FlexItem>
       <FlexItem className='chat-bot-answer'>
         <ChatbotContent className='chat-bot-answer-content'>
-        <MessageBox id='chatBotAnswer'>
+        <MessageBox id='chatBotAnswer' className='chat-bot-answer-box'>
           {/* Message History rendering */}
           {messageHistory.message.map((message: MessageContent, index) => {
             const renderMessage = () => {

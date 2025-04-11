@@ -144,6 +144,18 @@ body,
   min-height: 0px;
 }
 
+.chat-bot-answer-box {
+  max-width: 98% !important;
+}
+
+.pf-chatbot__jump.pf-chatbot__jump--top {
+  inset-inline-start: 95% !important;
+}
+
+.pf-chatbot__jump.pf-chatbot__jump--bottom {
+  inset-inline-start: 95% !important;
+}
+
 .chat-bot-answer-content {
   height: 100%;
 }
