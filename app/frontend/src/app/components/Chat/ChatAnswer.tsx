@@ -316,7 +316,7 @@ const ChatAnswer = forwardRef((props: ChatAnswerProps, ref: Ref<ChatAnswerRef>) 
           })}
 
           {/* New Answer rendering */}
-          {answer.content.join("") !== "" && (
+            {answer.content.join("") !== "" && (
             <Message
             name="Bot"
             role="bot"
@@ -326,13 +326,20 @@ const ChatAnswer = forwardRef((props: ChatAnswerProps, ref: Ref<ChatAnswerRef>) 
             {...(answer.sources?.length > 0 && {
               sources: {
               sources: answer.sources.map((source) => ({
-                title: `${source.content.substring(source.content.lastIndexOf('/') + 1)} (${cosineScoreToPercentage(source.score)}%)`,
+              title: `${source.content
+                .substring(source.content.lastIndexOf('/') + 1)
+                .replace(/_/g, ' ')
+                .replace(/^\w/, (c) => c.toUpperCase())} (${cosineScoreToPercentage(source.score)}%)`,
+              body: `${source.content
+                .substring(source.content.lastIndexOf('/') + 1)
+                .replace(/_/g, ' ')
+                .replace(/^\w/, (c) => c.toUpperCase())} (${cosineScoreToPercentage(source.score)}%)`,
                 link: source.content,
-                })),
+              })),
               },
             })}
             />
-          )}
+            )}
         </MessageBox>
         </ChatbotContent>
       </FlexItem>
