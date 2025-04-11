@@ -25,6 +25,7 @@ app/backend/public/*
 __pycache__
 .cache
 .eslintcache
+**/.cache_*
 
 # helpers
 .docs

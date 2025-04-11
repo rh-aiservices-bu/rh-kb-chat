@@ -2,14 +2,21 @@ import config from '@app/config';
 import { faCommentDots, faPaperPlane } from '@fortawesome/free-regular-svg-icons';
 import { faPlusCircle } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { Button, Card, CardBody, CardHeader, Flex, FlexItem, FormSelect, FormSelectOption, Grid, GridItem, Page, PageSection, Panel, PanelMain, PanelMainBody, Stack, StackItem, Text, TextArea, TextContent, TextVariants, Tooltip } from '@patternfly/react-core';
+import { Button, Card, CardBody, CardHeader, Flex, FlexItem, FormSelect, FormSelectOption, Grid, GridItem, Page, PageSection, Panel, PanelMain, PanelMainBody, Stack, StackItem, Content, TextArea, ContentVariants, Tooltip, Bullseye, DropdownList, DropdownItem } from '@patternfly/react-core';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
-import { Query, Message } from './classes';
+import { Query, MessageContent } from './classes';
 import ChatAnswer, { ChatAnswerRef } from './ChatAnswer'
+import githubLogo from '@app/assets/bgimages/github-mark.svg';
+import githubLogoWhite from '@app/assets/bgimages/github-mark-white.svg';
+import starLogo from '@app/assets/bgimages/star.svg';
+import starLogoWhite from '@app/assets/bgimages/star-white.svg';
+import { ChatbotFooter, ChatbotFootnote, } from '@patternfly/chatbot/dist/dynamic/ChatbotFooter';
+import { MessageBar } from '@patternfly/chatbot/dist/dynamic/MessageBar';
+import { Chatbot, ChatbotContent, ChatbotDisplayMode, ChatbotHeader, ChatbotHeaderActions, ChatbotHeaderMain, ChatbotHeaderSelectorDropdown, ChatbotHeaderTitle } from '@patternfly/chatbot';
+
 
 interface ChatProps {
-  selectedLanguage: string;
 }
 
 /**
@@ -19,25 +26,7 @@ interface ChatProps {
  * @param {Object} props - The component props.
  * @returns {JSX.Element} The rendered Chat component.
  */
-const Chat: React.FunctionComponent<ChatProps> = ({ selectedLanguage }) => {
-
-  class UiLanguage {
-    code: string;
-    displayName: string;
-
-    constructor(code: string, displayName: string) {
-      this.code = code;
-      this.displayName = displayName;
-    }
-  }
-
-  class UiLanguages {
-    content: UiLanguage[];
-
-    constructor(content: UiLanguage[]) {
-      this.content = content;
-    }
-  }
+const Chat: React.FunctionComponent<ChatProps> = () => {
 
   type CollectionVersion = {
     version_number: string;
@@ -50,9 +39,19 @@ const Chat: React.FunctionComponent<ChatProps> = ({ selectedLanguage }) => {
     language: string;
   };
 
-  type MarkdownRendererProps = {
-    children: string;
-  };
+  const [isDarkTheme, setIsDarkTheme] = React.useState<boolean>(document.documentElement.classList.contains('pf-v6-theme-dark'));
+  React.useEffect(() => {
+    // Create a MutationObserver to watch for changes to the class list of the body element
+    const observer = new MutationObserver(() => {
+      setIsDarkTheme(document.documentElement.classList.contains('pf-v6-theme-dark'));
+    });
+
+    // Observe the body element for class attribute changes
+    observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
+
+    // Cleanup the observer when the component unmounts
+    return () => observer.disconnect();
+  }, []);
 
   // ChatAnswer Refs
   const childRefs = React.useRef<(ChatAnswerRef | null)[]>([]);
@@ -79,6 +78,19 @@ const Chat: React.FunctionComponent<ChatProps> = ({ selectedLanguage }) => {
 
   //i18n
   const { t, i18n } = useTranslation();
+
+  // Fetch GitHub stars and forks 
+  const [repoStars, setRepoStars] = React.useState<number | null>(null);
+  React.useEffect(() => {
+    fetch('https://api.github.com/repos/rh-aiservices-bu/rh-kb-chat')
+      .then((response) => response.json())
+      .then((data) => {
+        setRepoStars(data.stargazers_count);
+      })
+      .catch((error) => {
+        console.error('Failed to fetch GitHub stars:', error);
+      });
+  }, []);
 
   // Collection elements
   const [collections, setCollections] = React.useState<Collection[]>([]); // The collections
@@ -112,12 +124,12 @@ const Chat: React.FunctionComponent<ChatProps> = ({ selectedLanguage }) => {
    * Clears the query text, previous response, and previous sources.
    * If the query text is empty, sets the previous response to ['Please enter a query...'].
    */
-  const sendQueryText = () => {
-    const previousQuery = new Message(new Query(queryText.content)); // Save the previous query
+  const sendQueryText = (message: string | number) => {
+    const queryText = String(message);
     setQueryText(new Query('')); // Clear the query text
-    const query = new Query(queryText.content, selectedCollection, collectionFullName, selectedVersion, i18n.language);
+    const query = new Query(queryText, selectedCollection, collectionFullName, selectedVersion, i18n.language, new Date());
 
-    if (query.content !== "") {
+    if (queryText !== "") {
       childRefs.current.forEach((childRef) => {
         if (childRef) {
           childRef.sendQuery(query);
@@ -186,159 +198,131 @@ const Chat: React.FunctionComponent<ChatProps> = ({ selectedLanguage }) => {
   }
 
   return (
-    <Page>
-      <PageSection>
-        <Flex direction={{ default: 'column' }}>
+    <PageSection hasBodyWrapper={false}
+      style={{ height: '100%', overflow: 'hidden' }}>
+      <Flex direction={{ default: 'column' }}
+        style={{ flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column' }}>
 
-          {/* Product, version and language selectors */}
-          <FlexItem>
-            <Flex>
-              <FlexItem>
-                <Flex direction={{ default: 'row' }}>
-                  <FlexItem className='collection-version-language-legends' >
-                    <TextContent>
-                      <Text component={TextVariants.h3} >{t('chat.filter.product')}:</Text>
-                    </TextContent>
-                  </FlexItem>
-                  <FlexItem>
-                    <FormSelect
-                      value={collectionFullName}
-                      onChange={onChangeProduct}
-                      aria-label="FormSelect Input"
-                      ouiaId="BasicFormSelectCategory"
-                      className="collection-select"
-                    >
-                      {collections && collections.map((collection, index) => (
-                        <FormSelectOption key={index} value={collection.collection_full_name} label={collection.collection_full_name} />
-                      ))}
-                    </FormSelect>
-                  </FlexItem>
-                </Flex>
-              </FlexItem>
-              <FlexItem>
-                <Flex direction={{ default: 'row' }}>
-                  <FlexItem className='collection-version-language-legends'>
-                    <TextContent>
-                      <Text component={TextVariants.h3} >{t('chat.filter.version')}:</Text>
-                    </TextContent>
-                  </FlexItem>
-                  <FlexItem>
-                    <FormSelect
-                      value={selectedVersion}
-                      onChange={onChangeVersion}
-                      aria-label="FormSelect Input"
-                      ouiaId="BasicFormSelectCategory"
-                      className='version-language-select'
-                    >
-                      {versions && versions.map((version, index) => (
-                        <FormSelectOption key={index} value={version.version_number} label={version.version_number} />
-                      ))}
-                    </FormSelect>
-                  </FlexItem>
-                </Flex>
-              </FlexItem>
-            </Flex>
-          </FlexItem>
+        {/* Product, version and language selectors */}
+        <FlexItem>
+          <Flex>
+            <FlexItem>
+              <Flex direction={{ default: 'row' }}>
+                <FlexItem className='collection-version-language-legends' >
+                  <Content>
+                    <Content component={ContentVariants.h3} >{t('chat.filter.product')}:</Content>
+                  </Content>
+                </FlexItem>
+                <FlexItem>
+                  <FormSelect
+                    value={collectionFullName}
+                    onChange={onChangeProduct}
+                    aria-label="FormSelect Input"
+                    ouiaId="BasicFormSelectCategory"
+                    className="collection-select"
+                  >
+                    {collections && collections.map((collection, index) => (
+                      <FormSelectOption key={index} value={collection.collection_full_name} label={collection.collection_full_name} />
+                    ))}
+                  </FormSelect>
+                </FlexItem>
+              </Flex>
+            </FlexItem>
+            <FlexItem>
+              <Flex direction={{ default: 'row' }}>
+                <FlexItem className='collection-version-language-legends'>
+                  <Content>
+                    <Content component={ContentVariants.h3} >{t('chat.filter.version')}:</Content>
+                  </Content>
+                </FlexItem>
+                <FlexItem>
+                  <FormSelect
+                    value={selectedVersion}
+                    onChange={onChangeVersion}
+                    aria-label="FormSelect Input"
+                    ouiaId="BasicFormSelectCategory"
+                    className='version-language-select'
+                  >
+                    {versions && versions.map((version, index) => (
+                      <FormSelectOption key={index} value={version.version_number} label={version.version_number} />
+                    ))}
+                  </FormSelect>
+                </FlexItem>
+              </Flex>
+            </FlexItem>
+          </Flex>
+        </FlexItem>
 
-          {/* Chat Window */}
-          <FlexItem className='flex-chat'>
-            <Card isRounded className='chat-card'>
-              <CardHeader className='chat-card-header'>
-                <Flex justifyContent={{ default: 'justifyContentSpaceBetween' }}>
-                  <FlexItem>
-                    {/* Empty item to center title */}
-                  </FlexItem>
-                  <FlexItem>
-                    <TextContent>
-                      <Text component={TextVariants.h3} className='chat-card-header-title'>
+        {/* Chat Window */}
+        <FlexItem style={{ flex: 1, minHeight: 0 }}>
+          <Chatbot displayMode={ChatbotDisplayMode.embedded} className='chat'>
+            <ChatbotHeader className='chat-header'>
+              <ChatbotHeaderMain>
+                <ChatbotHeaderTitle className='chat-header-title'>
+                  <Bullseye>
+                    <Content>
+                      <Content component={ContentVariants.h3} className='chat-header-title'>
                         <FontAwesomeIcon icon={faCommentDots} />&nbsp;{t('chat.title')}
-                      </Text>
-                    </TextContent>
+                      </Content>
+                    </Content>
+                  </Bullseye>
+                </ChatbotHeaderTitle>
+              </ChatbotHeaderMain>
+              <ChatbotHeaderActions>
+                <Flex>
+                  <FlexItem>
+                    <Button onClick={addItem} variant="primary">
+                      Add LLM
+                    </Button>
                   </FlexItem>
                   <FlexItem>
-                    <Flex>
-                      <FlexItem>
-                        <Button onClick={addItem} variant="primary">
-                          Add LLM
-                        </Button>
-                      </FlexItem>
-                      <FlexItem>
-                        <Button onClick={removeItem} variant="danger" isDisabled={items.length === 0}>
-                          Remove last LLM
-                        </Button>
-                      </FlexItem>
-                    </Flex>
+                    <Button onClick={removeItem} variant="danger" isDisabled={items.length === 0}>
+                      Remove last LLM
+                    </Button>
                   </FlexItem>
                 </Flex>
-              </CardHeader>
-              <CardBody className='chat-card-body'>
-                <Stack>
-                  {/* ChatbotAnswer panels */}
-                  <StackItem isFilled className='chat-bot-answer' id='chatBotAnswer'>
-                    <Grid hasGutter
-                      className="chat-grid">
-                      {items.map((item, index) => (
-                        <GridItem key={index} className='chat-grid-item' span={Math.floor(12 / (items.length)) as any}>
-                          {/* Replace with your ChatAnswer component */}
-                          {item}
-                        </GridItem>
-                      ))}
-                    </Grid>
-                  </StackItem>
+              </ChatbotHeaderActions>
+            </ChatbotHeader>
+              <Grid hasGutter
+                className="chat-grid">
+                {items.map((item, index) => (
+                  <GridItem key={index} className='chat-grid-item' span={Math.floor(12 / (items.length)) as any}>
+                    {/* ChatAnswer component */}
+                    {item}
+                  </GridItem>
+                ))}
+              </Grid>
+            <ChatbotFooter className='chat-footer'>
+              <MessageBar
+                hasMicrophoneButton
+                hasAttachButton={false}
+                onSendMessage={sendQueryText}
+                buttonProps={{
+                  microphone: { language: t('language_code') }
+                }}
+              />
+            </ChatbotFooter>
+          </Chatbot>
+        </FlexItem>
+        <FlexItem>
+          <Stack>
+            {/* Disclaimer section */}
+            <StackItem>
+              <Content component="p" className='chat-disclaimer'>{t('chat.disclaimer1')} {t('chat.disclaimer2')}<br />
+                PoC App by <a href='http://red.ht/cai-team' target='_blank'>red.ht/cai-team</a>&nbsp;&nbsp;-&nbsp;&nbsp;
+                <a href='https://github.com/rh-aiservices-bu/rh-kb-chat' target='_blank'>Source</a>&nbsp;&nbsp;
+                <img src={isDarkTheme ? githubLogoWhite : githubLogo} alt="GitHub Logo" style={{ height: '15px', marginRight: '0.5rem', verticalAlign: 'text-top' }} />
+                <span style={{ textDecoration: 'none', color: 'inherit' }}>{repoStars !== null ? `${repoStars}` : ''}&nbsp;</span>
+                {repoStars !== null &&
+                  <img src={isDarkTheme ? starLogoWhite : starLogo} alt="Star Logo" style={{ height: '15px', marginRight: '0.5rem', verticalAlign: 'text-top' }} />
+                }
+              </Content>
+            </StackItem>
+          </Stack>
 
-                  {/* Input section */}
-                  <StackItem className='chat-input-panel'>
-                    <Panel variant="raised">
-                      <PanelMain>
-                        <PanelMainBody className='chat-input-panel-body'>
-                          <TextArea
-                            value={queryText.content}
-                            type="text"
-                            onChange={event => {
-                              setQueryText({ ...queryText, content: event.target.value });
-                            }}
-                            aria-label="query text input"
-                            placeholder={t('chat.placeholder')}
-                            onKeyDown={event => {
-                              if (event.key === 'Enter') {
-                                event.preventDefault();
-                                sendQueryText();
-                              }
-                            }}
-                          />
-                          <Flex>
-                            <FlexItem>
-                              <Tooltip
-                                content={<div>{t('chat.new_chat')}</div>}
-                              >
-                                <Button variant="link" onClick={resetMessageHistory} aria-label='StartNewChat'><FontAwesomeIcon icon={faPlusCircle} /></Button>
-                              </Tooltip>
-                            </FlexItem>
-                            <FlexItem align={{ default: 'alignRight' }}>
-                              <Tooltip
-                                content={<div>{t('chat.send')}</div>}
-                              >
-                                <Button variant="link" onClick={sendQueryText} aria-label='SendQuery'><FontAwesomeIcon icon={faPaperPlane} /></Button>
-                              </Tooltip>
-                            </FlexItem>
-
-                          </Flex>
-                        </PanelMainBody>
-                      </PanelMain>
-                    </Panel>
-                  </StackItem>
-                  <StackItem>
-                    <TextContent>
-                      <Text className='chat-disclaimer'>{t('chat.disclaimer1')}<br />{t('chat.disclaimer2')}</Text>
-                    </TextContent>
-                  </StackItem>
-                </Stack>
-              </CardBody>
-            </Card >
-          </FlexItem>
-        </Flex>
-      </PageSection>
-    </Page>
+        </FlexItem>
+      </Flex>
+    </PageSection>
   );
 }
 
