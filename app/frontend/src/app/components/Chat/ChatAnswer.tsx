@@ -51,9 +51,7 @@ const ChatAnswer = forwardRef((props: ChatAnswerProps, ref: Ref<ChatAnswerRef>) 
   // Chat elements
   const [answer, setAnswer] = React.useState<Answer>(new Answer([], [], new Date())); // The answer text
   const [messageHistory, setMessageHistory] = React.useState<MessageHistory>(
-    new MessageHistory([
-      new MessageContent(new Answer([t('chat.content.greeting')], [], new Date())),
-    ])
+    new MessageHistory([])
   ); // The message history
   const chatBotAnswer = document.getElementById('chatBotAnswer'); // The chat bot answer element
 
