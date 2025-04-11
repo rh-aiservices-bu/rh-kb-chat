@@ -31,10 +31,10 @@ const ChatAnswer = forwardRef((props: ChatAnswerProps, ref: Ref<ChatAnswerRef>) 
   const uuid = Math.floor(Math.random() * 1000000000); // Generate a random number between 0 and 999999999
 
   // Chat elements
-  const [answer, setAnswer] = React.useState<Answer>(new Answer([],[])); // The answer text
+  const [answer, setAnswer] = React.useState<Answer>(new Answer([],[], new Date())); // The answer text
   const [messageHistory, setMessageHistory] = React.useState<MessageHistory>(
     new MessageHistory([
-      new MessageContent(new Answer([t('chat.content.greeting')],[]))
+      new MessageContent(new Answer([t('chat.content.greeting')],[], new Date())),
     ])
   ); // The message history
   const chatBotAnswer = document.getElementById('chatBotAnswer'); // The chat bot answer element
@@ -73,7 +73,8 @@ const ChatAnswer = forwardRef((props: ChatAnswerProps, ref: Ref<ChatAnswerRef>) 
         });
         setAnswer(answer => new Answer(
           [...(answer?.content || []), data['token']],
-          [...(answer?.sources || [])]
+          [...(answer?.sources || [])],
+          answer?.timestamp || new Date()
         ));
         return;
       } else if (data['type'] === 'source') {
@@ -84,14 +85,16 @@ const ChatAnswer = forwardRef((props: ChatAnswerProps, ref: Ref<ChatAnswerRef>) 
             const updatedSources = [...answer.sources];
             updatedSources[existingSourceIndex].score = Math.max(updatedSources[existingSourceIndex].score, data['score']);
             return new Answer(
-              [...(answer?.content || [])],
-              updatedSources
+              [...(answer.content || [])],
+              updatedSources,
+              answer.timestamp
             );
           } else {
             // Add the new source if it doesn't exist
             return new Answer(
-              [...(answer?.content || [])],
-              [...(answer?.sources || []), new Source(data['source'], data['score'])]
+              [...(answer.content || [])],
+              [...(answer.sources || []), new Source(data['source'], data['score'])],
+              answer.timestamp
             );
           }
         });
@@ -138,11 +141,11 @@ const ChatAnswer = forwardRef((props: ChatAnswerProps, ref: Ref<ChatAnswerRef>) 
    */
   const sendQuery = (query: Query) => {
     if (connection.current?.readyState === WebSocket.OPEN) {
-      const previousAnswer = new MessageContent(new Answer(answer.content,answer.sources)); // Save the previous response, needed because states are updated asynchronously
+      const previousAnswer = new MessageContent(new Answer(answer.content,answer.sources, answer.timestamp)); // Save the previous response, needed because states are updated asynchronously
       const previousQuery = new MessageContent(new Query(query.content)); // Save the previous query
       const previousMessageHistory = new MessageHistory(messageHistory.message); // Save the previous message history
       setMessageHistory(new MessageHistory([...previousMessageHistory.message, previousAnswer, previousQuery])); // Add the previous response to the message history
-      setAnswer(new Answer([],[])); // Clear the previous response
+      setAnswer(new Answer([],[], new Date())); // Clear the previous response
       setTokens(0);
       setTps(0);
       setTtft(0);
@@ -159,7 +162,7 @@ const ChatAnswer = forwardRef((props: ChatAnswerProps, ref: Ref<ChatAnswerRef>) 
         startTime.current = Date.now();
         connection.current?.send(JSON.stringify(data)); // Send the query to the server
       } else {
-        setAnswer(new Answer([t('chat.content.empty_query')],[]));
+        setAnswer(new Answer([t('chat.content.empty_query')],[], new Date())); // Set the previous response to ['Please enter a query...']
       }
     };
   }
@@ -171,14 +174,14 @@ const ChatAnswer = forwardRef((props: ChatAnswerProps, ref: Ref<ChatAnswerRef>) 
    */
   const resetMessageHistory = () => {
     setMessageHistory(new MessageHistory([
-      new MessageContent(new Answer([t('chat.content.greeting')],[]))
+      new MessageContent(new Answer([t('chat.content.greeting')],[], new Date())),
     ]));
-    setAnswer(new Answer([''],[])); // Clear the previous response
+    setAnswer(new Answer([''],[], new Date())); // Clear the previous response
   };
 
   const changeCollectionOrVersion = (selectedCollection, selectedVersion) => {
     const previousAnswer = new MessageContent( // Save the previous response, needed because states are updated asynchronously
-      new Answer(answer.content,answer.sources)
+      new Answer(answer.content, answer.sources, answer.timestamp)
     );
     const previousMessageHistory = new MessageHistory(messageHistory.message); // Save the previous message history
     if (selectedCollection.collection_full_name !== "None") {
@@ -187,7 +190,8 @@ const ChatAnswer = forwardRef((props: ChatAnswerProps, ref: Ref<ChatAnswerRef>) 
           previousAnswer,
         new MessageContent(new Answer(
           [t('chat.content.change_product_prompt_start') + ' **' + selectedCollection.collection_full_name + '** ' + t('chat.content.change_product_prompt_version') + ' **' + selectedVersion + '**.'],
-          []
+          [],
+          new Date()
         ))
         ]
       ));
@@ -196,12 +200,14 @@ const ChatAnswer = forwardRef((props: ChatAnswerProps, ref: Ref<ChatAnswerRef>) 
         [...previousMessageHistory.message,
           previousAnswer,
         new MessageContent(new Answer(
-          [t('chat.content.change_product_prompt_none')],[]
+          [t('chat.content.change_product_prompt_none')],
+          [],
+          new Date()
         ))
         ]
       ));
     }
-    setAnswer(new Answer([],[])); // Clear the previous response
+    setAnswer(new Answer([],[], new Date())); // Clear the previous response
   }
 
   useImperativeHandle(ref, () => ({
@@ -270,12 +276,12 @@ const ChatAnswer = forwardRef((props: ChatAnswerProps, ref: Ref<ChatAnswerRef>) 
             const renderMessage = () => {
               if (message.messageContent.content.length != 0) {
                 if (message.messageContent.type === "Query" && message.messageContent.content != "") { // If the message is a query
-                  return (
-                  <Message
+                    return (
+                    <Message
                     name={userName}
                     role="user"
                     content={Array.isArray(message.messageContent.content) ? message.messageContent.content.join(' ') : message.messageContent.content}
-                    timestamp="1 hour ago"
+                    timestamp={message.messageContent.timestamp ? message.messageContent.timestamp.toLocaleString() : ''}
                     avatar={userAvatar}
                     />
                     );
@@ -285,7 +291,7 @@ const ChatAnswer = forwardRef((props: ChatAnswerProps, ref: Ref<ChatAnswerRef>) 
                     name="Bot"
                     role="bot"
                     content={(message.messageContent.content as string[]).join("")}
-                    timestamp="1 hour ago"
+                    timestamp={message.messageContent.timestamp ? message.messageContent.timestamp.toLocaleString() : ''}
                     avatar={orb}
                     {...(message.messageContent.type === "Answer" && 'sources' in message.messageContent && message.messageContent.sources?.length > 0 && {
                       sources: {
@@ -319,7 +325,7 @@ const ChatAnswer = forwardRef((props: ChatAnswerProps, ref: Ref<ChatAnswerRef>) 
             name="Bot"
             role="bot"
             content={(answer.content as string[]).join("")}
-            timestamp="1 hour ago"
+            timestamp={answer.timestamp ? answer.timestamp.toLocaleString() : ''}
             avatar={orb}
             {...(answer.sources?.length > 0 && {
               sources: {

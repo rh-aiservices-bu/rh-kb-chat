@@ -126,9 +126,8 @@ const Chat: React.FunctionComponent<ChatProps> = () => {
    */
   const sendQueryText = (message: string | number) => {
     const queryText = String(message);
-    const previousQuery = new MessageContent(new Query(queryText)); // Save the previous query
     setQueryText(new Query('')); // Clear the query text
-    const query = new Query(queryText, selectedCollection, collectionFullName, selectedVersion, i18n.language);
+    const query = new Query(queryText, selectedCollection, collectionFullName, selectedVersion, i18n.language, new Date());
 
     if (queryText !== "") {
       childRefs.current.forEach((childRef) => {
