@@ -1,22 +1,11 @@
 import userAvatar from '@app/assets/bgimages/default-user.svg';
 import orb from '@app/assets/bgimages/orb.svg';
 import config from '@app/config';
-import { Flex, FlexItem, FormSelect, FormSelectOption, Grid, GridItem, Content, ContentVariants, FormGroup, Form } from "@patternfly/react-core";
+import { Flex, FlexItem, FormSelect, FormSelectOption, Content } from "@patternfly/react-core";
 import { t } from "i18next";
 import React, { forwardRef, useImperativeHandle, Ref, useRef } from 'react';
-import Markdown from 'react-markdown';
-import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
-import { dracula } from 'react-syntax-highlighter/dist/cjs/styles/prism';
 import { Answer, MessageContent, MessageHistory, Query, Models, Source } from './classes';
-import rehypeRaw from 'rehype-raw';
-import remarkGfm from 'remark-gfm';
-import { version } from 'html-webpack-plugin';
 import { ChatbotContent, Message, MessageBox } from '@patternfly/chatbot';
-
-
-type MarkdownRendererProps = {
-  children: string;
-};
 
 
 interface ChatAnswerProps {
@@ -39,7 +28,6 @@ const ChatAnswer = forwardRef((props: ChatAnswerProps, ref: Ref<ChatAnswerRef>) 
   const uuid = Math.floor(Math.random() * 1000000000); // Generate a random number between 0 and 999999999
 
   // Chat elements
-  const [answerText, setAnswerText] = React.useState<Answer>(new Answer([''],[])); // The answer text
   const [answer, setAnswer] = React.useState<Answer>(new Answer([],[])); // The answer text
   const [messageHistory, setMessageHistory] = React.useState<MessageHistory>(
     new MessageHistory([
@@ -86,10 +74,24 @@ const ChatAnswer = forwardRef((props: ChatAnswerProps, ref: Ref<ChatAnswerRef>) 
         ));
         return;
       } else if (data['type'] === 'source') {
-        setAnswer(answer => new Answer(
-          [...(answer?.content || [])],
-          [...(answer?.sources || []), new Source(data['source'], data['score'])]
-        ));
+        setAnswer(answer => {
+          const existingSourceIndex = answer?.sources?.findIndex(source => source.content === data['source']);
+          if (existingSourceIndex !== -1) {
+            // Update the score if the new score is higher
+            const updatedSources = [...answer.sources];
+            updatedSources[existingSourceIndex].score = Math.max(updatedSources[existingSourceIndex].score, data['score']);
+            return new Answer(
+              [...(answer?.content || [])],
+              updatedSources
+            );
+          } else {
+            // Add the new source if it doesn't exist
+            return new Answer(
+              [...(answer?.content || [])],
+              [...(answer?.sources || []), new Source(data['source'], data['score'])]
+            );
+          }
+        });
         return;
       }
     }
@@ -159,7 +161,7 @@ const ChatAnswer = forwardRef((props: ChatAnswerProps, ref: Ref<ChatAnswerRef>) 
         startTime.current = Date.now();
         connection.current?.send(JSON.stringify(data)); // Send the query to the server
       } else {
-        setAnswerText(new Answer([t('chat.content.empty_query')],[]));
+        setAnswer(new Answer([t('chat.content.empty_query')],[]));
       }
     };
   }
@@ -173,7 +175,7 @@ const ChatAnswer = forwardRef((props: ChatAnswerProps, ref: Ref<ChatAnswerRef>) 
     setMessageHistory(new MessageHistory([
       new MessageContent(new Answer([t('chat.content.greeting')],[]))
     ]));
-    setAnswerText(new Answer([''],[])); // Clear the previous response
+    setAnswer(new Answer([''],[])); // Clear the previous response
   };
 
   const changeCollectionOrVersion = (selectedCollection, selectedVersion) => {
