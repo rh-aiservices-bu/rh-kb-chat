@@ -2,11 +2,11 @@ import userAvatar from '@app/assets/bgimages/default-user.svg';
 import orb from '@app/assets/bgimages/orb.svg';
 import config from '@app/config';
 import { Flex, FlexItem, FormSelect, FormSelectOption, Content } from "@patternfly/react-core";
-import { t } from "i18next";
 import React, { forwardRef, useImperativeHandle, Ref, useRef } from 'react';
 import { Answer, MessageContent, MessageHistory, Query, Models, Source } from './classes';
 import { ChatbotContent, Message, MessageBox } from '@patternfly/chatbot';
 import { useUser } from '@app/components/UserContext/UserContext';
+import { useTranslation } from 'react-i18next';
 
 interface ChatAnswerProps {
 }
@@ -21,6 +21,24 @@ const ChatAnswer = forwardRef((props: ChatAnswerProps, ref: Ref<ChatAnswerRef>) 
   // User
   const { userName } = useUser(); // Get the username from the context
 
+  // Translation
+  const { t, i18n } = useTranslation();
+
+  React.useEffect(() => {
+    const handleLanguageChange = () => {
+      const languageCode = t('language_code');
+      newGreeting(languageCode);
+    };
+
+    // Listen for language changes
+    i18n.on('languageChanged', handleLanguageChange);
+
+    // Cleanup listener on unmount
+    return () => {
+      i18n.off('languageChanged', handleLanguageChange);
+    };
+  }, [i18n, t]);
+
   // Models
   const [llms, setLlms] = React.useState<Models[]>([]); // The list of models
   const [selectedLLM, setSelectedLlm] = React.useState<string>(''); // The selected model
@@ -31,10 +49,10 @@ const ChatAnswer = forwardRef((props: ChatAnswerProps, ref: Ref<ChatAnswerRef>) 
   const uuid = Math.floor(Math.random() * 1000000000); // Generate a random number between 0 and 999999999
 
   // Chat elements
-  const [answer, setAnswer] = React.useState<Answer>(new Answer([],[], new Date())); // The answer text
+  const [answer, setAnswer] = React.useState<Answer>(new Answer([], [], new Date())); // The answer text
   const [messageHistory, setMessageHistory] = React.useState<MessageHistory>(
     new MessageHistory([
-      new MessageContent(new Answer([t('chat.content.greeting')],[], new Date())),
+      new MessageContent(new Answer([t('chat.content.greeting')], [], new Date())),
     ])
   ); // The message history
   const chatBotAnswer = document.getElementById('chatBotAnswer'); // The chat bot answer element
@@ -141,11 +159,11 @@ const ChatAnswer = forwardRef((props: ChatAnswerProps, ref: Ref<ChatAnswerRef>) 
    */
   const sendQuery = (query: Query) => {
     if (connection.current?.readyState === WebSocket.OPEN) {
-      const previousAnswer = new MessageContent(new Answer(answer.content,answer.sources, answer.timestamp)); // Save the previous response, needed because states are updated asynchronously
+      const previousAnswer = new MessageContent(new Answer(answer.content, answer.sources, answer.timestamp)); // Save the previous response, needed because states are updated asynchronously
       const previousQuery = new MessageContent(new Query(query.content)); // Save the previous query
       const previousMessageHistory = new MessageHistory(messageHistory.message); // Save the previous message history
       setMessageHistory(new MessageHistory([...previousMessageHistory.message, previousAnswer, previousQuery])); // Add the previous response to the message history
-      setAnswer(new Answer([],[], new Date())); // Clear the previous response
+      setAnswer(new Answer([], [], new Date())); // Clear the previous response
       setTokens(0);
       setTps(0);
       setTtft(0);
@@ -162,7 +180,7 @@ const ChatAnswer = forwardRef((props: ChatAnswerProps, ref: Ref<ChatAnswerRef>) 
         startTime.current = Date.now();
         connection.current?.send(JSON.stringify(data)); // Send the query to the server
       } else {
-        setAnswer(new Answer([t('chat.content.empty_query')],[], new Date())); // Set the previous response to ['Please enter a query...']
+        setAnswer(new Answer([t('chat.content.empty_query')], [], new Date())); // Set the previous response to ['Please enter a query...']
       }
     };
   }
@@ -174,9 +192,9 @@ const ChatAnswer = forwardRef((props: ChatAnswerProps, ref: Ref<ChatAnswerRef>) 
    */
   const resetMessageHistory = () => {
     setMessageHistory(new MessageHistory([
-      new MessageContent(new Answer([t('chat.content.greeting')],[], new Date())),
+      new MessageContent(new Answer([t('chat.content.greeting')], [], new Date())),
     ]));
-    setAnswer(new Answer([''],[], new Date())); // Clear the previous response
+    setAnswer(new Answer([''], [], new Date())); // Clear the previous response
   };
 
   const changeCollectionOrVersion = (selectedCollection, selectedVersion) => {
@@ -207,8 +225,25 @@ const ChatAnswer = forwardRef((props: ChatAnswerProps, ref: Ref<ChatAnswerRef>) 
         ]
       ));
     }
-    setAnswer(new Answer([],[], new Date())); // Clear the previous response
+    setAnswer(new Answer([], [], new Date())); // Clear the previous response
   }
+
+  const newGreeting = (languageCode: string) => {
+    const previousAnswer = new MessageContent( // Save the previous response, needed because states are updated asynchronously
+      new Answer(answer.content, answer.sources, answer.timestamp)
+    );
+    const previousMessageHistory = new MessageHistory(messageHistory.message);
+    setMessageHistory(new MessageHistory(
+      [...previousMessageHistory.message,
+        previousAnswer,
+      new MessageContent(new Answer(
+        [t('chat.content.greeting')],
+        [],
+        new Date()
+      ))
+      ]
+    ));
+  };
 
   useImperativeHandle(ref, () => ({
     sendQuery(query) {
@@ -250,6 +285,23 @@ const ChatAnswer = forwardRef((props: ChatAnswerProps, ref: Ref<ChatAnswerRef>) 
     });
   };
 
+  /**
+   * Reads aloud the given content using the Web Speech API.
+   * Supports different languages if specified.
+   *
+   * @param content - The text content to read aloud.
+   */
+  const readAloud = (content: string) => {
+    const language = t('language_code') || 'en-US'; // Get the language from the t function, default to 'en-US'
+    if ('speechSynthesis' in window) {
+      const utterance = new SpeechSynthesisUtterance(content);
+      utterance.lang = language;
+      window.speechSynthesis.speak(utterance);
+    } else {
+      console.error('Speech synthesis is not supported in this browser.');
+    }
+  };
+
   return (
     <Flex direction={{ default: 'column' }} className='chat-item'>
       <FlexItem >
@@ -278,89 +330,121 @@ const ChatAnswer = forwardRef((props: ChatAnswerProps, ref: Ref<ChatAnswerRef>) 
       </FlexItem>
       <FlexItem className='chat-bot-answer'>
         <ChatbotContent className='chat-bot-answer-content'>
-        <MessageBox id='chatBotAnswer' className='chat-bot-answer-box'>
-          {/* Message History rendering */}
-          {messageHistory.message.map((message: MessageContent, index) => {
-            const renderMessage = () => {
-              if (message.messageContent.content.length != 0) {
-                if (message.messageContent.type === "Query" && message.messageContent.content != "") { // If the message is a query
+          <MessageBox id='chatBotAnswer' className='chat-bot-answer-box'>
+            {/* Message History rendering */}
+            {messageHistory.message.map((message: MessageContent, index) => {
+              const renderMessage = () => {
+                if (message.messageContent.content.length != 0) {
+                  if (message.messageContent.type === "Query" && message.messageContent.content != "") { // If the message is a query
                     return (
-                    <Message
-                    name={userName}
-                    role="user"
-                    content={Array.isArray(message.messageContent.content) ? message.messageContent.content.join(' ') : message.messageContent.content}
-                    timestamp={message.messageContent.timestamp ? message.messageContent.timestamp.toLocaleString() : ''}
-                    avatar={userAvatar}
-                    actions={{
-                      copy: { onClick: () => copyToClipboard(
-                        Array.isArray(message.messageContent.content) 
-                          ? message.messageContent.content.join(' ') 
-                          : message.messageContent.content
-                      ) },
-                      listen: { onClick: () => console.log('Listen') }
-                    }}
-                    />
+                      <Message
+                        name={userName}
+                        role="user"
+                        content={Array.isArray(message.messageContent.content) ? message.messageContent.content.join(' ') : message.messageContent.content}
+                        timestamp={message.messageContent.timestamp ? message.messageContent.timestamp.toLocaleString() : ''}
+                        avatar={userAvatar}
+                        actions={{
+                          copy: {
+                            onClick: () => copyToClipboard(
+                              Array.isArray(message.messageContent.content)
+                                ? message.messageContent.content.join(' ')
+                                : message.messageContent.content
+                            )
+                          },
+                          listen: {
+                            onClick: () => readAloud(
+                              Array.isArray(message.messageContent.content)
+                                ? message.messageContent.content.join(' ')
+                                : message.messageContent.content
+                            )
+                          }
+                        }}
+                      />
                     );
-                } else if (message.messageContent.type === "Answer" && (message.messageContent.content as string[]).join("") != "") { // If the message is a response
-                    return(
-                    <Message
-                    name="Bot"
-                    role="bot"
-                    content={(message.messageContent.content as string[]).join("")}
-                    timestamp={message.messageContent.timestamp ? message.messageContent.timestamp.toLocaleString() : ''}
-                    avatar={orb}
-                    {...(message.messageContent.type === "Answer" && 'sources' in message.messageContent && message.messageContent.sources?.length > 0 && {
-                      sources: {
-                      sources: message.messageContent.sources.map((source) => ({
-                        title: `${source.content.substring(source.content.lastIndexOf('/') + 1)} (${cosineScoreToPercentage(source.score)}%)`,
-                        link: source.content,
-                        })),
-                      },
-                    })}
-                    />
+                  } else if (message.messageContent.type === "Answer" && (message.messageContent.content as string[]).join("") != "") { // If the message is a response
+                    return (
+                      <Message
+                        name="Bot"
+                        role="bot"
+                        content={(message.messageContent.content as string[]).join("")}
+                        timestamp={message.messageContent.timestamp ? message.messageContent.timestamp.toLocaleString() : ''}
+                        avatar={orb}
+                        {...(message.messageContent.type === "Answer" && 'sources' in message.messageContent && message.messageContent.sources?.length > 0 && {
+                          sources: {
+                            sources: message.messageContent.sources.map((source) => ({
+                              title: `${source.content.substring(source.content.lastIndexOf('/') + 1)} (${cosineScoreToPercentage(source.score)}%)`,
+                              link: source.content,
+                            })),
+                          },
+                        })}
+                        actions={{
+                          copy: {
+                            onClick: () => copyToClipboard(
+                              (message.messageContent.content as string[]).join("")
+                            )
+                          },
+                          listen: {
+                            onClick: () => readAloud(
+                              (message.messageContent.content as string[]).join("")
+                            )
+                          }
+                        }}
+                      />
                     );
+                  } else {
+                    {/* If the message is of an unknown type */ }
+                    return;
+                  }
                 } else {
-                  {/* If the message is of an unknown type */ }
+                  {/* If the message is empty */ }
                   return;
                 }
-              } else {
-                {/* If the message is empty */ }
-                return;
               }
-            }
-            return (
-              <React.Fragment key={index}>
-                {renderMessage()}
-              </React.Fragment>
-            );
-          })}
-
-          {/* New Answer rendering */}
-            {answer.content.join("") !== "" && (
-            <Message
-            name="Bot"
-            role="bot"
-            content={(answer.content as string[]).join("")}
-            timestamp={answer.timestamp ? answer.timestamp.toLocaleString() : ''}
-            avatar={orb}
-            {...(answer.sources?.length > 0 && {
-              sources: {
-              sources: answer.sources.map((source) => ({
-              title: `${source.content
-                .substring(source.content.lastIndexOf('/') + 1)
-                .replace(/_/g, ' ')
-                .replace(/^\w/, (c) => c.toUpperCase())} (${cosineScoreToPercentage(source.score)}%)`,
-              body: `${source.content
-                .substring(source.content.lastIndexOf('/') + 1)
-                .replace(/_/g, ' ')
-                .replace(/^\w/, (c) => c.toUpperCase())} (${cosineScoreToPercentage(source.score)}%)`,
-                link: source.content,
-              })),
-              },
+              return (
+                <React.Fragment key={index}>
+                  {renderMessage()}
+                </React.Fragment>
+              );
             })}
-            />
+
+            {/* New Answer rendering */}
+            {answer.content.join("") !== "" && (
+              <Message
+                name="Bot"
+                role="bot"
+                content={(answer.content as string[]).join("")}
+                timestamp={answer.timestamp ? answer.timestamp.toLocaleString() : ''}
+                avatar={orb}
+                {...(answer.sources?.length > 0 && {
+                  sources: {
+                    sources: answer.sources.map((source) => ({
+                      title: `${source.content
+                        .substring(source.content.lastIndexOf('/') + 1)
+                        .replace(/_/g, ' ')
+                        .replace(/^\w/, (c) => c.toUpperCase())} (${cosineScoreToPercentage(source.score)}%)`,
+                      body: `${source.content
+                        .substring(source.content.lastIndexOf('/') + 1)
+                        .replace(/_/g, ' ')
+                        .replace(/^\w/, (c) => c.toUpperCase())} (${cosineScoreToPercentage(source.score)}%)`,
+                      link: source.content,
+                    })),
+                  },
+                })}
+                actions={{
+                  copy: {
+                    onClick: () => copyToClipboard(
+                      (answer.content as string[]).join("")
+                    )
+                  },
+                  listen: {
+                    onClick: () => readAloud(
+                      (answer.content as string[]).join("")
+                    )
+                  }
+                }}
+              />
             )}
-        </MessageBox>
+          </MessageBox>
         </ChatbotContent>
       </FlexItem>
     </Flex>
