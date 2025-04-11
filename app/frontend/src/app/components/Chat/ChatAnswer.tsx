@@ -23,16 +23,21 @@ const ChatAnswer = forwardRef((props: ChatAnswerProps, ref: Ref<ChatAnswerRef>) 
 
   // Translation
   const { t, i18n } = useTranslation();
+  const [userLanguage, setUserLanguage] = React.useState<string>(t('language_code'));
 
   React.useEffect(() => {
     const handleLanguageChange = () => {
       const languageCode = t('language_code');
-      newGreeting(languageCode);
+      if (languageCode !== userLanguage) {
+        newGreeting(languageCode);
+        setUserLanguage(languageCode);
+      }
     };
-
-    // Listen for language changes
+  
+    // Remove any existing listener before adding a new one
+    i18n.off('languageChanged', handleLanguageChange);
     i18n.on('languageChanged', handleLanguageChange);
-
+  
     // Cleanup listener on unmount
     return () => {
       i18n.off('languageChanged', handleLanguageChange);
@@ -51,7 +56,9 @@ const ChatAnswer = forwardRef((props: ChatAnswerProps, ref: Ref<ChatAnswerRef>) 
   // Chat elements
   const [answer, setAnswer] = React.useState<Answer>(new Answer([], [], new Date())); // The answer text
   const [messageHistory, setMessageHistory] = React.useState<MessageHistory>(
-    new MessageHistory([])
+    new MessageHistory([
+      new MessageContent(new Answer([t('chat.content.greeting')], [], new Date())),
+    ])
   ); // The message history
   const chatBotAnswer = document.getElementById('chatBotAnswer'); // The chat bot answer element
 
