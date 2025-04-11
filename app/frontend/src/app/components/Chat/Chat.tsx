@@ -287,7 +287,7 @@ const Chat: React.FunctionComponent<ChatProps> = () => {
                 className="chat-grid">
                 {items.map((item, index) => (
                   <GridItem key={index} className='chat-grid-item' span={Math.floor(12 / (items.length)) as any}>
-                    {/* Replace with your ChatAnswer component */}
+                    {/* ChatAnswer component */}
                     {item}
                   </GridItem>
                 ))}
