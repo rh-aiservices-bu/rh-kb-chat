@@ -83,7 +83,7 @@ class MilvusHandler:
             )
 
 
-    def ingest_documentation(self, collection, version, chunk_size=768, chunk_overlap=128, drop_old=True, batch_size=600):
+    def ingest_documentation(self, collection, version, chunk_size=768, chunk_overlap=128, drop_old=True):
         """Ingest documentation into Milvus"""
 
         collection_name = (
@@ -127,7 +127,10 @@ class MilvusHandler:
             f"Calculating embeddings and uploading documents to collection {collection_name}"
         )
 
-        # Process in batches of 600
+        # Keep embedding requests bounded as well as Milvus inserts. Sending the
+        # full document set to the inference endpoint can return an error payload
+        # that older langchain-milvus versions misreport as a missing vector field.
+        batch_size = self.milvus_batch_size
         total_splits = len(splits)
         for i in range(0, total_splits, batch_size):
             end_idx = min(i + batch_size, total_splits)

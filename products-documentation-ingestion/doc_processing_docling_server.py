@@ -28,7 +28,6 @@ def generate_splits(urls, product, product_full_name, chunk_size, chunk_overlap)
     # Generate splits from the given URLs
     all_splits = []
     for url in urls:
-        print(f"Processing: {url}")
         md_content = docling_processing(url)
         # Get the title of the document from the last part of the URL
         title = url.split("/")[-1]
