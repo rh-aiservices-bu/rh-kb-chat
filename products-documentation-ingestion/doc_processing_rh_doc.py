@@ -132,9 +132,14 @@ def get_pages(product, version, language):
     # Extract all the links
     links = []
     for match in new_soup.findAll("a"):
-        links.append(match.get("href"))
+        href = match.get("href")
+        if href:
+            links.append(href)
     links = [
-        url for url in links if url.startswith("/en-US/documentation") or url.startswith("/en/documentation")
+        url for url in links
+        if (url.startswith("https://docs.redhat.com/en/documentation") or
+            url.startswith("/en/documentation") or
+            url.startswith("/en-US/documentation"))
     ]  # Filter out unwanted links
     pages = [
         link.replace("/html/", "/html-single/") for link in links if "/html/" in link
@@ -147,7 +152,7 @@ def split_document(product, version, language, page, product_full_name, chunk_si
     """Split a Red Hat documentation page into smaller sections."""
 
     # Load, parse, and transform to Markdown
-    document_url = ["https://docs.redhat.com" + page]
+    document_url = [page if page.startswith("http") else "https://docs.redhat.com" + page]
     print(f"Processing: {document_url}")
     loader = RedHatDocumentationLoader(document_url)
     docs = loader.load()
