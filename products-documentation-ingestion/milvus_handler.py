@@ -1,9 +1,11 @@
 import os
+from numbers import Real
 
 from langchain_milvus import Milvus
-from langchain_community.embeddings import HuggingFaceInferenceAPIEmbeddings
+from langchain_core.embeddings import Embeddings
 from pymilvus import MilvusClient
 from dotenv import load_dotenv
+import requests
 
 import doc_processing_rh_doc as dp_rh
 import doc_processing_docling_server as dp_ds
@@ -12,6 +14,66 @@ os.environ["TRANSFORMERS_VERBOSITY"] = "error"
 os.environ["TRANSFORMERS_NO_ADVISORY_WARNINGS"] = "1"
 
 load_dotenv()
+
+
+class LiteLLMEmbeddings(Embeddings):
+    """Embedding client for an OpenAI-compatible LiteLLM endpoint."""
+
+    def __init__(self, api_url, api_key, model_name):
+        self.api_url = api_url
+        self.api_key = api_key
+        self.model_name = model_name
+
+    def embed_documents(self, texts):
+        response = requests.post(
+            self.api_url,
+            headers={
+                "accept": "application/json",
+                "Content-Type": "application/json",
+                "Authorization": f"Bearer {self.api_key}",
+            },
+            json={
+                "encoding_format": "float",
+                "input": texts,
+                "model": self.model_name,
+            },
+            timeout=120,
+        )
+
+        if not response.ok:
+            raise RuntimeError(
+                f"Embedding endpoint returned HTTP {response.status_code}: "
+                f"{response.text[:500]}"
+            )
+
+        payload = response.json()
+
+        if isinstance(payload, dict) and isinstance(payload.get("data"), list):
+            data = sorted(payload["data"], key=lambda item: item.get("index", 0))
+            payload = [item.get("embedding") for item in data]
+
+        valid = (
+            isinstance(payload, list)
+            and len(payload) == len(texts)
+            and all(
+                isinstance(vector, list)
+                and vector
+                and all(isinstance(value, Real) for value in vector)
+                for vector in payload
+            )
+        )
+        if not valid:
+            preview = repr(payload)[:500]
+            raise RuntimeError(
+                "Embedding endpoint returned an invalid response; expected "
+                f"{len(texts)} numeric vector(s), received: {preview}"
+            )
+
+        return payload
+
+    def embed_query(self, text):
+        return self.embed_documents([text])[0]
+
 
 class MilvusHandler:
     def __init__(
@@ -39,12 +101,11 @@ class MilvusHandler:
             password=self.milvus_password,
             db_name=self.milvus_db
         )
-        self.embeddings = HuggingFaceInferenceAPIEmbeddings(
+        self.embeddings = LiteLLMEmbeddings(
             api_url=self.embeddings_api_url,
             api_key=self.embeddings_api_key,
-            model_name=self.embeddings_model_name
+            model_name=self.embeddings_model_name,
         )
-        # check_embedding_ctx_length=False,
 
     def collection_check(self, collection_name):
         collections = self.client.list_collections()
