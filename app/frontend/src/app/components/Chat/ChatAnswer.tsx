@@ -1,22 +1,12 @@
-import userAvatar from '@app/assets/bgimages/avatar-user.svg';
+import userAvatar from '@app/assets/bgimages/default-user.svg';
 import orb from '@app/assets/bgimages/orb.svg';
 import config from '@app/config';
-import { Flex, FlexItem, FormSelect, FormSelectOption, Grid, GridItem, StackItem, Text, TextContent, TextVariants } from "@patternfly/react-core";
-import { t } from "i18next";
+import { Flex, FlexItem, FormSelect, FormSelectOption, Content } from "@patternfly/react-core";
 import React, { forwardRef, useImperativeHandle, Ref, useRef } from 'react';
-import Markdown from 'react-markdown';
-import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
-import { dracula } from 'react-syntax-highlighter/dist/cjs/styles/prism';
-import { Answer, Message, MessageHistory, Query, Sources, Models, Source } from './classes';
-import rehypeRaw from 'rehype-raw';
-import remarkGfm from 'remark-gfm';
-import { version } from 'html-webpack-plugin';
-
-
-type MarkdownRendererProps = {
-  children: string;
-};
-
+import { Answer, MessageContent, MessageHistory, Query, Models, Source } from './classes';
+import { ChatbotContent, Message, MessageBox } from '@patternfly/chatbot';
+import { useUser } from '@app/components/UserContext/UserContext';
+import { useTranslation } from 'react-i18next';
 
 interface ChatAnswerProps {
 }
@@ -28,6 +18,32 @@ export interface ChatAnswerRef {
 }
 
 const ChatAnswer = forwardRef((props: ChatAnswerProps, ref: Ref<ChatAnswerRef>) => {
+  // User
+  const { userName } = useUser(); // Get the username from the context
+
+  // Translation
+  const { t, i18n } = useTranslation();
+  const [userLanguage, setUserLanguage] = React.useState<string>(t('language_code'));
+
+  React.useEffect(() => {
+    const handleLanguageChange = () => {
+      const languageCode = t('language_code');
+      if (languageCode !== userLanguage) {
+        newGreeting(languageCode);
+        setUserLanguage(languageCode);
+      }
+    };
+  
+    // Remove any existing listener before adding a new one
+    i18n.off('languageChanged', handleLanguageChange);
+    i18n.on('languageChanged', handleLanguageChange);
+  
+    // Cleanup listener on unmount
+    return () => {
+      i18n.off('languageChanged', handleLanguageChange);
+    };
+  }, [i18n, t]);
+
   // Models
   const [llms, setLlms] = React.useState<Models[]>([]); // The list of models
   const [selectedLLM, setSelectedLlm] = React.useState<string>(''); // The selected model
@@ -38,52 +54,18 @@ const ChatAnswer = forwardRef((props: ChatAnswerProps, ref: Ref<ChatAnswerRef>) 
   const uuid = Math.floor(Math.random() * 1000000000); // Generate a random number between 0 and 999999999
 
   // Chat elements
-  const [answerText, setAnswerText] = React.useState<Answer>(new Answer([''])); // The answer text
-  const [answerSources, setAnswerSources] = React.useState<Sources>(new Sources([])); // Array of sources for the answer
+  const [answer, setAnswer] = React.useState<Answer>(new Answer([], [], new Date())); // The answer text
   const [messageHistory, setMessageHistory] = React.useState<MessageHistory>(
     new MessageHistory([
-      new Message(new Answer([t('chat.content.greeting')]))
+      new MessageContent(new Answer([t('chat.content.greeting')], [], new Date())),
     ])
   ); // The message history
-  const chatBotAnswer = document.getElementById('chatBotAnswer'); // The chat bot answer element
 
   // Stopwatch and timer#
   const startTime = useRef<number | null>(null);
   const [tokens, setTokens] = React.useState<number>(0);
   const [ttft, setTtft] = React.useState<number>(0);
   const [tps, setTps] = React.useState<number>(0);
-
-  /**
-     * Renders markdown content with syntax highlighting for code blocks.
-     * 
-     * @param markdown - The markdown content to render.
-     * @returns The rendered markdown content.
-     */
-  const MarkdownRenderer = ({ children: markdown }: MarkdownRendererProps) => {
-    return (
-      <Markdown className='chat-question-text'
-        remarkPlugins={[remarkGfm]}
-        rehypePlugins={[rehypeRaw]}
-        components={{
-          code({ node, inline, className, children, ...props }: any) {
-            const match = /language-(\w+)/.exec(className || '');
-
-            return !inline && match ? (
-              <SyntaxHighlighter style={dracula} PreTag="div" language={match[1]} {...props}>
-                {String(children).replace(/\n$/, '')}
-              </SyntaxHighlighter>
-            ) : (
-              <code className='chat-question-text' {...props}>
-                {children}
-              </code>
-            );
-          },
-        }}
-      >
-        {markdown}
-      </Markdown>
-    );
-  }
 
   // Open a WebSocket connection and listen for messages
   React.useEffect(() => {
@@ -111,10 +93,33 @@ const ChatAnswer = forwardRef((props: ChatAnswerProps, ref: Ref<ChatAnswerRef>) 
           }
           return newTokens;
         });
-        setAnswerText(answerText => new Answer([...answerText.content, data['token']]));
+        setAnswer(answer => new Answer(
+          [...(answer?.content || []), data['token']],
+          [...(answer?.sources || [])],
+          answer?.timestamp || new Date()
+        ));
         return;
       } else if (data['type'] === 'source') {
-        setAnswerSources(answerSources => new Sources([...answerSources.content, new Source(data['source'], data['score'])]));
+        setAnswer(answer => {
+          const existingSourceIndex = answer?.sources?.findIndex(source => source.content === data['source']);
+          if (existingSourceIndex !== -1) {
+            // Update the score if the new score is higher
+            const updatedSources = [...answer.sources];
+            updatedSources[existingSourceIndex].score = Math.max(updatedSources[existingSourceIndex].score, data['score']);
+            return new Answer(
+              [...(answer.content || [])],
+              updatedSources,
+              answer.timestamp
+            );
+          } else {
+            // Add the new source if it doesn't exist
+            return new Answer(
+              [...(answer.content || [])],
+              [...(answer.sources || []), new Source(data['source'], data['score'])],
+              answer.timestamp
+            );
+          }
+        });
         return;
       }
     }
@@ -130,7 +135,6 @@ const ChatAnswer = forwardRef((props: ChatAnswerProps, ref: Ref<ChatAnswerRef>) 
     };
   }, []);
 
-
   // Load available models at startup
   React.useEffect(() => {
     const fetchLLMs = async () => {
@@ -144,11 +148,10 @@ const ChatAnswer = forwardRef((props: ChatAnswerProps, ref: Ref<ChatAnswerRef>) 
     , []);
 
   // Scroll to the bottom of the chat window when the answer changes
+  const scrollToBottomRef = React.useRef<HTMLDivElement>(null);
   React.useEffect(() => {
-    if (chatBotAnswer) {
-      chatBotAnswer.scrollTop = chatBotAnswer.scrollHeight;
-    }
-  }, [answerText, answerSources, messageHistory]);  // Dependency array
+    scrollToBottomRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [answer, messageHistory]);  // Dependency array
 
 
   /**
@@ -159,13 +162,11 @@ const ChatAnswer = forwardRef((props: ChatAnswerProps, ref: Ref<ChatAnswerRef>) 
    */
   const sendQuery = (query: Query) => {
     if (connection.current?.readyState === WebSocket.OPEN) {
-      const previousAnswer = new Message(new Answer(answerText.content)); // Save the previous response, needed because states are updated asynchronously
-      const previousSources = new Message(new Sources(answerSources.content)); // Save the previous sources
-      const previousQuery = new Message(new Query(query.content)); // Save the previous query
-      const previousMessageHistory = new MessageHistory(messageHistory.content); // Save the previous message history
-      setMessageHistory(new MessageHistory([...previousMessageHistory.content, previousAnswer, previousSources, previousQuery])); // Add the previous response to the message history
-      setAnswerText(new Answer([])); // Clear the previous response
-      setAnswerSources(new Sources([])); // Clear the previous sources
+      const previousAnswer = new MessageContent(new Answer(answer.content, answer.sources, answer.timestamp)); // Save the previous response, needed because states are updated asynchronously
+      const previousQuery = new MessageContent(new Query(query.content)); // Save the previous query
+      const previousMessageHistory = new MessageHistory(messageHistory.message); // Save the previous message history
+      setMessageHistory(new MessageHistory([...previousMessageHistory.message, previousAnswer, previousQuery])); // Add the previous response to the message history
+      setAnswer(new Answer([], [], new Date())); // Clear the previous response
       setTokens(0);
       setTps(0);
       setTtft(0);
@@ -182,7 +183,7 @@ const ChatAnswer = forwardRef((props: ChatAnswerProps, ref: Ref<ChatAnswerRef>) 
         startTime.current = Date.now();
         connection.current?.send(JSON.stringify(data)); // Send the query to the server
       } else {
-        setAnswerText(new Answer([t('chat.content.empty_query')]));
+        setAnswer(new Answer([t('chat.content.empty_query')], [], new Date())); // Set the previous response to ['Please enter a query...']
       }
     };
   }
@@ -194,44 +195,58 @@ const ChatAnswer = forwardRef((props: ChatAnswerProps, ref: Ref<ChatAnswerRef>) 
    */
   const resetMessageHistory = () => {
     setMessageHistory(new MessageHistory([
-      new Message(new Answer([t('chat.content.greeting')]))
+      new MessageContent(new Answer([t('chat.content.greeting')], [], new Date())),
     ]));
-    setAnswerSources(new Sources([]));
-    setAnswerText(new Answer(['']));
+    setAnswer(new Answer([''], [], new Date())); // Clear the previous response
   };
 
   const changeCollectionOrVersion = (selectedCollection, selectedVersion) => {
-    const previousAnswer = new Message( // Save the previous response, needed because states are updated asynchronously
-      new Answer(answerText.content)
+    const previousAnswer = new MessageContent( // Save the previous response, needed because states are updated asynchronously
+      new Answer(answer.content, answer.sources, answer.timestamp)
     );
-    const previousSources = new Message( // Save the previous sources
-      new Sources(answerSources.content)
-    );
-    const previousMessageHistory = new MessageHistory(messageHistory.content); // Save the previous message history
+    const previousMessageHistory = new MessageHistory(messageHistory.message); // Save the previous message history
     if (selectedCollection.collection_full_name !== "None") {
       setMessageHistory(new MessageHistory(
-        [...previousMessageHistory.content,
+        [...previousMessageHistory.message,
           previousAnswer,
-          previousSources,
-        new Message(new Answer(
-          [t('chat.content.change_product_prompt_start') + ' **' + selectedCollection.collection_full_name + '** ' + t('chat.content.change_product_prompt_version') + ' **' + selectedVersion + '**.']
+        new MessageContent(new Answer(
+          [t('chat.content.change_product_prompt_start') + ' **' + selectedCollection.collection_full_name + '** ' + t('chat.content.change_product_prompt_version') + ' **' + selectedVersion + '**.'],
+          [],
+          new Date()
         ))
         ]
       ));
     } else {
       setMessageHistory(new MessageHistory(
-        [...previousMessageHistory.content,
+        [...previousMessageHistory.message,
           previousAnswer,
-          previousSources,
-        new Message(new Answer(
-          [t('chat.content.change_product_prompt_none')]
+        new MessageContent(new Answer(
+          [t('chat.content.change_product_prompt_none')],
+          [],
+          new Date()
         ))
         ]
       ));
     }
-    setAnswerText(new Answer([])); // Clear the previous response
-    setAnswerSources(new Sources([])); // Clear the previous sources
+    setAnswer(new Answer([], [], new Date())); // Clear the previous response
   }
+
+  const newGreeting = (languageCode: string) => {
+    const previousAnswer = new MessageContent( // Save the previous response, needed because states are updated asynchronously
+      new Answer(answer.content, answer.sources, answer.timestamp)
+    );
+    const previousMessageHistory = new MessageHistory(messageHistory.message);
+    setMessageHistory(new MessageHistory(
+      [...previousMessageHistory.message,
+        previousAnswer,
+      new MessageContent(new Answer(
+        [t('chat.content.greeting')],
+        [],
+        new Date()
+      ))
+      ]
+    ));
+  };
 
   useImperativeHandle(ref, () => ({
     sendQuery(query) {
@@ -263,12 +278,38 @@ const ChatAnswer = forwardRef((props: ChatAnswerProps, ref: Ref<ChatAnswerRef>) 
 
     const clampedScore = Math.max(0, Math.min(2, score));
     return Math.round((1 - clampedScore / 2) * 100);
-}
+  }
+
+  const copyToClipboard = (content: string) => {
+    navigator.clipboard.writeText(content).then(() => {
+      console.log('Content copied to clipboard');
+    }).catch(err => {
+      console.error('Failed to copy content: ', err);
+    });
+  };
+
+  /**
+   * Reads aloud the given content using the Web Speech API.
+   * Supports different languages if specified.
+   *
+   * @param content - The text content to read aloud.
+   */
+  const readAloud = (content: string) => {
+    const language = t('language_code') || 'en-US'; // Get the language from the t function, default to 'en-US'
+    if ('speechSynthesis' in window) {
+      const utterance = new SpeechSynthesisUtterance(content);
+      utterance.lang = language;
+      window.speechSynthesis.speak(utterance);
+    } else {
+      console.error('Speech synthesis is not supported in this browser.');
+    }
+  };
 
   return (
-    <Flex direction={{ default: 'column' }}>
+    <Flex direction={{ default: 'column' }} className='chat-item'>
       <FlexItem >
         <Flex direction={{ default: 'row' }} className='chat-llm-select'>
+          <Content component='h3' className='model-title'>Model:</Content>
           <FormSelect
             value={selectedLLM}
             onChange={onChangeLlm}
@@ -280,117 +321,135 @@ const ChatAnswer = forwardRef((props: ChatAnswerProps, ref: Ref<ChatAnswerRef>) 
               <FormSelectOption key={index} value={llm.name} label={llm.name} />
             ))}
           </FormSelect>
-            <TextContent style={{ display: 'flex', alignItems: 'normal' }}>
-          {ttft !== 0 && (            
-              <Text className="token-metrics">{ttft.toFixed(2)}s tft,</Text>
-          )}
-          {tps !== 0 && (
-              <Text className="token-metrics">{tps.toFixed(2)} t/s</Text>
-          )}
-          </TextContent>
+          <Content className='chat-llm-stats'>
+            {ttft !== 0 && (
+              <Content component="p" className='chat-llm-stats'>{ttft.toFixed(2)}s tft,</Content>
+            )}
+            {tps !== 0 && (
+              <Content component="p" className='chat-llm-stats'>{tps.toFixed(2)} t/s</Content>
+            )}
+          </Content>
         </Flex>
       </FlexItem>
-      <FlexItem>
-        <TextContent id='chatBotAnswer'>
-          {/* Message History rendering */}
-          {messageHistory.content.map((message: Message, index) => {
-            const renderMessage = () => {
-              if (message.content.content.length != 0) {
-                if (message.content.type === "Query" && message.content.content != "") { // If the message is a query
-                  return <Grid className='chat-item'>
-                    <GridItem span={1} className='grid-item-orb'>
-                      <img src={userAvatar} className='user-avatar' />
-                    </GridItem>
-                    <GridItem span={11}>
-                      <Text component={TextVariants.p} className='chat-question-text'>{Array.isArray(message.content.content) ? message.content.content.join(' ') : message.content.content}</Text>
-                    </GridItem>
-                  </Grid>
-                } else if (message.content.type === "Answer" && (message.content.content as string[]).join("") != "") { // If the message is a response
-                  return <Grid className='chat-item'>
-                    <GridItem span={1} className='grid-item-orb'>
-                      <img src={orb} className='orb' />
-                    </GridItem>
-                    <GridItem span={11}>
-                      <MarkdownRenderer>{(message.content.content as string[]).join("")}</MarkdownRenderer>
-                    </GridItem>
-                  </Grid>
-                } else if (message.content.type === "Sources") { // If the message is a source
-                  return <Grid className='chat-item'>
-                    <GridItem span={1} className='grid-item-orb'>&nbsp;</GridItem>
-                    <GridItem span={11}>
-                      <Text component={TextVariants.p} className='chat-source-text'>{t('chat.content.references') + ": "}</Text>
-                      {message.content && (message.content.content as Source[]).map((source, index) => {
-                        const renderSource = () => {
-                          if (source.content.startsWith('http')) {
-                            return <Text component={TextVariants.p} className='chat-source-text'>
-                              <a href={source.content} target="_blank" className='chat-source-link'>{source.content}</a>
-                            </Text>
-                          } else {
-                            return <Text component={TextVariants.p} className='chat-source-text'>{source.content}</Text>
+      <FlexItem className='chat-bot-answer'>
+        <ChatbotContent className='chat-bot-answer-content'>
+          <MessageBox className='chat-bot-answer-box'>
+            {/* Message History rendering */}
+            {messageHistory.message.map((message: MessageContent, index) => {
+              const renderMessage = () => {
+                if (message.messageContent.content.length != 0) {
+                  if (message.messageContent.type === "Query" && message.messageContent.content != "") { // If the message is a query
+                    return (
+                      <Message
+                        name={userName}
+                        role="user"
+                        content={Array.isArray(message.messageContent.content) ? message.messageContent.content.join(' ') : message.messageContent.content}
+                        timestamp={message.messageContent.timestamp ? message.messageContent.timestamp.toLocaleString() : ''}
+                        avatar={userAvatar}
+                        actions={{
+                          copy: {
+                            onClick: () => copyToClipboard(
+                              Array.isArray(message.messageContent.content)
+                                ? message.messageContent.content.join(' ')
+                                : message.messageContent.content
+                            )
+                          },
+                          listen: {
+                            onClick: () => readAloud(
+                              Array.isArray(message.messageContent.content)
+                                ? message.messageContent.content.join(' ')
+                                : message.messageContent.content
+                            )
                           }
-                        };
-                        return (
-                          <React.Fragment key={index}>
-                            {renderSource()}
-                          </React.Fragment>
-                        );
-                      })}
-                    </GridItem>
-                  </Grid>
+                        }}
+                      />
+                    );
+                  } else if (message.messageContent.type === "Answer" && (message.messageContent.content as string[]).join("") != "") { // If the message is a response
+                    return (
+                      <Message
+                        name="Bot"
+                        role="bot"
+                        content={(message.messageContent.content as string[]).join("")}
+                        timestamp={message.messageContent.timestamp ? message.messageContent.timestamp.toLocaleString() : ''}
+                        avatar={orb}
+                        {...(message.messageContent.type === "Answer" && 'sources' in message.messageContent && message.messageContent.sources?.length > 0 && {
+                          sources: {
+                            sources: message.messageContent.sources.map((source) => ({
+                              title: `${source.content.substring(source.content.lastIndexOf('/') + 1)} (${cosineScoreToPercentage(source.score)}%)`,
+                              link: source.content,
+                            })),
+                          },
+                        })}
+                        actions={{
+                          copy: {
+                            onClick: () => copyToClipboard(
+                              (message.messageContent.content as string[]).join("")
+                            )
+                          },
+                          listen: {
+                            onClick: () => readAloud(
+                              (message.messageContent.content as string[]).join("")
+                            )
+                          }
+                        }}
+                      />
+                    );
+                  } else {
+                    {/* If the message is of an unknown type */ }
+                    return;
+                  }
                 } else {
-                  {/* If the message is of an unknown type */}
+                  {/* If the message is empty */ }
                   return;
                 }
-              } else {
-                {/* If the message is empty */}
-                return;
               }
-            }
+              return (
+                <React.Fragment key={index}>
+                  <div ref={scrollToBottomRef}></div>
+                  {renderMessage()}
+                </React.Fragment>
+              );
+            })}
 
-            return (
-              <React.Fragment key={index}>
-                {renderMessage()}
-              </React.Fragment>
-            );
-          })}
-
-          {/* New Answer rendering */}
-          {answerText.content.join("") !== "" && (
-            <div>
-              <Grid className='chat-item'>
-                <GridItem span={1} className='grid-item-orb'>
-                  <img src={orb} className='orb' />
-                </GridItem>
-                <GridItem span={11}>
-                  <MarkdownRenderer>{answerText.content.join("")}</MarkdownRenderer>
-                </GridItem>
-              </Grid>
-              <Grid className='chat-item'>
-                <GridItem span={1} className='grid-item-orb'>&nbsp;</GridItem>
-                <GridItem span={11}>
-                  <Text component={TextVariants.p} className='chat-source-text'>{answerSources.content.length != 0 && (t('chat.content.references') + ": ")}</Text>
-                  {answerSources && answerSources.content.map((source, index) => {
-                    const renderSource = () => {
-                      if (source.content.startsWith('http')) {
-                        return <Text component={TextVariants.p} className='chat-source-text'>
-                          <a href={source.content} target="_blank" className='chat-source-link'>{source.content}</a> ({cosineScoreToPercentage(source.score)}% match)
-                        </Text>
-                      } else {
-                        return <Text component={TextVariants.p} className='chat-source-text'>{source.content} ({cosineScoreToPercentage(source.score)}% match)</Text>
-                      }
-                    };
-                    return (
-                      <React.Fragment key={index}>
-                        {renderSource()}
-                      </React.Fragment>
-                    );
-                  })}
-
-                </GridItem>
-              </Grid>
-            </div>
-          )}
-        </TextContent>
+            {/* New Answer rendering */}
+            {answer.content.join("") !== "" && (
+              <Message
+                name="Bot"
+                role="bot"
+                content={(answer.content as string[]).join("")}
+                timestamp={answer.timestamp ? answer.timestamp.toLocaleString() : ''}
+                avatar={orb}
+                {...(answer.sources?.length > 0 && {
+                  sources: {
+                    sources: answer.sources.map((source) => ({
+                      title: `${source.content
+                        .substring(source.content.lastIndexOf('/') + 1)
+                        .replace(/_/g, ' ')
+                        .replace(/^\w/, (c) => c.toUpperCase())} (${cosineScoreToPercentage(source.score)}%)`,
+                      body: `${source.content
+                        .substring(source.content.lastIndexOf('/') + 1)
+                        .replace(/_/g, ' ')
+                        .replace(/^\w/, (c) => c.toUpperCase())} (${cosineScoreToPercentage(source.score)}%)`,
+                      link: source.content,
+                    })),
+                  },
+                })}
+                actions={{
+                  copy: {
+                    onClick: () => copyToClipboard(
+                      (answer.content as string[]).join("")
+                    )
+                  },
+                  listen: {
+                    onClick: () => readAloud(
+                      (answer.content as string[]).join("")
+                    )
+                  }
+                }}
+              />
+            )}
+          </MessageBox>
+        </ChatbotContent>
       </FlexItem>
     </Flex>
   );

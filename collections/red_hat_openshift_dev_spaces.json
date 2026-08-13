@@ -4,6 +4,56 @@
   "common_sources": [],
   "versions": [
     {
+      "version_number": "3.24",
+      "store_directive": "create_or_keep",
+      "sources": [
+        {
+          "ingestion_type": "redhat_doc",
+          "language": "en-US"
+        }
+      ]
+    },    
+    {
+      "version_number": "3.23",
+      "store_directive": "create_or_keep",
+      "sources": [
+        {
+          "ingestion_type": "redhat_doc",
+          "language": "en-US"
+        }
+      ]
+    },    
+    {
+      "version_number": "3.22",
+      "store_directive": "create_or_keep",
+      "sources": [
+        {
+          "ingestion_type": "redhat_doc",
+          "language": "en-US"
+        }
+      ]
+    },    
+    {
+      "version_number": "3.21",
+      "store_directive": "create_or_keep",
+      "sources": [
+        {
+          "ingestion_type": "redhat_doc",
+          "language": "en-US"
+        }
+      ]
+    },    
+    {
+      "version_number": "3.20",
+      "store_directive": "create_or_keep",
+      "sources": [
+        {
+          "ingestion_type": "redhat_doc",
+          "language": "en-US"
+        }
+      ]
+    },
+    {
       "version_number": "3.18",
       "store_directive": "create_or_keep",
       "sources": [

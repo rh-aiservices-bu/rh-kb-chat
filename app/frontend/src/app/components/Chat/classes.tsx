@@ -4,30 +4,36 @@ export class Query {
   collectionFullName: string;
   selectedVersion: string;
   language: string;
-  type: string;
-
+  timestamp: Date;
+  type = 'Query';
+  
   constructor(
     content: string = '',
     collection: string = '',
     collectionFullName: string = '',
     selectedVersion: string = '',
-    language: string = ''
+    language: string = '',
+    timestamp: Date = new Date()
   ) {
     this.content = content;
     this.collection = collection;
     this.collectionFullName = collectionFullName;
     this.selectedVersion = selectedVersion;
     this.language = language;
-    this.type = 'Query';
+    this.timestamp = timestamp;
   }
 }
 
 export class Answer {
   content: string[];
+  sources: Source[];
+  timestamp: Date;
   type = 'Answer';
-
-  constructor(content: string[]) {
+  
+  constructor(content: string[], sources, timestamp) {
     this.content = content;
+    this.sources = sources;
+    this.timestamp = timestamp;
   }
 }
 
@@ -41,29 +47,19 @@ export class Source {
   }
 }
 
-export class Sources {
-  content: Source[];
-  type = 'Sources';
-
-  constructor(content: Source[]) {
-    this.content = content;
-  }
-}
-
-
-export class Message {
-  content: Query | Answer | Sources;
-
-  constructor(content: Query | Answer | Sources) {
-    this.content = content;
+export class MessageContent {
+  messageContent: Query | Answer ;
+  
+  constructor(messageContent: Query | Answer ) {
+    this.messageContent = messageContent;
   }
 }
 
 export class MessageHistory {
-  content: Message[];
+  message: MessageContent[];
 
-  constructor(content: Message[]) {
-    this.content = content;
+  constructor(message: MessageContent[]) {
+    this.message = message;
   }
 }
 
