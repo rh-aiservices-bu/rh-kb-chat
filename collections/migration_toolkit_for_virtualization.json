@@ -4,8 +4,58 @@
   "common_sources": [],
   "versions": [
     {
-      "version_number": "2.7",
+      "version_number": "2.12",
       "store_directive": "create_or_keep",
+      "sources": [
+        {
+          "ingestion_type": "redhat_doc",
+          "language": "en-US"
+        }
+      ]
+    },
+    {
+      "version_number": "2.11",
+      "store_directive": "create_or_keep",
+      "sources": [
+        {
+          "ingestion_type": "redhat_doc",
+          "language": "en-US"
+        }
+      ]
+    },
+    {
+      "version_number": "2.10",
+      "store_directive": "delete",
+      "sources": [
+        {
+          "ingestion_type": "redhat_doc",
+          "language": "en-US"
+        }
+      ]
+    },
+    {
+      "version_number": "2.9",
+      "store_directive": "delete",
+      "sources": [
+        {
+          "ingestion_type": "redhat_doc",
+          "language": "en-US"
+        }
+      ]
+    },
+    {
+      "version_number": "2.8",
+      "store_directive": "delete",
+      "sources": [
+        {
+          "ingestion_type": "redhat_doc",
+          "language": "en-US"
+        }
+      ]
+    },
+    {
+      "version_number": "2.7",
+      "store_directive": "delete",
       "sources": [
         {
           "ingestion_type": "redhat_doc",
@@ -15,56 +65,6 @@
     },
     {
       "version_number": "2.6",
-      "store_directive": "create_or_keep",
-      "sources": [
-        {
-          "ingestion_type": "redhat_doc",
-          "language": "en-US"
-        }
-      ]
-    },
-    {
-      "version_number": "2.5",
-      "store_directive": "delete",
-      "sources": [
-        {
-          "ingestion_type": "redhat_doc",
-          "language": "en-US"
-        }
-      ]
-    },
-    {
-      "version_number": "2.4",
-      "store_directive": "delete",
-      "sources": [
-        {
-          "ingestion_type": "redhat_doc",
-          "language": "en-US"
-        }
-      ]
-    },
-    {
-      "version_number": "2.3",
-      "store_directive": "delete",
-      "sources": [
-        {
-          "ingestion_type": "redhat_doc",
-          "language": "en-US"
-        }
-      ]
-    },
-    {
-      "version_number": "2.2",
-      "store_directive": "delete",
-      "sources": [
-        {
-          "ingestion_type": "redhat_doc",
-          "language": "en-US"
-        }
-      ]
-    },
-    {
-      "version_number": "2.1",
       "store_directive": "delete",
       "sources": [
         {
