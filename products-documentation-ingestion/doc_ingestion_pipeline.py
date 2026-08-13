@@ -24,7 +24,6 @@ ingestion_secret_name = 'doc-ingestion'
 def doc_ingestion_pipeline():
     ### 🐶 Document ingestion
     doc_ingestion_task = doc_ingest()
-    doc_ingestion_task.set_image_pull_policy("Always")
     kubernetes.use_secret_as_env(
         doc_ingestion_task,
         secret_name=ingestion_secret_name,
