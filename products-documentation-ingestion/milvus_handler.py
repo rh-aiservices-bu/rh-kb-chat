@@ -119,6 +119,10 @@ class MilvusHandler:
             drop_old=drop_old,
         )
 
+        if not splits:
+            print(f"WARNING: No splits generated for collection {collection_name}, skipping ingestion")
+            return
+
         print(
             f"Calculating embeddings and uploading documents to collection {collection_name}"
         )

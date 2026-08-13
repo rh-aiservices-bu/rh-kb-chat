@@ -134,7 +134,7 @@ def get_pages(product, version, language):
     for match in new_soup.findAll("a"):
         links.append(match.get("href"))
     links = [
-        url for url in links if url.startswith("/en/documentation")
+        url for url in links if url.startswith("/en-US/documentation") or url.startswith("/en/documentation")
     ]  # Filter out unwanted links
     pages = [
         link.replace("/html/", "/html-single/") for link in links if "/html/" in link
