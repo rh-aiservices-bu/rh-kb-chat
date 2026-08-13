@@ -1,4 +1,5 @@
 beautifulsoup4==4.13.3
+setuptools
 einops==0.8.1
 html2text==2024.2.26
 langchain==0.3.19
