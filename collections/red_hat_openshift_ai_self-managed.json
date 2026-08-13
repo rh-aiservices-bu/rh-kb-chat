@@ -49,7 +49,7 @@
     },
     {
       "version_number": "2.17",
-      "store_directive": "update",
+      "store_directive": "delete",
       "sources": [
         {
           "ingestion_type": "redhat_doc",
@@ -59,7 +59,7 @@
     },
     {
       "version_number": "2.16",
-      "store_directive": "update",
+      "store_directive": "delete",
       "sources": [
         {
           "ingestion_type": "redhat_doc",
@@ -69,7 +69,7 @@
     },
     {
       "version_number": "2.13",
-      "store_directive": "update",
+      "store_directive": "delete",
       "sources": [
         {
           "ingestion_type": "redhat_doc",
