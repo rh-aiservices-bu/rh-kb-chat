@@ -1,128 +1,50 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<!-- Created with Inkscape (http://www.inkscape.org/) -->
-
-<svg
-   width="800"
-   height="583"
-   viewBox="0 0 800 583"
-   version="1.1"
-   id="svg528"
-   xml:space="preserve"
-   inkscape:version="1.2.2 (b0a8486541, 2022-12-01)"
-   sodipodi:docname="robot-head.svg"
-   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
-   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
-   xmlns="http://www.w3.org/2000/svg"
-   xmlns:svg="http://www.w3.org/2000/svg"><sodipodi:namedview
-     id="namedview530"
-     pagecolor="#ffffff"
-     bordercolor="#666666"
-     borderopacity="1.0"
-     inkscape:showpageshadow="2"
-     inkscape:pageopacity="0.0"
-     inkscape:pagecheckerboard="0"
-     inkscape:deskcolor="#d1d1d1"
-     inkscape:document-units="mm"
-     showgrid="false"
-     inkscape:zoom="0.7198092"
-     inkscape:cx="569.59538"
-     inkscape:cy="363.98534"
-     inkscape:window-width="1920"
-     inkscape:window-height="1017"
-     inkscape:window-x="0"
-     inkscape:window-y="32"
-     inkscape:window-maximized="1"
-     inkscape:current-layer="layer7" /><defs
-     id="defs525" /><g
-     inkscape:groupmode="layer"
-     id="layer7"
-     inkscape:label="Ears"
-     style="display:inline"
-     transform="translate(-2.4232039,-56.312379)"><path
-       style="display:inline;fill:#000c7e;fill-opacity:1;stroke:#000c7e;stroke-width:3.80666;stroke-linecap:butt;stroke-linejoin:round;stroke-dasharray:none;stroke-opacity:1;stop-color:#000000"
-       d="m 212.02906,442.84749 -49.52802,16.98918 9.48452,40.46645 49.71845,110.05452 47.79114,-4.61272 z"
-       id="path11903"
-       sodipodi:nodetypes="cccccc" /><path
-       style="fill:#fc0000;fill-opacity:1;stroke:#000c7e;stroke-width:3.80666;stroke-linecap:butt;stroke-linejoin:round;stroke-dasharray:none;stroke-opacity:1;stop-color:#000000"
-       d="m 161.14949,457.9201 c 0,0 -25.69097,6.73545 -32.98996,16.52955 -0.62223,10.58877 0.57421,25.00631 4.83551,43.60382 7.81221,28.45175 19.33628,51.99421 25.60253,65.47573 7.32312,14.56664 15.02033,25.96529 21.23737,29.51627 12.56122,1.41771 40.82566,3.00177 40.82566,3.00177 l -33.27144,-73.01553 -18.03518,-42.35147 z"
-       id="path11905"
-       sodipodi:nodetypes="ccccccccc" /><path
-       style="fill:#000051;fill-opacity:1;stroke:#000c7e;stroke-width:3.80666;stroke-linecap:butt;stroke-linejoin:round;stroke-dasharray:none;stroke-opacity:1;stop-color:#000000"
-       d="m 178.2956,454.04499 -14.50605,-63.65682 28.05914,-7.53475 18.43607,62.15372 z"
-       id="path11976"
-       sodipodi:nodetypes="ccccc" /><path
-       style="display:inline;fill:#000c7e;fill-opacity:1;stroke:#000c7e;stroke-width:3.80666;stroke-linecap:butt;stroke-linejoin:round;stroke-dasharray:none;stroke-opacity:1;stop-color:#000000"
-       d="m 577.13856,335.78872 50.1372,-15.09397 15.86936,38.41108 23.72185,118.42308 -41.51572,24.13598 z"
-       id="path11903-3"
-       sodipodi:nodetypes="cccccc" /><path
-       style="fill:#fc0000;fill-opacity:1;stroke:#000c7e;stroke-width:3.80666;stroke-linecap:butt;stroke-linejoin:round;stroke-dasharray:none;stroke-opacity:1;stop-color:#000000"
-       d="m 627.25731,318.34906 c 0,0 24.79685,-9.51708 36.4329,-5.8183 6.67442,8.23992 14.10179,20.65167 21.47428,38.24768 10.22847,27.67391 14.58107,53.52489 17.34411,68.13414 2.53661,16.10749 2.92371,29.85931 -0.0587,36.37167 -9.37949,8.48067 -31.42039,26.25849 -31.42039,26.25849 l -15.50604,-78.73439 -10.02046,-44.93146 z"
-       id="path11905-6"
-       sodipodi:nodetypes="ccccccccc" /><path
-       style="fill:#000051;fill-opacity:1;stroke:#000c7e;stroke-width:3.80666;stroke-linecap:butt;stroke-linejoin:round;stroke-dasharray:none;stroke-opacity:1;stop-color:#000000"
-       d="m 611.06917,325.20458 -25.29992,-60.18223 -27.18658,10.24937 21.23123,61.25391 z"
-       id="path11976-7"
-       sodipodi:nodetypes="ccccc" /></g><g
-     inkscape:groupmode="layer"
-     id="layer6"
-     inkscape:label="Face"
-     style="display:inline"
-     transform="translate(-2.4232039,-56.312379)"><path
-       style="display:inline;fill:#ffffff;fill-opacity:1;stroke:#000c7e;stroke-width:3.80666;stroke-linecap:butt;stroke-linejoin:round;stroke-dasharray:none;stroke-opacity:1"
-       d="m 183.93334,377.97385 c 32.65432,132.19125 28.46449,120.9774 81.88182,259.43562 C 398.72979,616.70219 522.71677,583.08267 647.76923,533.61654 623.90127,420.86789 610.7895,375.79658 569.01863,270.75438 Z"
-       id="path7987"
-       sodipodi:nodetypes="ccccc" /><path
-       style="display:inline;fill:#000051;fill-opacity:1;stroke:#000c7e;stroke-width:3.80666;stroke-linecap:butt;stroke-linejoin:round;stroke-dasharray:none;stroke-opacity:1;stop-color:#000000"
-       d="m 223.17775,422.54643 c 7.3944,23.55622 21.35608,63.35302 25.92205,85.7173 32.52409,-7.66809 50.39327,-13.76326 84.048,-27.06868 -0.16908,-14.61376 -17.32639,-56.7922 -22.18432,-84.31919 0,0 -54.98698,13.43095 -87.78573,25.67057 z"
-       id="path8201"
-       sodipodi:nodetypes="ccccc" /><path
-       style="display:inline;fill:#000051;fill-opacity:1;stroke:#000c7e;stroke-width:3.80666;stroke-linecap:butt;stroke-linejoin:round;stroke-dasharray:none;stroke-opacity:1;stop-color:#000000"
-       d="m 456.82644,361.44722 c 6.35626,23.18136 18.74873,70.71814 23.32001,84.7027 29.91214,-11.06283 65.26896,-19.63312 89.99694,-29.00228 -1.02506,-17.43656 -17.52948,-61.30126 -23.06247,-84.86787 -14.34344,4.63434 -54.46998,14.52701 -90.25448,29.16745 z"
-       id="path8203"
-       sodipodi:nodetypes="ccccc" /><path
-       style="display:inline;fill:#000051;fill-opacity:1;stroke:#000c7e;stroke-width:3.80666;stroke-linecap:butt;stroke-linejoin:round;stroke-dasharray:none;stroke-opacity:1;stop-color:#000000"
-       d="m 333.10568,545.33995 12.50392,39.55742 c 91.77303,-19.03459 110.39169,-24.10518 198.03965,-60.78015 l -9.44538,-36.23402 c -82.19465,29.60324 -112.70556,39.3286 -201.09819,57.45675 z"
-       id="path8205"
-       sodipodi:nodetypes="ccccc" /><path
-       style="fill:#fc0000;fill-opacity:1;stroke:#000c7e;stroke-width:3.80666;stroke-linecap:butt;stroke-linejoin:round;stroke-dasharray:none;stroke-opacity:1;stop-color:#000000"
-       d="m 257.82063,449.39244 5.86931,19.73727 50.51188,-17.32415 -1.06479,-10.8553 3.29556,-12.51833 z"
-       id="path11078" /><path
-       style="fill:#fc0000;fill-opacity:1;stroke:#000c7e;stroke-width:3.80666;stroke-linecap:butt;stroke-linejoin:round;stroke-dasharray:none;stroke-opacity:1;stop-color:#000000"
-       d="m 476.70874,381.29619 4.06539,12.67596 0.88306,11.7111 67.94053,-22.84069 -6.34826,-24.65731 z"
-       id="path11203" /><path
-       style="fill:#000c7e;fill-opacity:1;stroke:#000c7e;stroke-width:3.80666;stroke-linecap:butt;stroke-linejoin:round;stroke-dasharray:none;stroke-opacity:1;stop-color:#000000"
-       d="m 369.4293,467.03346 c 6.90465,8.67194 21.38665,16.35182 38.83162,15.05476 17.17832,-3.01427 27.42936,-32.88778 27.42936,-32.88778 -12.71166,15.72117 -15.54765,22.22966 -28.44031,24.60827 -14.92226,0.34932 -17.33142,1.01889 -37.82067,-6.77525 z"
-       id="path11205"
-       sodipodi:nodetypes="ccccc" /></g><g
-     inkscape:groupmode="layer"
-     id="layer5"
-     inkscape:label="Hat"
-     style="display:inline"
-     transform="translate(-2.4232039,-56.312379)"><g
-       inkscape:groupmode="layer"
-       id="layer2"
-       inkscape:label="hat-top"
-       style="display:inline;stroke-width:1.00013;stroke-dasharray:none"><path
-         style="fill:#fc0000;fill-opacity:1;stroke:#000c7e;stroke-width:3.889;stroke-linecap:butt;stroke-linejoin:miter;stroke-dasharray:none;stroke-opacity:1"
-         d="M 107.19747,172.95638 C 299.12719,67.636243 410.85145,61.501745 548.4739,58.292762 565.00618,125.9658 598.4309,250.6386 598.4309,250.6386 L 151.76349,371.69391 c 0,0 -31.18916,-134.74742 -44.56602,-198.73753 z"
-         id="path645"
-         sodipodi:nodetypes="ccccc" /></g><g
-       inkscape:groupmode="layer"
-       id="layer3"
-       inkscape:label="band"><path
-         style="color:#000000;fill:#000c7e;stroke-width:3.88849;-inkscape-stroke:none"
-         d="M 576.60658,157.43227 C 424.20009,170.589 267.22746,214.0566 130.71248,276.38743 l 14.45827,60.25007 C 274.92223,277.39477 445.22861,230.18194 589.105,217.7616 Z"
-         id="path4840"
-         sodipodi:nodetypes="ccccc" /></g><g
-       inkscape:groupmode="layer"
-       id="layer4"
-       inkscape:label="hat-bottom"
-       style="display:inline;fill:#000000;stroke-width:1.00013;stroke-dasharray:none"
-       transform="rotate(-14.870248,97.135567,121.15685)"><ellipse
-         style="fill:#fc0000;fill-opacity:1;stroke:#000c7e;stroke-width:5.92326;stroke-linecap:butt;stroke-linejoin:round;stroke-dasharray:none;stroke-opacity:1;stop-color:#000000"
-         id="path7914"
-         cx="-158.55728"
-         cy="630.01953"
-         rx="409.53497"
-         ry="48.458572"
-         transform="matrix(0.99976963,-0.02146368,0.79609925,0.60516608,0,0)" /></g></g></svg>
+<?xml version="1.0" encoding="UTF-8"?><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 38 38"><title>Red Hat AI icon</title>
+<desc>artificial intelligence, Red Hat Enterprise Linux AI, Red Hat OpenShift AI, RHEL AI, machine learning</desc>
+<metadata><?xpacket begin="﻿" id="W5M0MpCehiHzreSzNTczkc9d"?>
+<x:xmpmeta xmlns:x="adobe:ns:meta/" x:xmptk="Adobe XMP Core 8.0-c001 1.000000, 0000/00/00-00:00:00        ">
+   <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+      <rdf:Description rdf:about=""
+            xmlns:tiff="http://ns.adobe.com/tiff/1.0/"
+            xmlns:dc="http://purl.org/dc/elements/1.1/"
+            xmlns:xmp="http://ns.adobe.com/xap/1.0/">
+         <tiff:ImageLength>38</tiff:ImageLength>
+         <tiff:ImageWidth>38</tiff:ImageWidth>
+         <dc:modified>2025-03-12T19:43:40.963Z</dc:modified>
+         <dc:format>image/svg+xml</dc:format>
+         <dc:title>
+            <rdf:Alt>
+               <rdf:li xml:lang="x-default">Red Hat AI icon</rdf:li>
+            </rdf:Alt>
+         </dc:title>
+         <dc:description>
+            <rdf:Alt>
+               <rdf:li xml:lang="x-default">artificial intelligence, Red Hat Enterprise Linux AI, Red Hat OpenShift AI, RHEL AI, machine learning</rdf:li>
+            </rdf:Alt>
+         </dc:description>
+         <xmp:brand-content-type>Icon</xmp:brand-content-type>
+         <xmp:rhcc-rights-restricted>no</xmp:rhcc-rights-restricted>
+         <xmp:rhcc-file-last-modified>2025-03-12T19:39:59.817Z</xmp:rhcc-file-last-modified>
+         <xmp:brand-content-subtype>Technology icon</xmp:brand-content-subtype>
+         <xmp:brand-logo-color>Standard</xmp:brand-logo-color>
+      </rdf:Description>
+   </rdf:RDF>
+</x:xmpmeta>
+                                                                                                    
+                                                                                                    
+                                                                                                    
+                                                                                                    
+                                                                                                    
+                                                                                                    
+                                                                                                    
+                                                                                                    
+                                                                                                    
+                                                                                                    
+                                                                                                    
+                                                                                                    
+                                                                                                    
+                                                                                                    
+                                                                                                    
+                                                                                                    
+                                                       
+<?xpacket end="w"?></metadata>
+<defs><style>.uuid-d4ca69c2-2716-4216-b5d9-c608612b001a{fill:#4d4d4d;}.uuid-246a6908-db71-413b-883d-ad4d5b6914a7{fill:#fff;}.uuid-293636b2-d16c-4b3c-b3ee-76a7a851464a{fill:#e00;}</style></defs><g id="uuid-d0b370ff-968c-41c8-b8e2-761ffd1df8c1"><rect x="1" y="1" width="36" height="36" rx="9" ry="9"/><path class="uuid-d4ca69c2-2716-4216-b5d9-c608612b001a" d="M28,2.25c4.2734,0,7.75,3.4766,7.75,7.75v18c0,4.2734-3.4766,7.75-7.75,7.75H10c-4.2734,0-7.75-3.4766-7.75-7.75V10c0-4.2734,3.4766-7.75,7.75-7.75h18M28,1H10C5.0294,1,1,5.0294,1,10v18c0,4.9706,4.0294,9,9,9h18c4.9706,0,9-4.0294,9-9V10c0-4.9706-4.0294-9-9-9h0Z"/></g><g id="uuid-b55214ed-1f54-4b54-80ae-4d5ad877ea43"><path class="uuid-246a6908-db71-413b-883d-ad4d5b6914a7" d="M18.999,25.6772h-.0034c-.3462-.0024-.6348-.2661-.6724-.6128-.2261-2.0425-1.1992-3.9277-2.7397-5.3062-.2568-.2305-.2788-.6255-.0488-.8828.2295-.2568.624-.2783.8828-.0488,1.1616,1.04,2.043,2.3315,2.5845,3.7607.9795-2.5576,3.0322-4.6089,5.5938-5.5874-2.5635-.98-4.6172-3.0337-5.5957-5.5962-1.2622,3.3032-4.3091,5.7607-7.9287,6.1621-.335.0449-.6519-.2085-.6899-.5522-.0381-.3433.209-.6519.5522-.6899,3.8545-.4277,6.9624-3.5356,7.3901-7.3901.0347-.3149.3545-.6084.6719-.6108.2974.0024.6392.2578.6802.6045.4277,3.8608,3.5361,6.9688,7.3906,7.3965.3164.0352.6104.3579.6104.6763,0,.3486-.2637.6392-.6133.6768-3.8516.4272-6.96,3.5352-7.3867,7.3896-.0352.3169-.3594.6108-.6777.6108ZM26.9258,17.5659c.002,0,.0029,0,.0049.0005-.002-.0005-.0029-.0005-.0049-.0005ZM19.5664,9.0693c0,.001,0,.0024-.001.0039.001-.0015.001-.0029.001-.0039Z"/><path class="uuid-293636b2-d16c-4b3c-b3ee-76a7a851464a" d="M19,29.625c-.1045,0-.209-.0264-.3037-.0786l-9.8999-5.5c-.1982-.1104-.3213-.3193-.3213-.5464s.123-.436.3213-.5464l3.8999-2.1665c.3018-.1675.6826-.0586.8501.2427.1675.3018.0591.6826-.2427.8501l-2.9165,1.6201,8.6128,4.7852,8.6133-4.7852-2.917-1.6201c-.3018-.1675-.4102-.5483-.2422-.8501.166-.3013.5459-.4102.8496-.2427l3.9004,2.1665c.1982.1104.3213.3193.3213.5464s-.123.436-.3213.5464l-9.9004,5.5c-.0947.0522-.1992.0786-.3037.0786Z"/></g></svg>
