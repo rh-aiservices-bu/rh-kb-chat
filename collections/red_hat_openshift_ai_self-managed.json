@@ -29,6 +29,16 @@
   ],
   "versions": [
     {
+      "version_number": "2.18",
+      "store_directive": "create_or_keep",
+      "sources": [
+        {
+          "ingestion_type": "redhat_doc",
+          "language": "en-US"
+        }
+      ]
+    },
+    {
       "version_number": "2.17",
       "store_directive": "create_or_keep",
       "sources": [
