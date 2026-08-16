@@ -4,7 +4,7 @@ from kfp.dsl import (
     component
 )
 
-@component(target_image='quay.io/ckavili/rh-kb-doc-ingestion:1.7')
+@component(target_image='quay.io/ckavili/rh-kb-doc-ingestion:1.8')
 def doc_ingest():
     """
     Start ingesting the docs
