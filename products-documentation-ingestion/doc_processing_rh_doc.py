@@ -191,7 +191,24 @@ def generate_splits(product, product_full_name, version, language, chunk_size, c
     print("Generating splits for Red Hat doc...")
     all_splits = []
     for page in pages:
-        splits = split_document(product, version, language, page, product_full_name, chunk_size, chunk_overlap)
+        try:
+            splits = split_document(
+                product,
+                version,
+                language,
+                page,
+                product_full_name,
+                chunk_size,
+                chunk_overlap,
+            )
+        except requests.HTTPError as exc:
+            # Product landing pages occasionally retain links to guides that
+            # have been removed. Do not discard every valid guide in the
+            # product/version because of one stale catalog entry.
+            if exc.response is not None and exc.response.status_code == 404:
+                print(f"WARNING: Documentation page not found, skipping: {page}")
+                continue
+            raise
         all_splits.extend(splits)
     print(f"Generated {len(all_splits)} splits.")
 

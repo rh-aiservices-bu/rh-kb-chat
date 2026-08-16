@@ -7,7 +7,7 @@ import { Chat } from './components/Chat/Chat';
 
 export interface IAppRoute {
   label?: string; // Excluding the label will exclude the route from the nav sidebar in AppLayout
-  element: JSX.Element;
+  element: React.ReactElement;
   path: string;
   title: string;
   routes?: undefined;

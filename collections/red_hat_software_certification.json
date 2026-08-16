@@ -8,8 +8,10 @@
       "store_directive": "create_or_keep",
       "sources": [
         {
-          "ingestion_type": "redhat_doc",
-          "language": "en-US"
+          "ingestion_type": "docling_server",
+          "urls": [
+            "https://docs.redhat.com/en/documentation/red_hat_software_certification/2024/html-single/red_hat_software_certification_quick_start_guide/index"
+          ]
         }
       ]
     }

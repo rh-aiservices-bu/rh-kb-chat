@@ -1,10 +1,10 @@
 {
-  "collection_base_name": "edge_management",
-  "collection_full_name": "Edge management",
+  "collection_base_name": "red_hat_edge_manager",
+  "collection_full_name": "Red Hat Edge Manager",
   "common_sources": [],
   "versions": [
     {
-      "version_number": "1-latest",
+      "version_number": "1.1",
       "store_directive": "create_or_keep",
       "sources": [
         {

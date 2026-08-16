@@ -7,9 +7,9 @@ from langchain.callbacks.base import BaseCallbackHandler
 from langchain.chains import create_retrieval_chain
 from langchain.chains.combine_documents import create_stuff_documents_chain
 from langchain.prompts import PromptTemplate
-from langchain_community.embeddings import HuggingFaceInferenceAPIEmbeddings
 from langchain_community.llms import VLLMOpenAI
 
+from litellm_embeddings import LiteLLMEmbeddings
 from milvus_retriever_with_score_threshold import \
     MilvusRetrieverWithScoreThreshold
 
@@ -45,7 +45,7 @@ class Chatbot:
         logger: Logger object for logging messages.
         config (dict): Configuration settings for the chatbot.
         model_kwargs (dict): Keyword arguments for the model.
-        embeddings: HuggingFaceEmbeddings object for handling embeddings.
+        embeddings: LiteLLM embeddings client for handling embeddings.
         prompt_template: Template for the chatbot's prompt.
 
     Methods:
@@ -76,7 +76,7 @@ class Chatbot:
             )
 
         # Instantiate Embeddings
-        self.embeddings = HuggingFaceInferenceAPIEmbeddings(
+        self.embeddings = LiteLLMEmbeddings(
             api_url=self.config.get('embeddings').get('inference_endpoint'),
             api_key=self.config.get('embeddings').get('api_key'),
             model_name=self.config.get('embeddings').get('model_name'),

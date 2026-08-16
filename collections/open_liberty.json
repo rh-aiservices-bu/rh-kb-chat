@@ -8,8 +8,10 @@
       "store_directive": "create_or_keep",
       "sources": [
         {
-          "ingestion_type": "redhat_doc",
-          "language": "en-US"
+          "ingestion_type": "docling_server",
+          "urls": [
+            "https://openliberty.io/docs/24.0.0.12/overview.html"
+          ]
         }
       ]
     },
@@ -18,8 +20,10 @@
       "store_directive": "create_or_keep",
       "sources": [
         {
-          "ingestion_type": "redhat_doc",
-          "language": "en-US"
+          "ingestion_type": "docling_server",
+          "urls": [
+            "https://openliberty.io/docs/24.0.0.9/overview.html"
+          ]
         }
       ]
     },

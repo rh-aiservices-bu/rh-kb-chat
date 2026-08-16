@@ -1,5 +1,5 @@
 {
-  "collection_base_name": "streams_for_apache_kafka",
+  "collection_base_name": "red_hat_streams_for_apache_kafka",
   "collection_full_name": "Streams for Apache Kafka",
   "common_sources": [],
   "versions": [

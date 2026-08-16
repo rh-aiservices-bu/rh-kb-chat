@@ -8,8 +8,10 @@
       "store_directive": "create_or_keep",
       "sources": [
         {
-          "ingestion_type": "redhat_doc",
-          "language": "en-US"
+          "ingestion_type": "docling_server",
+          "urls": [
+            "https://docs.redhat.com/en/documentation/red_hat_certified_cloud_and_service_provider_certification/2025/html-single/red_hat_certified_cloud_and_service_provider_certification_policy_guide/index"
+          ]
         }
       ]
     }

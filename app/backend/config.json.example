@@ -46,10 +46,10 @@
     ],
     "embeddings": 
         {
-            "name": "Nomic-embed-text-v1.5",
-            "inference_endpoint": "replace_me/embed",
+            "name": "Nomic-embed-text-v2-moe",
+            "inference_endpoint": "https://replace_me/v1/embeddings",
             "api_key": "replace_me",
-            "model_name": "/mnt/models"
+            "model_name": "Nomic-embed-text-v2-moe"
         }
     ,
     "vectorstore": 

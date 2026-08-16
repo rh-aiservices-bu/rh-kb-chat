@@ -61,13 +61,13 @@ const Chat: React.FunctionComponent<ChatProps> = () => {
   const maxChats = parseInt(searchParams.get('maxchat') || '4', 10);
 
   // ChatAnswer instances
-  const [items, setItems] = React.useState<JSX.Element[]>([
-    <ChatAnswer key={1} ref={(el) => (childRefs.current[1] = el)} />
+  const [items, setItems] = React.useState<React.ReactElement[]>([
+    <ChatAnswer key={1} ref={(el) => { childRefs.current[1] = el; }} />
   ]);
   const addItem = () => {
     if (items.length < maxChats) {
       const newItem = (
-        <ChatAnswer key={items.length + 1} ref={(el) => (childRefs.current[items.length + 1] = el)} />
+        <ChatAnswer key={items.length + 1} ref={(el) => { childRefs.current[items.length + 1] = el; }} />
       );
       setItems([...items, newItem]);
     }
