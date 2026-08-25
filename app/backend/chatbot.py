@@ -1,166 +1,92 @@
+import base64
+import binascii
 import os
-from collections.abc import Generator
-from queue import Empty, Queue
-from threading import Thread
+import re
 
-from langchain.callbacks.base import BaseCallbackHandler
-from langchain.chains import create_retrieval_chain
-from langchain.chains.combine_documents import create_stuff_documents_chain
-from langchain.prompts import PromptTemplate
-from langchain_community.llms import VLLMOpenAI
+from openai import APIError, AsyncOpenAI
 
 from litellm_embeddings import LiteLLMEmbeddings
-from milvus_retriever_with_score_threshold import \
-    MilvusRetrieverWithScoreThreshold
-
-import asyncio
-from asyncio import Queue as AsyncQueue, QueueEmpty
-from concurrent.futures import ThreadPoolExecutor
+from milvus_retriever_with_score_threshold import MilvusRetrieverWithScoreThreshold
 
 
-class QueueCallback(BaseCallbackHandler):
-    """Callback handler for streaming LLM responses to an async queue."""
-
-    def __init__(self, q: AsyncQueue, logger):
-        self.q = q
-        self.logger = logger
-
-    async def on_llm_new_token(self, token: str, **kwargs) -> None:
-        data = {"type": "token", "token": token}
-        await self.q.put(data)
-
-    async def on_llm_end(self, *args, **kwargs) -> None:
-        await self.q.put(None)  # Signal the end of the stream
+DEFAULT_SYSTEM_TEMPLATE = """You are a helpful, respectful, and honest assistant answering questions about Red Hat products. Answer in {language}. Use only the supplied references when references are available. If the references do not contain enough information, say that you do not know based on the available references. You may analyze an attached image when the selected model supports vision. Do not invent facts or sources. Do not translate code, commands, configuration keys, product names, URLs, or quoted text."""
+DEFAULT_TRANSLATE_TEMPLATE = """Translate the user's text to English. Return only the translation, with no explanation or label. Preserve code, commands, configuration keys, product names, URLs, and quoted literals exactly. If the text is already English, return it unchanged."""
+IMAGE_DATA_URL = re.compile(r"^data:(image/(?:jpeg|png|webp));base64,([A-Za-z0-9+/=\r\n]+)$")
+MAX_IMAGE_BYTES = 5 * 1024 * 1024
 
 
 class Chatbot:
-    """
-    A class representing a chatbot.
-
-    Args:
-        config (dict): Configuration settings for the chatbot.
-        logger: Logger object for logging messages.
-
-    Attributes:
-        logger: Logger object for logging messages.
-        config (dict): Configuration settings for the chatbot.
-        model_kwargs (dict): Keyword arguments for the model.
-        embeddings: LiteLLM embeddings client for handling embeddings.
-        prompt_template: Template for the chatbot's prompt.
-
-    Methods:
-        _format_sources: Formats the list of sources.
-        stream: Streams the chatbot's response based on the query and other parameters.
-    """
+    """Multimodal chat-completions client backed by Milvus text retrieval."""
 
     def __init__(self, config, logger):
         os.environ["TOKENIZERS_PARALLELISM"] = "false"
         self.logger = logger
         self.config = config
-        self.model_kwargs = {"trust_remote_code": True}
-        self.llms_config = self.config.get('llms', [])
-
-        # Instantiate LLMs
-        self.llm_instances = {}
-        for llm in self.llms_config:
-            self.llm_instances[llm.get('name')] = VLLMOpenAI(
-                openai_api_key=llm.get('api_key'),
-                openai_api_base=llm.get('inference_endpoint'),
-                model_name=llm.get('model_name'),
-                max_tokens=llm.get('max_tokens'),
-                top_p=llm.get('top_p'),
-                temperature=llm.get('temperature'),
-                presence_penalty=llm.get('presence_penalty'),
-                streaming=True,
-                verbose=False
-            )
-
-        # Instantiate Embeddings
+        self.llms_config = config.get("llms", [])
         self.embeddings = LiteLLMEmbeddings(
-            api_url=self.config.get('embeddings').get('inference_endpoint'),
-            api_key=self.config.get('embeddings').get('api_key'),
-            model_name=self.config.get('embeddings').get('model_name'),
+            api_url=config.get("embeddings", {}).get("inference_endpoint"),
+            api_key=config.get("embeddings", {}).get("api_key"),
+            model_name=config.get("embeddings", {}).get("model_name"),
         )
+        self.vectorstore = config.get("vectorstore", {})
+        self.language_mapping = {
+            "en": "English", "fr": "French", "de": "German",
+            "es": "Spanish", "cn": "Chinese", "jp": "Japanese",
+        }
 
-        # Instantiate Vector Store
-        self.vectorstore = self.config.get('vectorstore', {})
+    @staticmethod
+    def _format_sources(documents):
+        unique_sources = []
+        seen = set()
+        for document in documents:
+            source = document.metadata.get("source")
+            if source and source not in seen:
+                seen.add(source)
+                unique_sources.append([source, document.metadata.get("score", 0.0)])
+        return unique_sources
 
-        # Instantiate Executor    
-        self.executor = ThreadPoolExecutor()
+    @staticmethod
+    def _validate_image(image_data_url):
+        if not image_data_url:
+            return None
+        match = IMAGE_DATA_URL.fullmatch(image_data_url)
+        if not match:
+            raise ValueError("The attachment must be a JPEG, PNG, or WebP image.")
+        try:
+            decoded = base64.b64decode(match.group(2), validate=True)
+        except (binascii.Error, ValueError) as exc:
+            raise ValueError("The attached image is not valid base64 data.") from exc
+        if len(decoded) > MAX_IMAGE_BYTES:
+            raise ValueError("The attached image exceeds the 5 MB limit.")
+        return image_data_url
 
-    def _format_sources(self, sources_list):
-        """
-        Formats the list of sources.
+    @staticmethod
+    def _request_options(selected_config, *, stream):
+        options = {"model": selected_config.get("model_name"), "stream": stream}
+        optional_values = {
+            "max_tokens": selected_config.get("max_tokens"),
+            "temperature": selected_config.get("temperature"),
+            "top_p": selected_config.get("top_p"),
+            "presence_penalty": selected_config.get("presence_penalty"),
+            "frequency_penalty": selected_config.get("frequency_penalty"),
+        }
+        options.update({key: value for key, value in optional_values.items() if value is not None})
+        return options
 
-        Args:
-            sources_list (list): List of sources.
+    async def _translate_to_english(self, client, selected_config, query):
+        response = await client.chat.completions.create(
+            messages=[
+                {"role": "system", "content": self.config.get("translate_system_template", DEFAULT_TRANSLATE_TEMPLATE)},
+                {"role": "user", "content": query},
+            ],
+            **self._request_options(selected_config, stream=False),
+        )
+        translated = response.choices[0].message.content or ""
+        return (translated.replace("English:", "").replace("Answer:", "")
+                .replace("English translation:", "").replace("Translation:", "").strip())
 
-        Returns:
-            list: Unique list of sources.
-        """
-        unique_list = []
-        for item in sources_list:
-            if item.metadata['source'] not in unique_list:
-                unique_list.append([item.metadata['source'], item.metadata['score']])
-        return unique_list
-
-    async def stream(self, model, query, collection, collection_full_name, version, language):
-        """
-        Streams the chatbot's response based on the query and other parameters.
-
-        Args:
-            query (str): The user's query.
-            collection (str): The name of the collection.
-            collection_full_name (str): The full name of the product.
-            version (str): The version of the product.
-
-        Yields:
-            dict: The chatbot's response data.
-        """
-        # A Queue is needed for Streaming implementation
-        q = AsyncQueue()
-        job_done = object()
-
-        selected_llm = next((item for item in self.llms_config if item["name"] == model), None)
-        if selected_llm:
-            llm = VLLMOpenAI(
-                openai_api_key=selected_llm.get('api_key'),
-                openai_api_base=selected_llm.get('inference_endpoint'),
-                model_name=selected_llm.get('model_name'),
-                max_tokens=selected_llm.get('max_tokens'),
-                top_p=selected_llm.get('top_p'),
-                temperature=selected_llm.get('temperature'),
-                presence_penalty=selected_llm.get('presence_penalty'),
-                streaming=True,
-                verbose=False,
-                callbacks=[QueueCallback(q, self.logger)]
-            )
-        else:
-            return
-        
-        translation_model = model
-        selected_translation_llm = next((item for item in self.llms_config if item["name"] == translation_model), None)
-        if selected_translation_llm:
-            llm_translate = VLLMOpenAI(
-                openai_api_key=selected_translation_llm.get('api_key'),
-                openai_api_base=selected_translation_llm.get('inference_endpoint'),
-                model_name=selected_translation_llm.get('model_name'),
-                max_tokens=selected_translation_llm.get('max_tokens'),
-                top_p=selected_translation_llm.get('top_p'),
-                temperature=selected_translation_llm.get('temperature'),
-                presence_penalty=selected_translation_llm.get('presence_penalty'),
-                streaming=False,
-                verbose=False
-            )
-        else:
-            return
-
-        self.logger.info(f"Collection: {collection}")
-        self.logger.info(f"Collection Full Name: {collection_full_name}")
-        self.logger.info(f"Version: {version}")
-        self.logger.info(f"Language: {language}")
-        
-        retriever = MilvusRetrieverWithScoreThreshold(
+    def _create_retriever(self, collection):
+        return MilvusRetrieverWithScoreThreshold(
             embedding_function=self.embeddings,
             collection_name=collection,
             collection_description="",
@@ -180,66 +106,64 @@ class Chatbot:
             logger=self.logger,
         )
 
-        language_mapping = {
-            "en": "English",
-            "fr": "French",
-            "de": "German",
-            "es": "Spanish",
-            "cn": "Chinese",
-            "jp": "Japanese",
-        }
-        
-        prompt_value = next((item["prompt"] for item in self.llms_config if item["name"] == model), None)
-        prompt_template = prompt_value.format(language=language_mapping.get(language, "English"))
-        prompt = PromptTemplate.from_template(prompt_template)
+    async def stream(self, model, query, collection, collection_full_name, version, language, image=None):
+        selected_config = next((item for item in self.llms_config if item.get("name") == model), None)
+        if selected_config is None:
+            yield {"type": "error", "message": f"Unknown model: {model}"}
+            return
+        try:
+            image = self._validate_image(image)
+        except ValueError as exc:
+            yield {"type": "error", "message": str(exc)}
+            return
+        if image and not selected_config.get("supports_vision", False):
+            yield {"type": "error", "message": f"{model} is not configured as a vision-capable model."}
+            return
 
-        translate_prompt = next((item["translate_prompt"] for item in self.llms_config if item["name"] == translation_model), None)
+        client = AsyncOpenAI(api_key=selected_config.get("api_key"), base_url=selected_config.get("inference_endpoint"))
+        retrieval_query = query.strip() or "Analyze the attached image"
+        try:
+            if language != "en" and query.strip():
+                retrieval_query = await self._translate_to_english(client, selected_config, query)
+            if collection_full_name != "None" and version != "None":
+                retrieval_query = f"We are talking about {collection_full_name}. {retrieval_query}"
+            self.logger.info("Collection: %s", collection)
+            self.logger.info("Retrieval query: %s", retrieval_query)
+            documents = await self._create_retriever(collection).ainvoke("search_query: " + retrieval_query)
+        except Exception as exc:
+            self.logger.exception("Document retrieval failed")
+            yield {"type": "error", "message": f"Document retrieval failed: {exc}"}
+            return
 
-        # Instantiate RAG chain
-        combine_docs_chain = create_stuff_documents_chain(llm, prompt)
-        rag_chain = create_retrieval_chain(retriever, combine_docs_chain)
+        for source, score in self._format_sources(documents):
+            yield {"type": "source", "source": source, "score": score}
+        references = "\n\n".join(
+            f"Reference {index + 1}:\n{document.page_content}"
+            for index, document in enumerate(documents)
+        ) or "No relevant references were retrieved."
+        user_text = f"Question:\n{query or 'Analyze the attached image.'}\n\nReferences:\n{references}"
+        user_content = [{"type": "text", "text": user_text}]
+        if image:
+            user_content.append({"type": "image_url", "image_url": {"url": image}})
 
-        # Create a function to call - this will run in a thread
-        async def task():
-            loop = asyncio.get_event_loop()
-            # Translate the query to English if needed
-            if language != "en":
-                english_query = await loop.run_in_executor(
-                    self.executor,
-                    llm_translate.invoke,
-                    translate_prompt.format(input=query)
-                )
-                english_query = str(english_query).replace("English:", "").replace("Answer:", "").replace("English translation:", "").replace("Translation:", "").strip().lstrip('\t')
-            else:
-                english_query = query
-
-            if (collection_full_name != "None") and (version != "None"):
-                new_query = f"We are talking about {collection_full_name}. {english_query}"
-            else:
-                new_query = english_query
-            self.logger.info(f"New Query: {new_query}")
-            resp = await loop.run_in_executor(
-                self.executor,
-                rag_chain.invoke,
-                {"input": 'search_query: ' + new_query}
+        system_template = selected_config.get(
+            "system_prompt", self.config.get("system_template", DEFAULT_SYSTEM_TEMPLATE)
+        )
+        messages = [
+            {"role": "system", "content": system_template.format(language=self.language_mapping.get(language, "English"))},
+            {"role": "user", "content": user_content},
+        ]
+        try:
+            response = await client.chat.completions.create(
+                messages=messages, **self._request_options(selected_config, stream=True)
             )
-            sources = self._format_sources(resp['context'])
-            if len(sources) != 0:
-                for source in sources:
-                    data = {"type": "source", "source": source[0], "score": source[1]}
-                    await q.put(data)
-            await q.put(job_done)
-
-        # Run the task in the background
-        asyncio.create_task(task())
-
-        # Get each new item from the queue and yield for our generator
-        while True:
-            try:
-                next_item = await asyncio.wait_for(q.get(), timeout=1.0)
-                if next_item is job_done:
-                    break
-                if isinstance(next_item, dict):
-                    yield next_item
-            except (QueueEmpty, asyncio.TimeoutError):
-                continue
+            async for chunk in response:
+                if chunk.choices and chunk.choices[0].delta.content:
+                    yield {"type": "token", "token": chunk.choices[0].delta.content}
+            yield {"type": "job_done"}
+        except APIError as exc:
+            self.logger.exception("Model API request failed")
+            yield {"type": "error", "message": f"Model API request failed: {exc}"}
+        except Exception as exc:
+            self.logger.exception("Unexpected model streaming error")
+            yield {"type": "error", "message": f"Model streaming failed: {exc}"}

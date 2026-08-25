@@ -5,6 +5,8 @@ export class Query {
   selectedVersion: string;
   language: string;
   timestamp: Date;
+  imageDataUrl?: string;
+  imageName?: string;
   type = 'Query';
   
   constructor(
@@ -13,7 +15,9 @@ export class Query {
     collectionFullName: string = '',
     selectedVersion: string = '',
     language: string = '',
-    timestamp: Date = new Date()
+    timestamp: Date = new Date(),
+    imageDataUrl?: string,
+    imageName?: string
   ) {
     this.content = content;
     this.collection = collection;
@@ -21,6 +25,8 @@ export class Query {
     this.selectedVersion = selectedVersion;
     this.language = language;
     this.timestamp = timestamp;
+    this.imageDataUrl = imageDataUrl;
+    this.imageName = imageName;
   }
 }
 
@@ -65,8 +71,10 @@ export class MessageHistory {
 
 export class Models {
   name: string;
+  supports_vision?: boolean;
 
-  constructor(name: string) {
+  constructor(name: string, supports_vision?: boolean) {
     this.name = name;
+    this.supports_vision = supports_vision;
   }
 }

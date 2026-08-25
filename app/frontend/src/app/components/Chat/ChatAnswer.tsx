@@ -121,6 +121,13 @@ const ChatAnswer = forwardRef((props: ChatAnswerProps, ref: Ref<ChatAnswerRef>) 
           }
         });
         return;
+      } else if (data['type'] === 'error') {
+        setAnswer(answer => new Answer(
+          [...(answer?.content || []), `\n\nError: ${data['message']}`],
+          [...(answer?.sources || [])],
+          answer?.timestamp || new Date()
+        ));
+        return;
       }
     }
 
@@ -163,7 +170,16 @@ const ChatAnswer = forwardRef((props: ChatAnswerProps, ref: Ref<ChatAnswerRef>) 
   const sendQuery = (query: Query) => {
     if (connection.current?.readyState === WebSocket.OPEN) {
       const previousAnswer = new MessageContent(new Answer(answer.content, answer.sources, answer.timestamp)); // Save the previous response, needed because states are updated asynchronously
-      const previousQuery = new MessageContent(new Query(query.content)); // Save the previous query
+      const previousQuery = new MessageContent(new Query(
+        query.content,
+        '',
+        '',
+        '',
+        query.language,
+        query.timestamp,
+        undefined,
+        query.imageName
+      )); // Save the previous query without retaining the base64 image
       const previousMessageHistory = new MessageHistory(messageHistory.message); // Save the previous message history
       setMessageHistory(new MessageHistory([...previousMessageHistory.message, previousAnswer, previousQuery])); // Add the previous response to the message history
       setAnswer(new Answer([], [], new Date())); // Clear the previous response
@@ -171,14 +187,15 @@ const ChatAnswer = forwardRef((props: ChatAnswerProps, ref: Ref<ChatAnswerRef>) 
       setTps(0);
       setTtft(0);
       // Put the query in a JSON object so that we can add other info later
-      if (query.content !== "") {
+      if (query.content !== "" || query.imageDataUrl) {
         let data = {
           model: selectedLLM,
           query: query.content,
           collection: query.collection,
           collection_full_name: query.collectionFullName,
           version: query.selectedVersion,
-          language: query.language
+          language: query.language,
+          image: query.imageDataUrl
         };
         startTime.current = Date.now();
         connection.current?.send(JSON.stringify(data)); // Send the query to the server
@@ -343,7 +360,7 @@ const ChatAnswer = forwardRef((props: ChatAnswerProps, ref: Ref<ChatAnswerRef>) 
                       <Message
                         name={userName}
                         role="user"
-                        content={Array.isArray(message.messageContent.content) ? message.messageContent.content.join(' ') : message.messageContent.content}
+                        content={`${Array.isArray(message.messageContent.content) ? message.messageContent.content.join(' ') : message.messageContent.content}${(message.messageContent as Query).imageName ? `\n\n📷 ${(message.messageContent as Query).imageName}` : ''}`}
                         timestamp={message.messageContent.timestamp ? message.messageContent.timestamp.toLocaleString() : ''}
                         avatar={userAvatar}
                         actions={{

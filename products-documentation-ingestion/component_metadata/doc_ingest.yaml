@@ -16,7 +16,7 @@ deploymentSpec:
         - python3
         - -m
         - kfp.dsl.executor_main
-        image: quay.io/ckavili/rh-kb-doc-ingestion:1.8
+        image: quay.io/rh-aiservices-bu/rh-kb-doc-ingestion:1.8
 pipelineInfo:
   name: doc-ingest
 root:

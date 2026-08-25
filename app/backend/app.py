@@ -115,7 +115,13 @@ async def health():
 @app.get("/api/llms")
 async def get_llms():
     """Get llms"""
-    return llms_config
+    return [
+        {
+            "name": llm.get("name"),
+            "supports_vision": llm.get("supports_vision", False),
+        }
+        for llm in (llms_config or [])
+    ]
 
 
 # Collections
@@ -133,6 +139,7 @@ async def handle_client_request(websocket: WebSocket, data: dict):
         data["collection_full_name"],
         data["version"],
         data["language"],
+        data.get("image"),
     ):
         answer = json.dumps(next_item)
         await websocket.send_text(answer)
