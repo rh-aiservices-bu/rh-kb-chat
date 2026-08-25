@@ -4,7 +4,7 @@
   "common_sources": [],
   "versions": [
     {
-      "version_number": "2-saas",
+      "version_number": "2.16",
       "store_directive": "create_or_keep",
       "sources": [
         {
@@ -25,7 +25,7 @@
     },
     {
       "version_number": "2.14",
-      "store_directive": "create_or_keep",
+      "store_directive": "delete",
       "sources": [
         {
           "ingestion_type": "redhat_doc",
@@ -165,6 +165,16 @@
     },
     {
       "version_number": "2.0",
+      "store_directive": "delete",
+      "sources": [
+        {
+          "ingestion_type": "redhat_doc",
+          "language": "en-US"
+        }
+      ]
+    },
+    {
+      "version_number": "2-saas",
       "store_directive": "delete",
       "sources": [
         {

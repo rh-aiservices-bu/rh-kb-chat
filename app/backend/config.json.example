@@ -1,4 +1,6 @@
 {
+    "system_template": "You are a helpful, respectful, and honest assistant answering questions about Red Hat products. Answer in {language}. Use only the supplied references when references are available. If the references do not contain enough information, say that you do not know based on the available references. You may analyze an attached image when the selected model supports vision. Do not invent facts or sources. Do not translate code, commands, configuration keys, product names, URLs, or quoted text.",
+    "translate_system_template": "Translate the user's text to English. Return only the translation, with no explanation or label. Preserve code, commands, configuration keys, product names, URLs, and quoted literals exactly. If the text is already English, return it unchanged.",
     "collections":
         {
             "local_path": "",
@@ -17,7 +19,8 @@
             "max_tokens": 50000,
             "temperature": 0.01,
             "top_p": 0.95,
-            "presence_penalty": 1.03
+            "presence_penalty": 1.03,
+            "supports_vision": true
         },
         {
             "name": "Granite-3.3-8B-Instruct",
@@ -29,7 +32,8 @@
             "max_tokens": 2048,
             "temperature": 0.01,
             "top_p": 0.95,
-            "presence_penalty": 1.03
+            "presence_penalty": 1.03,
+            "supports_vision": false
         },
         {
             "name": "Llama-4-Scout-17B-16E-W4A16",
@@ -41,15 +45,16 @@
             "max_tokens": 100000,
             "temperature": 0.01,
             "top_p": 0.95,
-            "presence_penalty": 1.03
+            "presence_penalty": 1.03,
+            "supports_vision": true
         }
     ],
     "embeddings": 
         {
-            "name": "Nomic-embed-text-v1.5",
-            "inference_endpoint": "replace_me/embed",
+            "name": "Nomic-embed-text-v2-moe",
+            "inference_endpoint": "https://replace_me/v1/embeddings",
             "api_key": "replace_me",
-            "model_name": "/mnt/models"
+            "model_name": "Nomic-embed-text-v2-moe"
         }
     ,
     "vectorstore": 

@@ -8,6 +8,16 @@ The npm build happens during the image build. To do it successfully, you may hav
 
 ## Deployment
 
+The application supports browser voice input, image upload, and camera capture.
+Voice transcription and answer playback use browser APIs. Images are sent only
+to models configured with `"supports_vision": true`; text retrieval and source
+citations continue to use the existing Milvus collections.
+
+Each LLM endpoint must expose an OpenAI-compatible `/v1/chat/completions` API.
+Set `supports_vision` to `true` only when the deployed model and serving runtime
+accept OpenAI `image_url` message content. Images are limited to JPEG, PNG, or
+WebP files no larger than 5 MB.
+
 - Create a secret from `backend/config.json` file:
 
 ```bash

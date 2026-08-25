@@ -210,6 +210,18 @@ body,
   border-radius: 10px !important;
 }
 
+.camera-preview {
+  width: 100%;
+  max-height: 360px;
+  object-fit: contain;
+  background: #151515;
+}
+
+.attachment-error {
+  color: var(--pf-t--global--color--status--danger--default);
+  padding: 0.5rem 1rem;
+}
+
 .monaco-editor {
   font-family: 'RedHatText', helvetica, arial, sans-serif !important;
 }
@@ -297,4 +309,3 @@ body,
   height: 50px;
   padding-right: 10px;
 }
-

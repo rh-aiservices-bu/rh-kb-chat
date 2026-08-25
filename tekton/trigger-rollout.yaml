@@ -5,9 +5,9 @@ metadata:
   name: trigger-rollout-chatbot
 spec:
   steps:
-  - name: trigger-rollout-chatbot
-    image: quay.io/openshift/origin-cli:4.14
-    command: ["/bin/sh", "-c"]
+  - computeResources: {}
+    image: 'quay.io/openshift/origin-cli:4.14'
+    name: trigger-rollout-chatbot
     script: |
       #!/bin/sh
 

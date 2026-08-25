@@ -1,20 +1,36 @@
 from typing import List
 
 from bs4 import BeautifulSoup
-from langchain_community.document_loaders.web_base import WebBaseLoader
 from langchain_community.document_transformers import Html2TextTransformer
 from langchain_core.documents import Document
+import requests
 
 import md_splitter
 
 
-class RedHatDocumentationLoader(WebBaseLoader):
+def fetch_soup(url):
+    """Fetch public documentation without WebBaseLoader's blocked headers."""
+    response = requests.get(url, timeout=60)
+    response.raise_for_status()
+    soup = BeautifulSoup(response.text, "lxml")
+    if soup.title and soup.title.get_text(strip=True) == "Access Denied":
+        raise RuntimeError(f"Red Hat Documentation denied access to {url}")
+    return soup
+
+
+class RedHatDocumentationLoader:
     """Load `Red Hat Documentation` single-html webpages."""
+
+    def __init__(self, web_paths):
+        self.web_path = web_paths[0]
 
     def load(self) -> List[Document]:
         """Load webpages as Documents."""
-        soup = self.scrape()
-        title = soup.select_one("h1", {"class": "title"}).text  # Get title
+        soup = fetch_soup(self.web_path)
+        title_element = soup.select_one("h1.title") or soup.select_one("h1")
+        if title_element is None:
+            raise RuntimeError(f"No document title found at {self.web_path}")
+        title = title_element.get_text(" ", strip=True)
 
         # Get main content
         book = soup.select_one(".book")
@@ -110,16 +126,10 @@ def get_pages(product, version, language):
     """Get the list of pages from the Red Hat product documentation."""
 
     # Load the Red Hat documentation page
-    url = [
-        "https://access.redhat.com/documentation/"
-        + language
-        + "/"
-        + product
-        + "/"
-        + version
-    ]
-    loader = WebBaseLoader(url)
-    soup = loader.scrape()
+    if language != "en-US":
+        raise ValueError(f"Unsupported Red Hat documentation language: {language}")
+    url = f"https://docs.redhat.com/en/documentation/{product}/{version}"
+    soup = fetch_soup(url)
 
     # Select only the element titles that contain the links to the documentation pages
     filtered_elements = soup.find_all("h3", attrs={"slot": "headline"})
@@ -132,13 +142,23 @@ def get_pages(product, version, language):
     # Extract all the links
     links = []
     for match in new_soup.findAll("a"):
-        links.append(match.get("href"))
+        href = match.get("href")
+        if href:
+            links.append(href)
     links = [
-        url for url in links if url.startswith("/en/documentation")
+        url for url in links
+        if (url.startswith("https://docs.redhat.com/en/documentation") or
+            url.startswith("/en/documentation") or
+            url.startswith("/en-US/documentation"))
     ]  # Filter out unwanted links
     pages = [
         link.replace("/html/", "/html-single/") for link in links if "/html/" in link
     ]  # We want single pages html
+
+    # Preserve order while removing duplicate links.
+    pages = list(dict.fromkeys(pages))
+    if not pages:
+        raise RuntimeError(f"No documentation page links found at {url}")
 
     return pages
 
@@ -147,7 +167,7 @@ def split_document(product, version, language, page, product_full_name, chunk_si
     """Split a Red Hat documentation page into smaller sections."""
 
     # Load, parse, and transform to Markdown
-    document_url = ["https://docs.redhat.com" + page]
+    document_url = [page if page.startswith("http") else "https://docs.redhat.com" + page]
     print(f"Processing: {document_url}")
     loader = RedHatDocumentationLoader(document_url)
     docs = loader.load()
@@ -171,7 +191,24 @@ def generate_splits(product, product_full_name, version, language, chunk_size, c
     print("Generating splits for Red Hat doc...")
     all_splits = []
     for page in pages:
-        splits = split_document(product, version, language, page, product_full_name, chunk_size, chunk_overlap)
+        try:
+            splits = split_document(
+                product,
+                version,
+                language,
+                page,
+                product_full_name,
+                chunk_size,
+                chunk_overlap,
+            )
+        except requests.HTTPError as exc:
+            # Product landing pages occasionally retain links to guides that
+            # have been removed. Do not discard every valid guide in the
+            # product/version because of one stale catalog entry.
+            if exc.response is not None and exc.response.status_code == 404:
+                print(f"WARNING: Documentation page not found, skipping: {page}")
+                continue
+            raise
         all_splits.extend(splits)
     print(f"Generated {len(all_splits)} splits.")
 

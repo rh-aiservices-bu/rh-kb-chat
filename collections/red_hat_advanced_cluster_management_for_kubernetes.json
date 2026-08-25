@@ -4,7 +4,7 @@
   "common_sources": [],
   "versions": [
     {
-      "version_number": "2.12",
+      "version_number": "2.17",
       "store_directive": "create_or_keep",
       "sources": [
         {
@@ -14,8 +14,58 @@
       ]
     },
     {
-      "version_number": "2.11",
+      "version_number": "2.16",
       "store_directive": "create_or_keep",
+      "sources": [
+        {
+          "ingestion_type": "redhat_doc",
+          "language": "en-US"
+        }
+      ]
+    },
+    {
+      "version_number": "2.15",
+      "store_directive": "delete",
+      "sources": [
+        {
+          "ingestion_type": "redhat_doc",
+          "language": "en-US"
+        }
+      ]
+    },
+    {
+      "version_number": "2.14",
+      "store_directive": "delete",
+      "sources": [
+        {
+          "ingestion_type": "redhat_doc",
+          "language": "en-US"
+        }
+      ]
+    },
+    {
+      "version_number": "2.13",
+      "store_directive": "delete",
+      "sources": [
+        {
+          "ingestion_type": "redhat_doc",
+          "language": "en-US"
+        }
+      ]
+    },
+    {
+      "version_number": "2.12",
+      "store_directive": "delete",
+      "sources": [
+        {
+          "ingestion_type": "redhat_doc",
+          "language": "en-US"
+        }
+      ]
+    },
+    {
+      "version_number": "2.11",
+      "store_directive": "delete",
       "sources": [
         {
           "ingestion_type": "redhat_doc",

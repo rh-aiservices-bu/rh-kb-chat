@@ -13,7 +13,9 @@ import starLogo from '@app/assets/bgimages/star.svg';
 import starLogoWhite from '@app/assets/bgimages/star-white.svg';
 import { ChatbotFooter, ChatbotFootnote, } from '@patternfly/chatbot/dist/dynamic/ChatbotFooter';
 import { MessageBar } from '@patternfly/chatbot/dist/dynamic/MessageBar';
-import { Chatbot, ChatbotContent, ChatbotDisplayMode, ChatbotHeader, ChatbotHeaderActions, ChatbotHeaderMain, ChatbotHeaderSelectorDropdown, ChatbotHeaderTitle } from '@patternfly/chatbot';
+import { Chatbot, ChatbotDisplayMode, ChatbotHeader, ChatbotHeaderActions, ChatbotHeaderMain, ChatbotHeaderTitle, FileDetailsLabel } from '@patternfly/chatbot';
+import CameraButton from './CameraButton';
+import CameraModal from './CameraModal';
 
 
 interface ChatProps {
@@ -61,13 +63,13 @@ const Chat: React.FunctionComponent<ChatProps> = () => {
   const maxChats = parseInt(searchParams.get('maxchat') || '4', 10);
 
   // ChatAnswer instances
-  const [items, setItems] = React.useState<JSX.Element[]>([
-    <ChatAnswer key={1} ref={(el) => (childRefs.current[1] = el)} />
+  const [items, setItems] = React.useState<React.ReactElement[]>([
+    <ChatAnswer key={1} ref={(el) => { childRefs.current[1] = el; }} />
   ]);
   const addItem = () => {
     if (items.length < maxChats) {
       const newItem = (
-        <ChatAnswer key={items.length + 1} ref={(el) => (childRefs.current[items.length + 1] = el)} />
+        <ChatAnswer key={items.length + 1} ref={(el) => { childRefs.current[items.length + 1] = el; }} />
       );
       setItems([...items, newItem]);
     }
@@ -101,6 +103,11 @@ const Chat: React.FunctionComponent<ChatProps> = () => {
 
   // Chat elements
   const [queryText, setQueryText] = React.useState<Query>(new Query('')); // The query text
+  const [imageFile, setImageFile] = React.useState<File>();
+  const [imageDataUrl, setImageDataUrl] = React.useState<string>();
+  const [attachmentError, setAttachmentError] = React.useState<string>();
+  const [isCameraOpen, setIsCameraOpen] = React.useState(false);
+  const mobileCameraInput = React.useRef<HTMLInputElement>(null);
 
 
   // Loads the collections from the backend on startup
@@ -127,16 +134,48 @@ const Chat: React.FunctionComponent<ChatProps> = () => {
   const sendQueryText = (message: string | number) => {
     const queryText = String(message);
     setQueryText(new Query('')); // Clear the query text
-    const query = new Query(queryText, selectedCollection, collectionFullName, selectedVersion, i18n.language, new Date());
+    const query = new Query(queryText, selectedCollection, collectionFullName, selectedVersion, i18n.language, new Date(), imageDataUrl, imageFile?.name);
 
-    if (queryText !== "") {
+    if (queryText !== "" || imageDataUrl) {
       childRefs.current.forEach((childRef) => {
         if (childRef) {
           childRef.sendQuery(query);
         }
       });
     }
+    setImageFile(undefined);
+    setImageDataUrl(undefined);
+    setAttachmentError(undefined);
   }
+
+  const handleImage = (files: File[]) => {
+    const file = files[0];
+    if (!file) return;
+    if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type)) {
+      setAttachmentError('Only JPEG, PNG, and WebP images are supported.');
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      setAttachmentError('The image must be 5 MB or smaller.');
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = () => {
+      setImageFile(file);
+      setImageDataUrl(String(reader.result));
+      setAttachmentError(undefined);
+    };
+    reader.onerror = () => setAttachmentError('The image could not be read.');
+    reader.readAsDataURL(file);
+  };
+
+  const openCamera = () => {
+    if (/Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent)) {
+      mobileCameraInput.current?.click();
+    } else {
+      setIsCameraOpen(true);
+    }
+  };
 
   /**
    * Updates the collection based on the selected collection and version.
@@ -293,14 +332,29 @@ const Chat: React.FunctionComponent<ChatProps> = () => {
                 ))}
               </Grid>
             <ChatbotFooter className='chat-footer'>
-              <MessageBar
-                hasMicrophoneButton
-                hasAttachButton={false}
-                onSendMessage={sendQueryText}
-                buttonProps={{
-                  microphone: { language: t('language_code') }
-                }}
+              {attachmentError && <div className="attachment-error">{attachmentError}</div>}
+              {imageFile && <FileDetailsLabel fileName={imageFile.name} onClose={() => { setImageFile(undefined); setImageDataUrl(undefined); }} />}
+              <input
+                ref={mobileCameraInput}
+                type="file"
+                accept="image/*"
+                capture="environment"
+                hidden
+                onChange={(event) => handleImage(Array.from(event.target.files || []))}
               />
+              <Flex alignItems={{ default: 'alignItemsCenter' }} flexWrap={{ default: 'nowrap' }}>
+                <FlexItem flex={{ default: 'flex_1' }}>
+                  <MessageBar
+                    hasMicrophoneButton
+                    hasAttachButton
+                    handleAttach={handleImage}
+                    onSendMessage={sendQueryText}
+                    buttonProps={{ microphone: { language: t('language_code') } }}
+                  />
+                </FlexItem>
+                <FlexItem><CameraButton onClick={openCamera} /></FlexItem>
+              </Flex>
+              <CameraModal isOpen={isCameraOpen} onClose={() => setIsCameraOpen(false)} onCapture={(file) => handleImage([file])} />
             </ChatbotFooter>
           </Chatbot>
         </FlexItem>
